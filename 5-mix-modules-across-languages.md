@@ -8,7 +8,7 @@ description: "Augment your .NET price service with Python currency converter and
 
 Augment your .NET price service with **Python currency converter** and see how easily you can pick any module regardless of technology and use it as direct dependency.
 
-![Cross-language module integration diagram](@assets/image_1757539581063.png)
+![Cross-language module integration diagram](assets/mix-modules-across-languages-1.png)
 
 ## What You'll See
 

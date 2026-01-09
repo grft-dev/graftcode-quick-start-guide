@@ -8,7 +8,7 @@ description: "Turn your own code into a discoverable backend service using Graft
 
 Turn your own code into a discoverable backend service using Graftcode Gateway on your local machine - no controllers, no REST routes, no OpenAPI specs.
 
-![image_1757536568865.png]
+![](assets/ClientSideCloud.png)
 
 ## What You'll See
 
@@ -99,7 +99,7 @@ docker run -d -p 80:80 -p 81:81 --name graftcode_demo myenergyservice:test
 Open your browser at the following URL to see your service in action through Graft Vision: 
 [http://localhost:81/GV](http://localhost:81/GV)
 
-![Graftcode Vision Interface](@assets/image_1757443479122.png)
+![Graftcode Vision Interface](assets/ExploreServiceUsingGraftcodeVision.png)
 
 Notice that:
 
@@ -114,6 +114,6 @@ That's it! Your .NET method is now exposed as a backend service with Graftcode G
 
 Check this chart to understand how your daily process of exposing backend logic for remote consumption will change with Graftcode:
 
-![image_1757537577512.png]
+![](assets/BackendOldWayNewWay.png)
 
 > ⚡ **Result:** You've turned a plain .NET method into a fully accessible backend service with one simple Dockerfile and few Docker commands to run, saving hours of manual coding and maintenance. No controllers, no REST endpoints, no OpenAPI specs. Just a public methods exposed through Graftcode Gateway.

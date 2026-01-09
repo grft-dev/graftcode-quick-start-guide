@@ -8,7 +8,7 @@ description: "Learn how to connect backend services using Graftcode - connect yo
 
 Services exposed with Graftcode can be consumed from frontend or other backend services too. In both cases you will always get instant effortless connection and highest performance. **Learn how to connect the .NET app that you've built** in the previous step "Host your own backend with Graftcode" section to cloud service that we were consuming from ReactJS app.
 
-![image_1757538118197.png]
+![](assets/connect-backend-services-1.png)
 
 ## What You'll See
 
@@ -23,7 +23,7 @@ Open the GraftVision that we've already hosted for .NET service. You can find it
 In GraftVision portal 
 locate the **NetConsumptionKWh** method under the **Meter Logic** section. This is the method we'll be implementing in your .NET app.
 
-![Graftcode Vision showing NetConsumptionKWh method details](@assets/image_1757497238685.png)
+![Graftcode Vision showing NetConsumptionKWh method details](assets/connect-backend-services-2.png)
 
 In the GraftVision portal, you can:
 - See the connection package manager command for your particular technology
@@ -91,7 +91,7 @@ The method call is:
 
 Focus on the way how your interaction with remote service looks like. It is fully decoupled from architecture or communication channel and feels like local method. 
 
-![image_1757538666786.png]
+![](assets/connect-backend-services-3.png)
 
 <collapsible title="🔧 Click here to see the full code of MyEnergyService.cs">
 ```csharp
@@ -153,7 +153,7 @@ In the portal:
 - Hit the **Execute** button to see the live results
 - Review the response format and data structure
 
-![GraftVision showing GetMyCurrentCost method details and live execution](@assets/graftvision-getmycurrentcost.png)
+![GraftVision showing GetMyCurrentCost method details and live execution](assets/connect-backend-services-4.png)
 
 This allows you to test your enhanced method that combines the _NetConsumptionKWh_ calculation executed on our cloud service with cost pricing implemented in your local module. Trying it in browser let you make sure it works as expected before using it in your applications.
 

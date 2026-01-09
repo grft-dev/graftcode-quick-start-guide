@@ -21,7 +21,7 @@ Behind the scenes your communication will be handled through our **Hypertube(TM)
 
 Diagrams below show how Graftcode fits into standard software project and changes your current landscape:
 
-![Graftcode Architecture Diagram](@assets/image_1757534682973.png)
+![Graftcode Architecture Diagram](assets/GraftcodeArchitectureDiagram.png)
 
 **Graftcode changes the integration story from:**
 - implement controllers
@@ -39,7 +39,7 @@ Diagrams below show how Graftcode fits into standard software project and change
 
 **Now check how clean becomes your system design with Graftcode**, so you can focus purely on business logic:
 
-![Graftcode Clean Architecture Diagram](@assets/image_1757449669716.png)
+![Graftcode Clean Architecture Diagram](assets/GraftcodeCleanArchitectureDiagram.png)
 
 **Graftcode removes need for all previosuly required communication code both on client and service side**. Same approach works for  frontends and between microservices in your cloud. To make any public method callable just replace your middleware (Self-hosted webservice/IIS/Tomcat/Apache) with **Graftcode Gateway** (our multi-runtime host). 
 

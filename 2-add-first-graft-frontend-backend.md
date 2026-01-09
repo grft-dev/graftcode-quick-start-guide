@@ -8,7 +8,7 @@ description: "Connect a simple frontend app to a backend service using Graftcode
 
 Connect a simple frontend app to a backend service using Graftcode - without writing controllers, DTOs, or any other code that handles connection.
 
-![Frontend to Backend Connection Diagram](@assets/image_1757535139098.png)
+![Frontend to Backend Connection Diagram](assets/FrontendtoBackendConnectionDiagram.png)
 
 ## What You'll See
 
@@ -47,7 +47,7 @@ Before calling backend service, let's see how it looks like. We prepared it in b
 
 - [With Graftcode in Vision Portal](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), you'll see the same backend but exposed as regular classes and methods + package manager command to install it as dependency in any technology.
 
-![Screenshot 2025-09-04 152416_1756993284283.png]
+![BackendServiceSwagger](assets/SwaggerBackend.png)
 
 Graftcode saves you from writing, generating  and maintaining client code - providing package manager command to install this service almost as regular dependency.
 
@@ -61,7 +61,7 @@ npm install javonet-nodejs-sdk
 
 Once the package is installed, we can proceed with adding the Graft that will allow us to call the .NET backend service. The installation command is provided in the Graftcode Vision portal.
 
-![graftvision-installation.png]
+![GraftVision](assets/graftvision-installation.png)
 
 Select preferred package manager from the dropdown and copy the command to your terminal window. As we're creating React app, we'll use NPM:
 
@@ -80,7 +80,7 @@ Now, your frontend can see backend classes, methods, and receive results directl
 Before making any calls, we need to **import the generated Graft client** and set up a connection to the backend service.  
 This tells your React app where the service is hosted and how to reach it. The configuration is always easy to find and ready to copy from the Graftcode Vision portal.
 
-![graftvision-configuration.png]
+![](assets/graftvision-configuration.png)
 
 Open _src\\App.jsx_ and add on **top of the file**:
 
@@ -193,6 +193,6 @@ Now open your browser at [http://localhost:5173](http://localhost:5173) and you'
 
 Check this chart to understand how your daily integration process will change with Graftcode:
 
-![image_1757450995977.png]
+![](assets/CompareOldWaysNewWays.png)
 
 > ⚡ **Important:** Think how much time you saved. Normally, you would need to generate or hand-write client code from Swagger/OpenAPI, maintain models/DTOs and routes for every method. With Graftcode, it's just one command and a method call to any function regardless of service complexity. There is no need to monitor for changes or manually update across multiple layers. Everything stays in sync and typed checked interface validates methods usage at compile time. If the interface changes are evolutionary your Graft will keep working even if you do not decide to update to latest state.
