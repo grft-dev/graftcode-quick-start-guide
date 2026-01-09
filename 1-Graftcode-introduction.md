@@ -1,3 +1,9 @@
+---
+title: "Graftcode Introduction"
+order: 1
+description: "Learn how Graftcode connects frontends, mobile apps, and backend services seamlessly, removing the overhead of APIs, SDK generation, and client maintenance."
+---
+
 **Graftcode allows you to connect frontends, mobile apps, and backend services seamlessly, removing the overhead of APIs, SDK generation, and client maintenance.**
 
 Instead of writing REST endpoints, gRPC protobufs, DTOs, or client layers, you just:

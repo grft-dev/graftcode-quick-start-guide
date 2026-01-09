@@ -1,3 +1,9 @@
+---
+title: "Add Your First Graft - Frontend to Backend"
+order: 2
+description: "Connect a simple frontend app to a backend service using Graftcode - without writing controllers, DTOs, or any other code that handles connection."
+---
+
 ## Goal
 
 Connect a simple frontend app to a backend service using Graftcode - without writing controllers, DTOs, or any other code that handles connection.

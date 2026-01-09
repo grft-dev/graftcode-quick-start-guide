@@ -1,3 +1,9 @@
+---
+title: "Switch Between Monolith and Microservices"
+order: 6
+description: "Learn how to run the exact same service either as part of your app (monolith, in-memory) or remotely (microservice, in the cloud) - just by changing configuration."
+---
+
 # Switch Between Monolith and Microservices
 
 ## Goal

@@ -1,3 +1,9 @@
+---
+title: "Compare Performance"
+order: 7
+description: "Understand how Graftcode's Hypertube technology delivers superior performance compared to traditional REST APIs and gRPC, reducing cloud costs, CO2 emissions, and improving user experience."
+---
+
 ## Goal
 
 Understand how Graftcode's Hypertube technology delivers superior performance compared to traditional REST APIs and gRPC, reducing cloud costs, CO2 emissions, and improving user experience.

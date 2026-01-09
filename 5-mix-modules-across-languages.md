@@ -1,3 +1,9 @@
+---
+title: "Mix Modules Across Languages"
+order: 5
+description: "Augment your .NET price service with Python currency converter and see how easily you can pick any module regardless of technology and use it as direct dependency."
+---
+
 ## Goal
 
 Augment your .NET price service with **Python currency converter** and see how easily you can pick any module regardless of technology and use it as direct dependency.

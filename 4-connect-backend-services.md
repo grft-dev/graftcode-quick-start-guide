@@ -1,3 +1,9 @@
+---
+title: "Connect Backend Services"
+order: 4
+description: "Learn how to connect backend services using Graftcode - connect your .NET app to cloud services with instant effortless connection and highest performance."
+---
+
 ## Goal
 
 Services exposed with Graftcode can be consumed from frontend or other backend services too. In both cases you will always get instant effortless connection and highest performance. **Learn how to connect the .NET app that you've built** in the previous step "Host your own backend with Graftcode" section to cloud service that we were consuming from ReactJS app.
