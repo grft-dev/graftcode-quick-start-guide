@@ -1,3 +1,0 @@
-# Compare Performance
-
-(content placeholder)
