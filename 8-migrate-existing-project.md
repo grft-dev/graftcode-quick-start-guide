@@ -4,7 +4,6 @@ order: 8
 description: "Transform your existing application to use Graftcode without a complete rewrite, preserving your current investment while gaining new capabilities, simplify maintenance, enable AI based enhancements and increase performance."
 ---
 
-# Migrate Your Existing Project
 
 ## Goal
 
