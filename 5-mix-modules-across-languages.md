@@ -30,7 +30,7 @@ This generates a **typed Graft for the Python currency converter module** - read
 Update your code to allow providing currency to be used for calculating result. First add using to new graft:
 
 ```csharp
-using graft.sdncenter_currency_converter;
+using graft.pypi.currency_converter.converter;
 ```
 
 Next add a new method __GetMyCurrentCost()__ that takes also currency argument. Remember to **Save** your file:

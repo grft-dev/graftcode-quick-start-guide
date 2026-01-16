@@ -66,7 +66,7 @@ Once the package is installed, we can proceed with adding the Graft that will al
 Select preferred package manager from the dropdown and copy the command to your terminal window. As we're creating React app, we'll use NPM:
 
 ```bash
-npm install --registry https://grft.dev/graftcode-demo__4849b22a-a92a-4da9-9e73-dc10b39dd547 @graft/nuget-EnergyPriceService@1.1.0
+npm install --registry https://grft.dev/c2b9af8b-b6ba-4324-a9ba-c5719cd06702__free @graft/nuget-EnergyPriceService@1.1.0
 ```
 
 **This command installs a Graft** - a generated package that exposes strongly-typed classes and methods, allowing you to call external services as if they were part of your local codebase.
@@ -196,3 +196,4 @@ Check this chart to understand how your daily integration process will change wi
 ![](assets/CompareOldWaysNewWays.png)
 
 > ⚡ **Important:** Think how much time you saved. Normally, you would need to generate or hand-write client code from Swagger/OpenAPI, maintain models/DTOs and routes for every method. With Graftcode, it's just one command and a method call to any function regardless of service complexity. There is no need to monitor for changes or manually update across multiple layers. Everything stays in sync and typed checked interface validates methods usage at compile time. If the interface changes are evolutionary your Graft will keep working even if you do not decide to update to latest state.
+

@@ -59,22 +59,21 @@ Here's a breakdown of the command:
 Now let's add usings to your _MyEnergyService.cs_ file to use the new Graft.
 
 ```csharp
-using graft.nuget.be;
-using graft.nuget.MyEnergyService;
+using graft.nuget.EnergyPriceService;
 ```
 
-Create a static constructor for your **MyEnergyService** class and add the following line to configure the connection to the remote service (remember, you can set the configuration in multiple ways - code, env variable or config file):
+Create a static constructor for your **EnergyPriceCalculator** class and add the following line to configure the connection to the remote service (remember, you can set the configuration in multiple ways - code, env variable or config file):
 
 ```csharp
-static MyEnergyService()
+static EnergyPriceCalculator()
 {
-    GraftConfig.host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+    graft.nuget.EnergyPriceService.GraftConfig.host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 }
 ```
 
 ## Step 4. Use the method
 
-And add new method to **MyEnergyService** class which returns current cost retrieving consumption calculated by remote cloud service and multiplying by generated random price. Add this code to your _MyEnergyService.cs_ file, below the _GetPrice()_ method, and remeber to **Save it**:
+And add new method to **EnergyPriceCalculator** class which returns current cost retrieving consumption calculated by remote cloud service and multiplying by generated random price. Add this code to your _MyEnergyService.cs_ file, below the _GetPrice()_ method, and remeber to **Save it**:
 
 ```csharp
 public static double GetMyCurrentCost(int previousReadingKwh, int currentReadingKwh)
@@ -97,14 +96,13 @@ Focus on the way how your interaction with remote service looks like. It is full
 ```csharp
 namespace MyEnergyService;
 
-using graft.nuget.be;
-using graft.nuget.MyEnergyService;
+using graft.nuget.EnergyPriceService;
 
-public class MyEnergyService
+public class EnergyPriceCalculator
 {
-    static MyEnergyService()
+    static EnergyPriceCalculator()
     {
-        GraftConfig.host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+        graft.nuget.EnergyPriceService.GraftConfig.host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
     }
 
     public static double GetMyCurrentCost(int previousReadingKwh, int currentReadingKwh)

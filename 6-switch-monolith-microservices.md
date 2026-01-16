@@ -61,7 +61,7 @@ You will see that the Currency Converter module is now hosted as separate micros
 
 Now we will switch the configuration of your **MyEnergyService** so that it will use the **CurrencyConverter** module hosted in separate container (as microservice) instead of in-memory module (as part of monolith).
 
-To do this, open **Docker Desktop** and navigate to your running **graftcode_demo** container by clicking on it. Then view the files by clicking on **Files** tab and modify **usr/app/graft.pypi.sdncenter-currency-converter-config.json** file (right click and select **Edit file**).
+To do this, open **Docker Desktop** and navigate to your running **graftcode_demo** container by clicking on it. Then view the files by clicking on **Files** tab and modify **usr/app/graft.pypi.sdncenter_currency_converter-config.json** file (right click and select **Edit file**).
 
 In this file, change the channel section to use TCP/IP connection to your new container instead of in-memory (in-memory means that it is hosted within the same process as your .NET service on the same local machine, whereas TCP/IP means that the connection is made over the network).
 
