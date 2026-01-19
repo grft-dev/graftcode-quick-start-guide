@@ -11,7 +11,7 @@ Instead of writing REST endpoints, gRPC protobufs, DTOs, or client layers, you j
 - **Install** auto-generated, strongly-typed client using regular package manager command.
 - **Call** remote methods like local dependency.
 
-Behind the scenes your communication will be handled through our **Hypertube(TM) protocol** which uses **native level runtimes integration and binary messages**, processing calls **5x to 10× faster than WebService or gRPC and require 30–60% less code** - while keeping your business logic fully decoupled.
+Behind the scenes your communication will be handled through our **Hypertube(TM) protocol** which uses **native level runtimes integration and binary messages**, processing calls **5x to 10x faster than WebService or gRPC and require 30–60% less code** - while keeping your business logic fully decoupled.
 
 > Start with the short intro video below to see Graftcode in action:
 
@@ -49,7 +49,9 @@ As **Graftcode works across all major programming languages runtimes** both remo
 
 This allows you to build applications faster, decouple from integration logic, iterate quickly, and scale seamlessly even changing between monolith and microservices architectures with just configuration change.
 
-## What We Hear From Early Adopters
+## 
+
+<collapsible title="❓ What We Hear From Early Adopters">
 
 - **Ship features faster.** Backend client auto delivered as _strongly-typed, always up-to-date dependency_ simplifies changes and reduces bugs.
 - **Less code to maintain.** Lack of controllers, DTOs, REST/gRPC clients, and SDKs reduces up to ~30%-60% of code and fully decouples app from the way how components will be connected.
@@ -62,5 +64,7 @@ This allows you to build applications faster, decouple from integration logic, i
 - **Polyglot freedom.** With multi-runtime hosting capability and connection on native level you can mix programming languages per service and reuse best-in-class libraries across Python, Java, C#, Node.js, Go, PHP, Ruby, Perl without complex interop.
 - **Intuitive Effortless Migration.** Migrate existing projects just running your services on Graftcode gateway, adding Graft to client and switching at least one api client call to try and next quickly scale to all.
 - **Run anywhere.** Graftcode works across all major programming languages and platforms-cloud, browser, mobile. It can host logic within containers, PaaS services or on local machines.
+
+</collapsible>
 
 Let's see this in action through a real-world demo.
