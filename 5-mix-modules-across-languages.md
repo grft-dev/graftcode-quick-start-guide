@@ -1,23 +1,23 @@
 ---
 title: "Mix Modules Across Languages"
 order: 5
-description: "Augment your .NET price service with Python currency converter and see how easily you can pick any module regardless of technology and use it as direct dependency."
+description: "Augment your .NET price service with Python currency converter and see how easily you can pick any module regardless of technology and use it as a direct dependency."
 ---
 
 ## Goal
 
-Augment your .NET price service with **Python currency converter** and see how easily you can pick any module regardless of technology and use it as direct dependency.
+Augment your .NET price service with **Python currency converter** and see how easily you can pick any module regardless of technology and use it as a direct dependency.
 
 ![Cross-language module integration diagram](assets/mix-modules-across-languages-1.png)
 
 ## What You'll See
 
-- Add a Python currency converter package directly into your .NET app as regular dotnet dependency using nuget.
+- Add a Python currency converter package directly into your .NET app as regular dotnet dependency using NuGet.
 - Call it like a local C# method in one line.
 
-## Step 1. Add the Python currency converter package from PyPI using nuget
+## Step 1. Add the Python currency converter package from PyPI repository using NuGet
 
-From your **MyEnergyService** project call this command:
+From your **MyEnergyService** project, run the following command:
 
 ```bash
 dotnet add package -s https://grft.dev graft.pypi.sdncenter-currency-converter
@@ -25,7 +25,7 @@ dotnet add package -s https://grft.dev graft.pypi.sdncenter-currency-converter
 
 This generates a **typed Graft for the Python currency converter module** - ready to call from .NET.
 
-## Step 2. Add usage of python logic in your .NET service method that calculates current cost:
+## Step 2. Add usage of Python logic in your .NET service method that calculates current cost:
 
 Update your code to allow providing currency to be used for calculating result. First add using to new graft:
 
@@ -33,7 +33,13 @@ Update your code to allow providing currency to be used for calculating result. 
 using graft.pypi.currency_converter.converter;
 ```
 
-Next add a new method __GetMyCurrentCost()__ that takes also currency argument. Remember to **Save** your file:
+Next, let's add configuration to EnergyPriceCalculator static constructor
+
+```csharp
+graft.pypi.sdncenter_currency_converter.GraftConfig.Host="inMemory";
+```
+
+And now, let's add a new method __GetMyCurrentCost()__ that additionally takes a currency argument. Remember to **Save** your file:
 
 ```csharp
     public static double GetMyCurrentCost(int previousReadingKwh, int currentReadingKwh, string currency)
@@ -45,7 +51,7 @@ Next add a new method __GetMyCurrentCost()__ that takes also currency argument. 
     }
 ```
 
-Now your service calculates the price and converts the result to the desired currency using the Python module. Because our change was evolutionary without breaking previous method overloads, Grafts generated before will keep working even if they are no updated to latest state.
+Now your service calculates the price and converts the result to the desired currency using the Python module. Because this change is backward-compatible and does not break existing method overloads, previously generated Grafts will continue to work even if they are not updated.
 
 ## Step 3. Build, configure and test your enhanced service
 
@@ -68,16 +74,16 @@ docker run -d -p 80:80 -p 81:81 --name graftcode_demo myenergyservice:test
 
 Now you can visit the GraftVision portal at [http://localhost:81/GV](http://localhost:81/GV)
 
-_GetEnergyPrice.GetMyCurrentCost()_ appears automatically extended with new parameter.
-You can Try it out live passing "EUR" as target currency.
+_GetEnergyPrice.GetMyCurrentCost()_ is automatically extended with new parameter.
+You can Try it Out live passing "EUR" as target currency.
 
 ## Step 4. Compare: old-way vs. Graftcode way
 
 ### Old Way (without Graftcode)
 
-- It was impossible to use python modules directly in .NET
+- It was impossible to use Python modules directly in .NET
 - you had either to use .NET counterpart of required module
-  - or use python over REST and host it as separate service
+  - or use Python over REST and host it as separate service
   - or use complex low-level interop libraries
 
 ### New Way (with Graftcode)

@@ -65,7 +65,7 @@ COPY /bin/Release/net8.0/publish/ /usr/app/
 EXPOSE 80
 EXPOSE 81
 # And run Graftcode Gateway passing name of modules that should be exposed
-CMD ["gg", "--runtime", "netcore", "--modules", "/usr/app/MyEnergyService.dll", "--endpoint", "https://grft.dev"]
+CMD ["gg", "--modules", "/usr/app/MyEnergyService.dll"]
 ```
 
 <collapsible title="🐳 Understanding the Dockerfile - Click to see what each line does">
