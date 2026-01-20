@@ -1,5 +1,5 @@
 ---
-title: "Expose Methods as Services"
+title: "Host a Backend Service with Graftcode Gateway"
 order: 3
 description: "Turn your own code into a discoverable backend service using Graftcode Gateway on your local machine - no controllers, no REST routes, no OpenAPI specs."
 ---

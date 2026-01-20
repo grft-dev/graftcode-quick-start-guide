@@ -6,7 +6,7 @@ description: "Learn how to connect backend services using Graftcode - connect yo
 
 ## Goal
 
-Services exposed with Graftcode can be consumed from frontend or other backend services too. In both cases you will always get instant effortless connection and highest performance. **Learn how to connect the .NET app that you've built** in the previous step "Host your own backend with Graftcode" section to cloud service that we were consuming from ReactJS app.
+Services exposed with Graftcode can be consumed from frontend or other backend services too. In both cases you will always get instant effortless connection and highest performance. **Learn how to connect the .NET app that you've built** in the previous step "Host a Backend Service with Graftcode Gateway" section to cloud service that we were consuming from ReactJS app.
 
 ![](assets/connect-backend-services-1.png)
 
@@ -26,7 +26,7 @@ locate the **NetConsumptionKWh** method under the **Meter Logic** section. This 
 ![Graftcode Vision showing NetConsumptionKWh method details](assets/connect-backend-services-2.png)
 
 In the GraftVision portal, you can:
-- See the connection package manager command for your particular technology
+- See the generated package manager command for your selected technology, allowing you to install the service as a strongly-typed dependency
 - View all available methods and their signatures
 - Try out these method by inserting parameters and seeing the result
 - See the expected input parameters and return types
@@ -36,12 +36,13 @@ In the GraftVision portal, you can:
 Since this is a .NET application, we'll now select **Nuget** as our package manager from the dropdown menu in the GraftVision portal. Let's take the command and run it in your terminal window.
 
 ```bash
-dotnet add package -s https://grft.dev/graftcode-demo__e74616d1-1661-45ff-92a7-e7770a70d24a graft.nuget.EnergyPriceService --version 1.1.0.0
+dotnet add package -s https://grft.dev/302597d3-3b30-4eb4-ba90-ec9be7b282eb__free graft.nuget.EnergyPriceService --version 1.2.0.0
 ```
 
 
 <collapsible title="🔧 Understanding the Command - Click to see what it does what each part means">
 This command:
+
 - Adds the Graftcode service package to your .NET project
 - Uses the custom Graftcode package source URL unique for that specific Graftcode Gateway instance
 - Installs the strongly-typed client for the backend service
@@ -49,8 +50,9 @@ This command:
 
 Here's a breakdown of the command:
 - **dotnet add package** - Standard .NET CLI command to add a NuGet package to your project
-- **-s https://grft.dev/graftcode-demo__fa55e1ed-8373-4600-95eb-d028f21d2451** - Specifies the custom Graftcode package source where your service package is hosted
-- **graft.nuget.be** - The name of the generated package that contains the strongly-typed client for your backend service
+- **-s https://grft.dev/302597d3-3b30-4eb4-ba90-ec9be7b282eb__free** - Specifies the custom Graftcode package source where your service package is hosted
+- **graft.nuget.EnergyPriceService** - The name of the generated package that contains the strongly-typed client for your backend service
+- **version 1.2.0.0** - Version of the package
 
 </collapsible>
 
@@ -67,7 +69,7 @@ Create a static constructor for your **EnergyPriceCalculator** class and add the
 ```csharp
 static EnergyPriceCalculator()
 {
-    graft.nuget.EnergyPriceService.GraftConfig.host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+    graft.nuget.EnergyPriceService.GraftConfig.Host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 }
 ```
 
@@ -93,6 +95,7 @@ Focus on the way how your interaction with remote service looks like. It is full
 ![](assets/connect-backend-services-3.png)
 
 <collapsible title="🔧 Click here to see the full code of MyEnergyService.cs">
+
 ```csharp
 namespace MyEnergyService;
 
@@ -102,7 +105,7 @@ public class EnergyPriceCalculator
 {
     static EnergyPriceCalculator()
     {
-        graft.nuget.EnergyPriceService.GraftConfig.host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+        graft.nuget.EnergyPriceService.GraftConfig.Host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
     }
 
     public static double GetMyCurrentCost(int previousReadingKwh, int currentReadingKwh)
