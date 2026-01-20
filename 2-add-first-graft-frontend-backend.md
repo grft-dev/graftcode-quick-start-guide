@@ -60,14 +60,14 @@ Before we add our first Graft, we need to install _javonet-nodejs-sdk_ package. 
 npm install javonet-nodejs-sdk
 ```
 
-Once the package is installed, we can proceed with adding the Graft that will allow us to call the .NET backend service. The installation command is provided in the Graftcode Vision portal.
+Once the package is installed, we can proceed with adding the Graft that will allow us to call the .NET backend service. The installation command is provided in the Graftcode Vision portal. Select preferred package manager from the dropdown and copy the command to your terminal window. As we're creating React app, we'll use NPM.
 
 ![GraftVision](assets/graftvision-installation.png)
 
-Select preferred package manager from the dropdown and copy the command to your terminal window. As we're creating React app, we'll use NPM:
+You can also copy the command from the box below:
 
 ```bash
-npm install --registry https://grft.dev/c2b9af8b-b6ba-4324-a9ba-c5719cd06702__free @graft/nuget-EnergyPriceService@1.1.0
+npm install --registry https://grft.dev/302597d3-3b30-4eb4-ba90-ec9be7b282eb__free @graft/nuget-EnergyPriceService@1.2.0
 ```
 
 **This command installs a Graft** - a generated package that exposes strongly-typed classes and methods, allowing you to call external services as if they were part of your local codebase.
@@ -79,30 +79,27 @@ Now, your frontend can see backend classes, methods, and receive results directl
 ## Step 4. Import and configure the backend client
 
 Before making any calls, we need to **import the generated Graft client** and set up a connection to the backend service.  
-This tells your React app where the service is hosted and how to reach it. The configuration is always easy to find and ready to copy from the Graftcode Vision portal.
+This tells your React app where the service is hosted and how to reach it. The configuration is always easy to find and ready to copy from the Graftcode Vision portal. Just click on a second tab "2. Configuration" in Graftcode Vision Portal.
 
 ![](assets/graftvision-configuration.png)
 
-Open _src\\App.jsx_ and add on **top of the file**:
+Open src\App.jsx and add the following code at **the very top of the file**.
+This imports React state handling, generated Graft client and configures the connection to the backend service.
+The configuration code is copied directly from the Graftcode Vision Portal.
 
 ```javascript
 import { useState } from "react";
-import { GraftConfig, BillingLogic } from '@graft/nuget-EnergyPriceService'
-```
 
+import { GraftConfig, BillingLogic } from '@graft/nuget-EnergyPriceService';
+GraftConfig.host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+```
+> 💡 **Note:** You can also provide the Configuration Connection via environment variables or configuration files if preferred.
 
 <collapsible title="⚛️ New to React or Graftcode? Click here to understand these imports">
 - **useState** - A React hook we'll use later to store the backend response and update the UI when data changes
 - **GraftConfig** - A Graftcode function used to configure how your frontend connects to the backend service (connection details, protocols, etc.)
 - **BillingLogic** - The strongly-typed client (Graft) for one of the classes exposed that lets you call .NET backend methods just like local functions, with full autocomplete and type safety
-
 </collapsible>
-
-Next, configure how the frontend connects to the backend service. **Paste this snippet right below imports** (it can be also configured via environment variables or config files):
-
-```javascript
-GraftConfig.host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws"
-```
 
 ## Step 5. Call the backend method
 
@@ -150,9 +147,9 @@ If you've missed any step, here is the full code of _src\\App.jsx_:
 <collapsible title="🔧 Click here to see the full code of src\\App.jsx">
 ```javascript
 import { useState } from "react";
-import { GraftConfig, BillingLogic } from '@graft/nuget-EnergyPriceService'
+import { GraftConfig, BillingLogic } from '@graft/nuget-EnergyPriceService';
 
-GraftConfig.host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws"
+GraftConfig.host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 
 const monthlyBillCostWithTaxPromise = BillingLogic.CalculateMonthlyBill(88.4, 1.4, 23);
 

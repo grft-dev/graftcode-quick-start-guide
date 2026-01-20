@@ -15,11 +15,11 @@ Turn your own code into a discoverable backend service using Graftcode Gateway o
 - You'll clone a simple .NET library app with a single public method.
 - You'll expose it through Graftcode Gateway using a lightweight Dockerfile.
 - You'll instantly get a GraftVision portal - like Swagger, but smarter and ready to be called from most popular languages with just one command.
-- You'll see how wihtout any controllers, DTOs, and REST endpoints - Graftcode makes your business logic or plain object facade public methods callable at no effort and no coupling to any communication technology.
+- You’ll see how, without controllers, DTOs, or REST endpoints, Graftcode makes your business logic or plain object facade methods directly callable, with no coupling to any specific communication technology.
 
 ## Step 1. Clone the .NET backend service
 
-**Navigate back to your root new folder created for tutorial**. Next clone the prepared .NET energy price service from GitHub:
+**Navigate back to the root folder you created for this tutorial**. Next clone the prepared .NET energy price service from GitHub:
 
 ```bash
 git clone https://github.com/grft-dev/dotnet-energy-price-service.git
@@ -27,7 +27,7 @@ cd dotnet-energy-price-service
 code .
 ```
 
-This is a very simple service that already contains the energy price logic with public method _GetPrice()_ ready to be exposed through Graftcode Gateway. The code of the class _EnergyPriceCalculator.cs_ that will expose _EnergyPriceCalculator_ is as simple as this:
+This is a very simple service that already contains the energy price logic with a public method _GetPrice()_ ready to be exposed through Graftcode Gateway. The code of the class _EnergyPriceCalculator.cs_ that will expose _EnergyPriceCalculator_ is as simple as this:
 
 ```csharp
 namespace MyEnergyService;
@@ -65,14 +65,19 @@ COPY /bin/Release/net8.0/publish/ /usr/app/
 EXPOSE 80
 EXPOSE 81
 # And run Graftcode Gateway passing name of modules that should be exposed
-CMD ["gg", "--runtime", "netcore", "--modules", "/usr/app/MyEnergyService.dll", "--endpoint", "https://d.grft.dev"]
+CMD ["gg", "--runtime", "netcore", "--modules", "/usr/app/MyEnergyService.dll", "--endpoint", "https://grft.dev"]
 ```
 
 <collapsible title="🐳 Understanding the Dockerfile - Click to see what each line does">
 
-- **FROM pladynski/myrepo:graftcode** - Sets the base image to Graftcode Gateway, which contains all the necessary tools to expose your .NET methods as web APIs
-- **COPY ./src/MyEnergyService/bin/Release/net8.0/publish/ /usr/app/** - Copies your compiled .NET application files from the local publish folder into the Docker container's /usr/app/ directory
-- **CMD ["/usr/app/gg", "--runtime", "netcore", "--modules", "/usr/app/MyEnergyService.dll", "--GV"]** - Runs the Graftcode Gateway executable (gg) with your .NET module, automatically exposing your public methods as REST endpoints with GraftVision UI enabled
+- **FROM mcr.microsoft.com/dotnet/aspnet:9.0** - Pulls the official Microsoft .NET ASP.NET runtime image, providing a Linux environment with the .NET 9 runtime required to execute your published service binaries.
+- **RUN mkdir -p /usr/app && apt-get update && apt-get install -y wget** - Creates the application directory and installs required system tools for downloading Graftcode Gateway.
+- **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package, which is responsible for discovering and exposing public methods from your .NET assemblies.
+- **rm /usr/app/gg.deb && apt-get clean && rm -rf /var/lib/apt/lists/** - Removes installer files and cleans package caches to reduce the final image size.
+- **COPY /bin/Release/net8.0/publish/ /usr/app/** - Copies your already-published .NET service binaries into the container. Only compiled output is included, not source code.
+- **EXPOSE 80** - Declares the port used for service communication.
+- **EXPOSE 81** - Declares the port used by Graftcode Vision, the Swagger-like UI for exploring and testing exposed methods.
+- **CMD ["gg", "--modules", "/usr/app/MyEnergyService.dll", "--endpoint", "https://grft.dev"** - Runs the Graftcode Gateway executable (gg) with your .NET module, automatically exposing your public methods as REST endpoints with Graftcode Vision UI enabled
 
 </collapsible>
 
