@@ -48,6 +48,7 @@ Before calling backend service, let's see how it looks like. We prepared it in b
 - [With Graftcode in Vision Portal](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), you'll see the same backend but exposed as regular classes and methods + package manager command to install it as dependency in any technology.
 
 ![BackendServiceSwagger](assets/SwaggerBackend.png)
+![BackendServiceSwagger](assets/graftvision_graftcode-demo.png)
 
 Graftcode saves you from writing, generating  and maintaining client code - providing package manager command to install this service almost as regular dependency.
 
@@ -142,7 +143,7 @@ function App() {
 <collapsible title="🔧Click here to understand how this React code works with the backend call ">
 -  Inside _App()_, we use _useState(0)_ to declare a piece of state called data, which will hold the backend response.
 - _monthlyBillCostWithTaxPromise.then(setData)_ waits for the backend call to finish and updates the state with the returned value.
-- Finally, the JSX returns an _<h1>_ element showing the current energy monthly bill value.
+- Finally, the JSX returns an element showing the current energy monthly bill value.
 </collapsible>
 
 If you've missed any step, here is the full code of _src\\App.jsx_:
@@ -185,7 +186,7 @@ Now open your browser at [http://localhost:5173](http://localhost:5173) and you'
 - Notice auto-completion and type checks in your IDE for all methods and arguments.
 - No REST/gRPC client code, DTOs, models  - just direct, strongly-typed calls, thanks to Graftcode.
 
-![image_1757498435519.png]
+![](assets/image_1757498435519.png)
 
 
 
