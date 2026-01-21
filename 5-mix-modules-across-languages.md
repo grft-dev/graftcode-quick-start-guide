@@ -23,7 +23,7 @@ From your **MyEnergyService** project, run the following command:
 dotnet add package -s https://grft.dev graft.pypi.sdncenter-currency-converter
 ```
 
-This generates a **typed Graft for the Python currency converter module** - ready to call from .NET.
+This generates a **typed Graft for the Python currency converter module** - ready to call from .NET. This is regular public Python module published on PyPi repository. Thanks to Graftcode you can use any module from any technology by just requesting them through Graftcode registry and providing "**graft.\<repository\>**" prefix.
 
 ## Step 2. Add usage of Python logic in your .NET service method that calculates current cost:
 
@@ -33,10 +33,13 @@ Update your code to allow providing currency to be used for calculating result. 
 using graft.pypi.currency_converter.converter;
 ```
 
-Next, let's add configuration for Python Currency Converter module. Let's place it in the EnergyPriceCalculator static constructor
+Next, let's add configuration for Python Currency Converter module. Let's place it in the EnergyPriceCalculator static constructor. This time we will check if there is nothing configured through Environmental Variable and if not use by default in memory communication:
 
 ```csharp
-graft.pypi.sdncenter_currency_converter.GraftConfig.setConfig("licenseKey=f7GZ-De6k-Mx4p-t7FN-q5DC\nname=graft.pypi.sdncenter_currency_converter;host=inMemory;modules=currency_converter;runtime=python";
+var config = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GRAFT_CONFIG")) ?
+    "licenseKey=f7GZ-De6k-Mx4p-t7FN-q5DC\nname=graft.pypi.sdncenter_currency_converter;host=inMemory;modules=currency_converter;runtime=python" :
+    Environment.GetEnvironmentVariable("GRAFT_CONFIG");
+graft.pypi.sdncenter_currency_converter.GraftConfig.setConfig(config);
 ```
 
 And now, let's add a new method __GetMyCurrentCost()__ that additionally takes a currency argument. Remember to **Save** your file:
@@ -72,7 +75,7 @@ docker build --no-cache --pull -t myenergyservice:test .
 docker run -d -p 80:80 -p 81:81 --name graftcode_demo myenergyservice:test
 ```
 
-Now you can visit the GraftVision portal at [http://localhost:81/GV](http://localhost:81/GV)
+Now you can visit the GraftVision portal at [http://localhost:81/GV](http://localhost:81/GV#MyEnergyService/EnergyPriceCalculator-0/GetMyCurrentCost(System.Int32,System.Int32,System.String))
 
 _GetEnergyPrice.GetMyCurrentCost()_ is automatically extended with new parameter.
 You can Try it Out live passing "EUR" as target currency.
