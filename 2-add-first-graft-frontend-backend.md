@@ -67,7 +67,7 @@ Once the package is installed, we can proceed with adding the Graft that will al
 You can also copy the command from the box below:
 
 ```bash
-npm install --registry https://grft.dev/302597d3-3b30-4eb4-ba90-ec9be7b282eb__free @graft/nuget-EnergyPriceService@1.2.0
+npm install --registry https://grft.dev/34de0ff8-008d-4363-844b-b2e5a41c63bb__free @graft/nuget-EnergyPriceService@1.2.0
 ```
 
 **This command installs a Graft** - a generated package that exposes strongly-typed classes and methods, allowing you to call external services as if they were part of your local codebase.
@@ -105,7 +105,7 @@ GraftConfig.host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcent
 
 With the client imported and configured, you can now call your backend service as if it were a local function.
 
-Let's update _src\\App.jsx_ and call one of its method. **Put this line below** _setConfig_ **and above** _function App()_.
+Let's update _src\\App.jsx_ and call one of its method. **Put this line below** _GraftConfig.host_ **and above** _function App()_.
 
 ```javascript
 const monthlyBillCostWithTaxPromise = BillingLogic.CalculateMonthlyBill(88.4, 1.4, 23);

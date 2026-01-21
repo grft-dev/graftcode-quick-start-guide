@@ -19,7 +19,7 @@ Turn your own code into a discoverable backend service using Graftcode Gateway o
 
 ## Step 1. Clone the .NET backend service
 
-**Navigate back to the root folder you created for this tutorial**. Next clone the prepared .NET energy price service from GitHub:
+**Return to terminal window and navigate back to the root folder you created for this tutorial**. Next clone the prepared .NET energy price service from GitHub:
 
 ```bash
 git clone https://github.com/grft-dev/dotnet-energy-price-service.git
@@ -77,7 +77,7 @@ CMD ["gg", "--modules", "/usr/app/MyEnergyService.dll"]
 - **COPY /bin/Release/net8.0/publish/ /usr/app/** - Copies your already-published .NET service binaries into the container. Only compiled output is included, not source code.
 - **EXPOSE 80** - Declares the port used for service communication.
 - **EXPOSE 81** - Declares the port used by Graftcode Vision, the Swagger-like UI for exploring and testing exposed methods.
-- **CMD ["gg", "--modules", "/usr/app/MyEnergyService.dll", "--endpoint", "https://grft.dev"** - Runs the Graftcode Gateway executable (gg) with your .NET module, automatically exposing your public methods as REST endpoints with Graftcode Vision UI enabled
+- **CMD ["gg", "--modules", "/usr/app/MyEnergyService.dll"** - Runs the Graftcode Gateway executable (gg) with your .NET module, automatically exposing your public methods as REST endpoints with Graftcode Vision UI enabled
 
 </collapsible>
 
@@ -91,9 +91,8 @@ docker run -d -p 80:80 -p 81:81 --name graftcode_demo myenergyservice:test
 ```
 
 <collapsible title="📖 New to Docker? Click here to understand what these commands do">
-
-- **docker login** - Authenticates with the Docker registry using the provided credentials to access the Graftcode Gateway base image
-- **dotnet publish** - Compiles and publishes your .NET application, creating optimized binaries ready for production deployment
+- **dotnet build** - Compiles .NET application, creating optimized binaries ready for production deployment
+- **dotnet publish** - Publishes your .NET application to publish folder including all dependencies
 - **docker build** - Creates a Docker image from your Dockerfile, combining the Graftcode Gateway with your published service code, and tags it as "myenergyservice:test"
 - **docker run** - Starts a container from your built image in detached mode (-d), exposing ports 80 and 81 to make your service accessible via HTTP
 
