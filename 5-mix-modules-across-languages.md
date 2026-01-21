@@ -33,10 +33,10 @@ Update your code to allow providing currency to be used for calculating result. 
 using graft.pypi.currency_converter.converter;
 ```
 
-Next, let's add configuration to EnergyPriceCalculator static constructor
+Next, let's add configuration for Python Currency Converter module. Let's place it in the EnergyPriceCalculator static constructor
 
 ```csharp
-graft.pypi.sdncenter_currency_converter.GraftConfig.Host="inMemory";
+graft.pypi.sdncenter_currency_converter.GraftConfig.setConfig("licenseKey=f7GZ-De6k-Mx4p-t7FN-q5DC\nname=graft.pypi.sdncenter_currency_converter;host=inMemory;modules=currency_converter;runtime=python";
 ```
 
 And now, let's add a new method __GetMyCurrentCost()__ that additionally takes a currency argument. Remember to **Save** your file:
