@@ -54,7 +54,7 @@ CMD ["gg", "--modules", "/usr/app/sdncenter_currency_converter/", "--httpPort", 
 
 
 Now run the following commands to build and start the container.
-This will install the Python module, download the latest Graftcode Gateway, and expose the module for remote consumption through Grafts.:
+This will install the Python module, download the latest Graftcode Gateway, and expose the module for remote consumption through Grafts:
 
 ```PowerShell
 docker build -t pythoncurrencyservice:latest .
@@ -78,12 +78,11 @@ This variable overrides GRAFT_CONFIG and switches execution from in-memory to re
 ```bash
 docker stop graftcode_demo
 docker rm graftcode_demo
-docker run -e GRAFT_CONFIG="name=graft.pypi.sdncenter_currency_converter;channel=tcp;host=pythoncurrencyservice;port=9092;runtime=python" -d -p 80:80 -p 81:81 --name graftcode_demo myenergyservice:test 
-docker network connect mynetwork graftcode_demo
+docker run -d --network mynetwork -e GRAFT_CONFIG="name=graft.pypi.sdncenter_currency_converter;host=pythoncurrencyservice:9092;runtime=python;modules=/usr/app" -d -p 80:80 -p 81:81 --name graftcode_demo myenergyservice:test
 ```
 Both containers are connected to the same virtual network **(mynetwork)**, so they can reach each other using container names.
 
-As you see we just modified **channel** section to use the TCP/IP connection to the new container (currently hosted on your local machine, but it can be any remote host or cloud service) instead of in-memory connection. This is the same module that we were using before but now we're connection to it over the network. 
+As you see we just modified **host** section to use the TCP/IP connection to the new container (currently hosted on your local machine, but it can be any remote host or cloud service) instead of in-memory connection. This is the same module that we were using before but now we're connection to it over the network. 
 
 With simple restart, your app started using this remote connection to connect to the remote module, without any change in code.
 
@@ -91,10 +90,18 @@ Now navigate to GraftVision portal for **EnergyService** at [http://localhost:81
 
 This time execution of python module **CurrencyConverter** goes over the network to your remote microservice - but your business logic code didn't change. You can dynamically switch architecture between monolith and microservices without any modification in your core logic code - just by simple configuration change.
 
-**Want to check if its real?** Run command below to stop PythonCurrencyService and try the _GetMyCurrentCost_ method again:
+## Step 3. Confirm that the call goes via the network to a separate service container
+**Want to check if it's real?** 
+
+Run command below to stop PythonCurrencyService and then try the **_GetMyCurrentCost_** method again:
 ```bash
 docker stop pythoncurrencyservice
 ```
+
+You will see that once the Docker container is stopped, an error appears: **"Check if server is running correctly"**.
+After starting the container again, the method will return the result successfully.
+
+![](assets/monolith-microservice-proof.png)
 
 > ⚡ **Important:** You service is using multiple Grafts and each of them might have its own configuration. Energy Backend keeps calling our hosted cloud service through websockets but your currency converter Graft just switched from in-memory to TCP/IP. All of this can be done through configuration files, environmental variables or from code. This allows you to dynamically change the architecture of your app without any code change.
 
