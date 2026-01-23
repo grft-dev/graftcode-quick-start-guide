@@ -33,7 +33,9 @@ Update your code to allow providing currency to be used for calculating result. 
 using graft.pypi.currency_converter.converter;
 ```
 
-Next, let's add configuration for Python Currency Converter module. Let's place it in the EnergyPriceCalculator static constructor. This time we will check if there is nothing configured through Environmental Variable and if not use by default in memory communication:
+Next, let's add configuration for Python Currency Converter module. Let's place it in the EnergyPriceCalculator static constructor. 
+
+Due to a temporary bug currently being fixed, we first check whether the configuration is provided via an environment variable. If it is not set, we fall back to the default in-memory communication and pass an extended configuration string:
 
 ```csharp
 var config = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GRAFT_CONFIG")) ?
@@ -55,6 +57,47 @@ And now, let's add a new method __GetMyCurrentCost()__ that additionally takes a
 ```
 
 Now your service calculates the price and converts the result to the desired currency using the Python module. Because this change is backward-compatible and does not break existing method overloads, previously generated Grafts will continue to work even if they are not updated.
+
+<collapsible title="🔧 Click here to see the full code of MyEnergyService.cs">
+
+```csharp
+using graft.nuget.EnergyPriceService;
+using graft.pypi.currency_converter.converter;
+
+namespace MyEnergyService;
+
+public class EnergyPriceCalculator
+{
+    static EnergyPriceCalculator()
+    {
+        graft.nuget.EnergyPriceService.GraftConfig.Host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+        var config = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GRAFT_CONFIG")) ?
+            "licenseKey=f7GZ-De6k-Mx4p-t7FN-q5DC\nname=graft.pypi.sdncenter_currency_converter;host=inMemory;modules=currency_converter;runtime=python" :
+        Environment.GetEnvironmentVariable("GRAFT_CONFIG");
+        graft.pypi.sdncenter_currency_converter.GraftConfig.setConfig(config);
+    }
+
+    public static double GetPrice()
+    {
+        return new Random().Next(100, 105);
+    }
+
+    public static double GetMyCurrentCost(int previousReadingKwh, int currentReadingKwh)
+    {
+        var consumption = MeterLogic.NetConsumptionKWh(previousReadingKwh, currentReadingKwh);
+        return consumption * GetPrice();
+    }
+
+    public static double GetMyCurrentCost(int previousReadingKwh, int currentReadingKwh, string currency)
+    {
+        var consumption = MeterLogic.NetConsumptionKWh(previousReadingKwh, currentReadingKwh);
+
+        var convertedValue = SimpleCurrencyConverter.convert(consumption * (float)GetPrice(), "USD", currency);
+        return convertedValue;
+    }
+}
+```
+</collapsible>
 
 ## Step 3. Build, configure and test your enhanced service
 
@@ -94,4 +137,4 @@ You can Try it Out live passing "EUR" as target currency.
 - Install the package from any technology using regular package manager command.
 - Call methods like local C# in one line.
 
-> ⚡ **Result:** You've added a Python currency converter module directly to your .NET service with just one command and a single line of code. The Python module is called directly from .NET and runs in the same process - like a local C# method. You can do the same with any other language or technology thanks to Graftcode's multi-runtime support. Imagine the possibilities of being able to use any existing package from any technology regardless of technology constraints.
+> ⚡ **Result:** You've added a Python currency converter module directly to your .NET service with just one command and a few lines of code. The Python module is called directly from .NET and runs in the same process - like a local C# method. You can do the same with any other language or technology thanks to Graftcode's multi-runtime support. Imagine the possibilities of being able to use any existing package from any technology regardless of technology constraints.

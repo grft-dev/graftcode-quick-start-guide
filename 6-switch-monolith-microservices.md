@@ -12,21 +12,23 @@ Learn how to run the exact same service either as part of your app (monolith, in
 
 ## What You'll See
 
-- You'll create new container that will host Currency Converter python module with Graftcode Gateway.
-- You'll switch a configuration line to connect the same service remotely instead of direct monolith usage.
-- You'll see how without any code change you can switch between monolith and microservices architecture.
+- You'll create new container that will host Currency Converter Python module with Graftcode Gateway.
+- You will switch a single configuration line to connect to the same service remotely instead of using in-memory execution.
+- You will see how you can switch between monolith and microservices architecture without any code changes.
 
 ## Step 1. Run Currency Converter as separate microservice
 
 Let's create a new Dockerfile that will host the Currency Converter module and Graftcode Gateway as separate microservice on your local machine (Graftcode Gateway will just host the module and expose it as remote service).
 
-**Return to terminal and create a new folder "PythonCurrencyService"**, inside it create a new file named **Dockerfile** and copy and paste the content below into your Dockerfile.
+**Return to terminal and create a new folder "PythonCurrencyService"**. Inside it create a new file named **Dockerfile** and copy and paste the content below into your Dockerfile.
 
 ```PowerShell
 mkdir PythonCurrencyService
 cd PythonCurrencyService
 code .
 ```
+
+Inside it create a new file named **Dockerfile** and copy and paste the content below into your Dockerfile.
 
 ```Dockerfile
 FROM python:3.11-slim
@@ -36,14 +38,23 @@ WORKDIR /usr/app
 RUN pip install sdncenter-currency-converter --target ./sdncenter_currency_converter 
 
 # Install wget and download Graftcode Gateway (GG)
-RUN mkdir -p /usr/app  && apt-get update     && apt-get install -y wget     && wget -O /usr/app/gg.deb     https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb     && dpkg -i /usr/app/gg.deb     && rm /usr/app/gg.deb     && apt-get clean     && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /usr/app  \
+    && apt-get update \
+    && apt-get install -y wget \
+    && wget -O /usr/app/gg.deb \
+    https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
+    && dpkg -i /usr/app/gg.deb \
+    && rm /usr/app/gg.deb \
+    && apt-get clean \ 
+    && rm -rf /var/lib/apt/lists/*
 
 # Run Graftcode Gateway pointing at that module
 CMD ["gg", "--modules", "/usr/app/sdncenter_currency_converter/", "--httpPort", "91","--port","90","--TCPServer", "--tcpPort=9092"]
 ```
 
 
-Now you can run this command to build the container that will install our python module to local directory, download latest Graftcode Gateway and run it to expose that python service for remote consumers through Grafts:
+Now run the following commands to build and start the container.
+This will install the Python module, download the latest Graftcode Gateway, and expose the module for remote consumption through Grafts.:
 
 ```PowerShell
 docker build -t pythoncurrencyservice:latest .
@@ -53,15 +64,16 @@ docker network connect mynetwork graftcode_demo
 docker network connect mynetwork pythoncurrencyservice
 ```
 
-Now you can visit the GraftVision portal at [http://localhost:91/GV](http://localhost:91/GV#sdncenter-currency-converter/SimpleCurrencyConverter-0/convert(float,str,str)). 
+Now you can visit the Graftcode Vision portal at [http://localhost:91/GV](http://localhost:91/GV#sdncenter-currency-converter/SimpleCurrencyConverter-0/convert(float,str,str)). 
 
-You will see that the Currency Converter module is now hosted as separate microservice. You can host any other public module in the same way or extract any custom library as separate microservice by just hosting it on Graftcode Gateway in dedicated container or anywhere else.
+You will see that the Currency Converter module is now hosted as separate microservice. You can host any other public module in the same way or extract any custom library as separate microservice by just hosting it on Graftcode Gateway in a dedicated container or anywhere else.
 
 ## Step 2. Switch your CurrencyConverter calls from monolith to microservice
 
-Now we will switch the configuration of your **MyEnergyService** so that it will use the **CurrencyConverter** module hosted in separate container (as microservice) instead of in-memory module (as part of monolith).
+Now we will switch the configuration of your **MyEnergyService** so it uses the **CurrencyConverter** module hosted in a separate container (as microservice) instead of the in-memory module running inside the monolith.
 
-To do this, run this simple command which stops our container and runs it again passing new environmental variable which will overwrite our GRAFT_CONFIG and change it from inMemory to remote calls to our new PythonCurrencyService. Both containers are connected to same virtual network **mynetwork** so they can reach them by their container names.
+Return to the **dotnet-energy-price-service** project and run the following commands to stop the container and start it again with a new environment variable.
+This variable overrides GRAFT_CONFIG and switches execution from in-memory to remote TCP communication with PythonCurrencyService.
 
 ```bash
 docker stop graftcode_demo
@@ -69,8 +81,9 @@ docker rm graftcode_demo
 docker run -e GRAFT_CONFIG="name=graft.pypi.sdncenter_currency_converter;channel=tcp;host=pythoncurrencyservice;port=9092;runtime=python" -d -p 80:80 -p 81:81 --name graftcode_demo myenergyservice:test 
 docker network connect mynetwork graftcode_demo
 ```
+Both containers are connected to the same virtual network **(mynetwork)**, so they can reach each other using container names.
 
-As you see we just modified the "host" section to use the TCP/IP connection to the new container (currently hosted on your local machine, but it can be any remote host or cloud service) instead of in-memory connection. This is the same module that we were using before but now we're connection to it over the network. 
+As you see we just modified **channel** section to use the TCP/IP connection to the new container (currently hosted on your local machine, but it can be any remote host or cloud service) instead of in-memory connection. This is the same module that we were using before but now we're connection to it over the network. 
 
 With simple restart, your app started using this remote connection to connect to the remote module, without any change in code.
 

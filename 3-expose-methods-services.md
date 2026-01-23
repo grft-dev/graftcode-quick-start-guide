@@ -19,7 +19,7 @@ Turn your own code into a discoverable backend service using Graftcode Gateway o
 
 ## Step 1. Clone the .NET backend service
 
-**Return to terminal window and navigate back to the root folder you created for this tutorial**. Next clone the prepared .NET energy price service from GitHub:
+**Return to terminal window and navigate back to the root folder you created for this tutorial**. Next clone the prepared .NET energy price service from GitHub and open the project in your IDE by pasting these commands:
 
 ```bash
 git clone https://github.com/grft-dev/dotnet-energy-price-service.git
