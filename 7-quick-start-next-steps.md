@@ -87,7 +87,7 @@ This is the recommended setup for any long-lived service.
 
 We’re building Graftcode in the open and shipping new features **every few days**.
 
-👉 Join our **Discord** and tell us what you think:
+👉 Join our **Discord** by clicking this link https://discord.gg/2tWb3BAE36 and tell us what you think:
 - what worked well,
 - what felt confusing,
 - what you’d like to see next.
