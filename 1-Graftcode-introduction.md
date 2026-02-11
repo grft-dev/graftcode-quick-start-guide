@@ -11,7 +11,7 @@ Instead of writing REST endpoints, gRPC protobufs, DTOs, or client layers, you j
 - **Install** auto-generated, strongly-typed client using regular package manager command.
 - **Call** remote methods like local dependency.
 
-Behind the scenes your communication will be handled through our **Hypertube(TM) protocol** which uses **native level runtimes integration and binary messages**, processing calls **5x to 10x faster than WebService or gRPC and require 30–60% less code** - while keeping your business logic fully decoupled.
+Behind the scenes, communication is handled through our Hypertube(TM) protocol, which uses native runtime integration and binary messaging. In benchmark scenarios, it processes calls up to 70% faster than traditional WebServices and significantly faster than gRPC, while typically requiring 30 to 60% less code, and keeping your business logic fully decoupled.
 
 > Start with the short intro video below to see Graftcode in action:
 
