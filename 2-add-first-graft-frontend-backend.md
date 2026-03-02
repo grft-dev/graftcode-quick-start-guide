@@ -67,7 +67,7 @@ Once the package is installed, we can proceed with adding the Graft that will al
 You can also copy the command from the box below:
 
 ```bash
-npm install --registry https://grft.dev/34de0ff8-008d-4363-844b-b2e5a41c63bb__free @graft/nuget-EnergyPriceService@1.2.0
+npm install --registry https://grft.dev/7c81a896-630e-4abf-9b47-0e8adcca9183__free @graft/nuget-energypriceservice@1.2.0
 ```
 
 **This command installs a Graft** - a generated package that exposes strongly-typed classes and methods, allowing you to call external services as if they were part of your local codebase.
