@@ -36,7 +36,7 @@ In the GraftVision portal, you can:
 Since this is a .NET application, we'll now select **Nuget** as our package manager from the dropdown menu in the GraftVision portal. Let's take the command and run it in your terminal window.
 
 ```bash
-dotnet add package -s https://grft.dev/34de0ff8-008d-4363-844b-b2e5a41c63bb__free graft.nuget.EnergyPriceService --version 1.2.0.0
+dotnet add package -s https://grft.dev/7c81a896-630e-4abf-9b47-0e8adcca9183__free graft.nuget.energypriceservice --version 1.2.0
 ```
 
 
@@ -50,7 +50,7 @@ This command:
 
 Here's a breakdown of the command:
 - **dotnet add package** - Standard .NET CLI command to add a NuGet package to your project
-- **-s https://grft.dev/302597d3-3b30-4eb4-ba90-ec9be7b282eb__free** - Specifies the custom Graftcode package source where your service package is hosted. It is unique virtual feed generate to expose access to Grafts for modules hosted on your Graftcode Gateway instance. 
+- **-s https://grft.dev/7c81a896-630e-4abf-9b47-0e8adcca9183__free** - Specifies the custom Graftcode package source where your service package is hosted. It is unique virtual feed generate to expose access to Grafts for modules hosted on your Graftcode Gateway instance. 
 - **graft.nuget.EnergyPriceService** - The name of the generated package that contains the strongly-typed client for your backend service
 - **version 1.2.0.0** - Version of the package
 
