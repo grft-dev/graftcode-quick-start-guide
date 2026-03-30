@@ -1,81 +1,57 @@
 ---
 title: "Connect Backend Services"
 order: 4
-description: "Learn how to connect backend services using Graftcode - connect your .NET app to cloud services with instant effortless connection and highest performance."
+description: "Connect one backend service to another using Graftcode - install a strongly-typed dependency and call remote methods like local code."
 ---
 
 ## Goal
 
-Services exposed with Graftcode can be consumed from frontend or other backend services too. In both cases you will always get instant effortless connection and highest performance. **Learn how to connect the .NET app that you've built** in the previous step "Host a Backend Service with Graftcode Gateway" section to cloud service that we were consuming from ReactJS app.
+Connect the .NET service from the previous step to another backend service using Graftcode. The integration stays strongly typed and looks like a normal method call in your code.
 
-![](assets/connect-backend-services-1.png)
+### What You'll See
 
-## What You'll See
+- Install a remote service as a NuGet dependency.
+- Configure the connection from your .NET service.
+- Call a cloud method from your own backend code.
 
-- You'll connect your previously hosted .NET backend service to our **Energy Company** cloud service that we prepared for you.
-- You'll use the provided dotnet command to add the service as a direct dependency and obtain **Graft**.
-- You'll find and explore the _NetConsumptionKWh_ method using **strongly-typed Graft between .NET services**.
+## Step 1. Find the method in Graftcode Vision
 
-## Step 1. Check GraftVision URL again
+Open the hosted Graftcode Vision portal:
 
-Open the GraftVision that we've already hosted for .NET service. You can find it under this URL: [GraftVision portal](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io)
+Locate `MeterLogic.NetConsumptionKWh`. This is the remote method your .NET service will call.
 
-In GraftVision portal 
-locate the **NetConsumptionKWh** method under the **Meter Logic** section. This is the method we'll be implementing in your .NET app.
+Graftcode Vision shows the available methods, their signatures, and the package manager command needed to install the service as a strongly-typed dependency.
 
-![Graftcode Vision showing NetConsumptionKWh method details](assets/connect-backend-services-2.png)
+## Step 2. Install the Graft with NuGet
 
-In the GraftVision portal, you can:
-- See the generated package manager command for your selected technology, allowing you to install the service as a strongly-typed dependency
-- View all available methods and their signatures
-- Try out these method by inserting parameters and seeing the result
-- See the expected input parameters and return types
-
-## Step 2. Connect to this service using Nuget
-
-Since this is a .NET application, we'll now select **Nuget** as our package manager from the dropdown menu in the GraftVision portal. Let's take the command and run it in your terminal window.
+Use the generated NuGet command:
 
 ```bash
 dotnet add package -s https://grft.dev/34de0ff8-008d-4363-844b-b2e5a41c63bb__free graft.nuget.EnergyPriceService --version 1.2.0.0
 ```
 
+This installs the generated client for the remote service into your .NET project.
 
-<collapsible title="🔧 Understanding the Command - Click to see what it does what each part means">
-This command:
+## Step 3. Configure the connection
 
-- Adds the Graftcode service package to your .NET project
-- Uses the custom Graftcode package source URL unique for that specific Graftcode Gateway instance
-- Installs the strongly-typed client for the backend service
-- Enables you to call the _NetConsumptionKWh_ method directly in your code
-
-Here's a breakdown of the command:
-- **dotnet add package** - Standard .NET CLI command to add a NuGet package to your project
-- **-s https://grft.dev/302597d3-3b30-4eb4-ba90-ec9be7b282eb__free** - Specifies the custom Graftcode package source where your service package is hosted. It is unique virtual feed generate to expose access to Grafts for modules hosted on your Graftcode Gateway instance. 
-- **graft.nuget.EnergyPriceService** - The name of the generated package that contains the strongly-typed client for your backend service
-- **version 1.2.0.0** - Version of the package
-
-</collapsible>
-
-## Step 3. Add usings and configure the connection
-
-Now let's add usings to your _MyEnergyService.cs_ file to use the new Graft.
+Open `MyEnergyService.cs` and add the Graft namespace:
 
 ```csharp
 using graft.nuget.EnergyPriceService;
 ```
 
-Create a static constructor for your **EnergyPriceCalculator** class and add the following line to configure the connection to the remote service (remember, you can set the configuration in multiple ways - code, env variable or config file):
+Then configure the remote host in a static constructor:
 
 ```csharp
 static EnergyPriceCalculator()
 {
-    graft.nuget.EnergyPriceService.GraftConfig.Host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+    graft.nuget.EnergyPriceService.GraftConfig.Host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 }
 ```
 
-## Step 4. Use the method
+## Step 4. Call the remote method
 
-And add new method to **EnergyPriceCalculator** class which returns current cost retrieving consumption calculated by remote cloud service and multiplying by generated random price. Add this code to your _MyEnergyService.cs_ file, below the _GetPrice()_ method, and remeber to **Save it**:
+Add a new method to `EnergyPriceCalculator`:
 
 ```csharp
 public static double GetMyCurrentCost(int previousReadingKwh, int currentReadingKwh)
@@ -85,16 +61,11 @@ public static double GetMyCurrentCost(int previousReadingKwh, int currentReading
 }
 ```
 
-The method call is:
-- **Strongly-typed** - You get full IntelliSense and compile-time type checking
-- **Always in sync** - The client automatically reflects any changes made to the backend service
-- **Direct integration** - No REST calls, DTOs, or manual client code needed
-
-Focus on the way how your interaction with remote service looks like. It is fully decoupled from architecture or communication channel and feels like local method. 
+This is the important part: `MeterLogic.NetConsumptionKWh(...)` is a remote call, but it looks like a normal method call in your code.
 
 ![](assets/connect-backend-services-3.png)
 
-<collapsible title="🔧 Click here to see the full code of MyEnergyService.cs">
+Full file:
 
 ```csharp
 using graft.nuget.EnergyPriceService;
@@ -105,7 +76,7 @@ public class EnergyPriceCalculator
 {
     static EnergyPriceCalculator()
     {
-        graft.nuget.EnergyPriceService.GraftConfig.Host="wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+        graft.nuget.EnergyPriceService.GraftConfig.Host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
     }
 
     public static double GetMyCurrentCost(int previousReadingKwh, int currentReadingKwh)
@@ -113,49 +84,34 @@ public class EnergyPriceCalculator
         var consumption = MeterLogic.NetConsumptionKWh(previousReadingKwh, currentReadingKwh);
         return consumption * GetPrice();
     }
-    
+
     public static double GetPrice()
     {
         return new Random().Next(100, 105);
     }
 }
 ```
-</collapsible>
 
-## Step 5. Build and test your updated service
+## Step 5. Rebuild and test
 
-Now let's build and publish your project:
+Rebuild and publish the project:
 
 ```bash
 dotnet build .\\MyEnergyService.csproj
 dotnet publish .\\MyEnergyService.csproj
 ```
 
-Build the Docker image again and run it to test your updated service with the new _GetMyCurrentCost_ method.
-
-Stop Docker container if it's running, remove it and run again by executing the following commands:
+Rebuild the Docker image and restart the container:
 
 ```bash
 docker stop graftcode_demo
 docker rm graftcode_demo
-
 docker build --no-cache --pull -t myenergyservice:test .
 docker run -d -p 80:80 -p 81:81 --name graftcode_demo myenergyservice:test
 ```
 
-Once your container is running, open Graftcode Vision portal at: [http://localhost:81/GV](http://localhost:81/GV)
-
-In the portal:
-
-- Navigate to explore the new **GetMyCurrentCost** method
-- Insert parameters for:
-   - **previousReadingKwh** (e.g., 100)
-   - **currentReadingKwh** (e.g., 150)
-- Hit the **Run** button to see the live results
-- Review the response format and data structure
+Then open [http://localhost:81/GV](http://localhost:81/GV), find `GetMyCurrentCost`, and run it with sample values like `100` and `150`.
 
 ![GraftVision showing GetMyCurrentCost method details and live execution](assets/connect-backend-services-4.png)
 
-This allows you to test your enhanced method that combines the _NetConsumptionKWh_ calculation executed on our cloud service with cost pricing implemented in your local module. Trying it in browser let you make sure it works as expected before using it in your applications.
-
-> ⚡ **Important:** This example is proving that Graftcode not only covers the edge connection from Web app or mobile client to cloud backend but also allows to integrate across microservices. It all works regardless if module with your business logic is hosted in cloud, locally on your machine or within container. From code perspective the _NetConsumptionKWh_ method behaves exactly like a local function in your codebase, but it's actually executing on the remote backend service keeping your code decoupled from system architecture.
+> This example shows that Graftcode is not just for frontend-to-backend calls. You can also use it for backend-to-backend integration, with the same strongly-typed experience and without building REST clients or mapping DTOs by hand.

@@ -1,25 +1,23 @@
 ---
 title: "Host a Backend Service with Graftcode Gateway"
 order: 3
-description: "Turn your own code into a discoverable backend service using Graftcode Gateway on your local machine - no controllers, no REST routes, no OpenAPI specs."
+description: "Turn a simple project into a discoverable backend service using Graftcode Gateway - no controllers, no REST routes, no OpenAPI specs."
 ---
 
 ## Goal
 
-Turn your own code into a discoverable backend service using Graftcode Gateway on your local machine - no controllers, no REST routes, no OpenAPI specs.
+Turn a simple project into a remotely callable service using Graftcode Gateway - no controllers, no REST routes, no OpenAPI specs.
 
-![](assets/ClientSideCloud.png)
 
-## What You'll See
+### What You'll See
 
-- You'll clone a simple .NET library app with a single public method.
-- You'll expose it through Graftcode Gateway using a lightweight Dockerfile.
-- You'll instantly get a GraftVision portal - like Swagger, but smarter and ready to be called from most popular languages with just one command.
-- You’ll see how, without controllers, DTOs, or REST endpoints, Graftcode makes your business logic or plain object facade methods directly callable, with no coupling to any specific communication technology.
+- Clone a simple .NET library with a public method.
+- Expose it through Graftcode Gateway using a single Dockerfile.
+- Get a Graftcode Vision portal with all public methods discoverable and callable from any language.
 
 ## Step 1. Clone the .NET backend service
 
-**Return to terminal window and navigate back to the root folder you created for this tutorial**. Next clone the prepared .NET energy price service from GitHub and open the project in your IDE by pasting these commands:
+Start by getting a simple .NET service that we'll expose through Graftcode Gateway. 
 
 ```bash
 git clone https://github.com/grft-dev/dotnet-energy-price-service.git
@@ -27,7 +25,7 @@ cd dotnet-energy-price-service
 code .
 ```
 
-This is a very simple service that already contains the energy price logic with a public method _GetPrice()_ ready to be exposed through Graftcode Gateway. The code of the class _EnergyPriceCalculator.cs_ that will expose _EnergyPriceCalculator_ is as simple as this:
+This is a minimal .NET library. Just a class with a public static method:
 
 ```csharp
 namespace MyEnergyService;
@@ -41,21 +39,18 @@ public class EnergyPriceCalculator
 }
 ```
 
-## Step 2. Expose the service with Graftcode Gateway
+## Step 2. Expose it with Graftcode Gateway
 
-To expose this service to the outside world, **we've created a dockerfile in your project root for you**. This file tells Docker how to build and run your service with Graftcode Gateway. The dockerfile is simple and looks like this:
+The repo already includes a Dockerfile. It installs Graftcode Gateway and passes your compiled assembly to it:
 
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 
 WORKDIR /usr/app
 
-# Install wget, python3 + python3-dev and download GG
 RUN mkdir -p /usr/app \
  && apt-get update \
- && apt-get install -y \
-    wget \
-    python3-dev \
+ && apt-get install -y wget \
  && wget -O /usr/app/gg.deb \
     https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
  && dpkg -i /usr/app/gg.deb \
@@ -71,6 +66,8 @@ EXPOSE 81
 # And run Graftcode Gateway passing name of modules that should be exposed
 CMD ["gg", "--modules", "/usr/app/MyEnergyService.dll"]
 ```
+
+The key line is the last one - `gg` inspects your assembly, discovers public methods, and exposes them. Port 80 handles service calls, port 81 serves Graftcode Vision.
 
 <collapsible title="🐳 Understanding the Dockerfile - Click to see what each line does">
 
@@ -88,35 +85,19 @@ CMD ["gg", "--modules", "/usr/app/MyEnergyService.dll"]
 Now, let's build and run your Docker container with the following commands. Please note that you need to have Docker installed and running on your machine to execute these commands:
 
 ```bash
-dotnet build .\\MyEnergyService.csproj
-dotnet publish .\\MyEnergyService.csproj
+dotnet build .\MyEnergyService.csproj
+dotnet publish .\MyEnergyService.csproj
 docker build --no-cache --pull -t myenergyservice:test .
 docker run -d -p 80:80 -p 81:81 --name graftcode_demo myenergyservice:test
 ```
 
-<collapsible title="📖 New to Docker? Click here to understand what these commands do">
-- **dotnet build** - Compiles .NET application, creating optimized binaries ready for production deployment
-- **dotnet publish** - Publishes your .NET application to publish folder including all dependencies
-- **docker build** - Creates a Docker image from your Dockerfile, combining the Graftcode Gateway with your published service code, and tags it as "myenergyservice:test"
-- **docker run** - Starts a container from your built image in detached mode (-d), exposing ports 80 and 81 to make your service accessible via HTTP
+## Step 3. Explore your service in Graftcode Vision
 
-</collapsible>
-
-## Step 3. Explore your service with Graft Vision
-
-Open your browser at the following URL to see your service in action through Graft Vision: 
-[http://localhost:81/GV](http://localhost:81/GV)
+Open [http://localhost:81/GV](http://localhost:81/GV) in your browser.
 
 ![Graftcode Vision Interface](assets/ExploreServiceUsingGraftcodeVision.png)
 
-Notice that:
-
-- Graftcode Gateway can easily run as container on your machine or in cloud.
-- Instantly it hosts Swagger-like UI with all exposed public methods.
-- You can see all methods exposed by your service and "Try it out" button to call them live.
-- You can easily find a command to install the Graft package using your favorite package manager allowing you to call this service from any language.
-
-That's it! Your .NET method is now exposed as a backend service with Graftcode Gateway and can be called from any frontend web or mobile app or even another backend service.
+You'll see all public methods exposed by your service, a "Try it out" button to call them live, and the package manager command to install this service as a Graft in any frontend or backend app.
 
 ## Step 4. Compare: old-way vs. Graftcode way
 
@@ -124,4 +105,4 @@ Check this chart to understand how your daily process of exposing backend logic 
 
 ![](assets/BackendOldWayNewWay.png)
 
-> ⚡ **Result:** You've turned a plain .NET method into a fully accessible backend service with one simple Dockerfile and few Docker commands to run, saving hours of manual coding and maintenance. No controllers, no REST endpoints, no OpenAPI specs. Just a public methods exposed through Graftcode Gateway.
+> Your .NET method is now a fully accessible backend service - with one Dockerfile and four commands. No controllers, no DTOs, no OpenAPI spec. Any public method you add is instantly available to call from any language.
