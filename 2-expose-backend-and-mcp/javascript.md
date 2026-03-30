@@ -27,14 +27,12 @@ class EnergyPriceCalculator {
 module.exports = { EnergyPriceCalculator };
 ```
 
-This is intentionally small. The point of the quick start is that Graftcode works with your business logic directly, not with controllers or transport-specific wrappers.
-
 ## Step 2. Run it with Graftcode Gateway
 
 Add a `Dockerfile` that installs Graftcode Gateway and points it at your JavaScript module:
 
 ```dockerfile
-FROM node:20-slim
+FROM node:24
 
 WORKDIR /usr/app
 
@@ -54,8 +52,6 @@ EXPOSE 81
 CMD ["gg", "--modules", "/usr/app/src/energyPriceCalculator.js"]
 ```
 
-The important part is that `gg` receives the module you want to expose. Graftcode Gateway inspects it and makes the public surface discoverable.
-
 ## Step 3. Build and run the container
 
 ```bash
@@ -71,8 +67,8 @@ Open [http://localhost:81/GV](http://localhost:81/GV).
 
 You should see your public JavaScript methods exposed as a service together with the package manager command needed to install them as a Graft in another app.
 
-## Step 5. Install it from another app
+## Step 5. Use it in another app
 
-From Graftcode Vision, copy the generated `npm` install command and use it in any frontend or backend project.
+From Graftcode Vision, you can now select your correlated package type (npm, nuget, pypi, etc.) and copy the generated install command to use it in any frontend or backend project.
 
-That is the main value of Graftcode here: your JavaScript logic becomes a typed dependency for other applications, without writing REST handlers, request models, or client SDK code.
+That is the main value of Graftcode: your JavaScript logic becomes a typed dependency for other applications, without writing REST handlers, request models, or client SDK code. When you add or update a public method, consumers get notified through their package manager and can update with a single command - the same way they update any other dependency.

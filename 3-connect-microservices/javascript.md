@@ -15,11 +15,15 @@ Connect a JavaScript backend to another service with Graftcode so the remote int
 
 ## Step 1. Find the remote method in Graftcode Vision
 
-Open the hosted Graftcode Vision portal and locate `MeterLogic.NetConsumptionKWh`.
+Open the hosted Graftcode Vision portal https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/
 
 Graftcode Vision shows the method signature and gives you the exact package manager command needed to install that service as a Graft.
 
 ## Step 2. Install the Graft in your JavaScript service
+
+Open Graftcode Vision, pick `npm`, and copy the generated install command.
+
+`javonet-nodejs-sdk` is still required for this example today, but that extra step is temporary.
 
 ```bash
 npm install javonet-nodejs-sdk
@@ -33,42 +37,22 @@ This adds the generated client for the remote service to your project.
 In your service file, import the generated client and point it at the remote host:
 
 ```javascript
-const {
-  GraftConfig,
-  MeterLogic,
-} = require("@graft/nuget-energypriceservice");
-
-GraftConfig.host =
-  "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+import { GraftConfig } from "@graft/nuget-EnergyPriceService";
+GraftConfig.host = `wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws`;
 ```
 
 ## Step 4. Call the remote method from your own code
 
 ```javascript
 class EnergyPriceCalculator {
-  static getPrice() {
-    return Math.floor(Math.random() * 5) + 100;
-  }
-
   static async getMyCurrentCost(previousReadingKwh, currentReadingKwh) {
-    const consumption = await MeterLogic.NetConsumptionKWh(
-      previousReadingKwh,
-      currentReadingKwh
-    );
+    const consumption = await MeterLogic.NetConsumptionKWh(previousReadingKwh,currentReadingKwh);
 
-    return consumption * EnergyPriceCalculator.getPrice();
+    return consumption;
   }
 }
 
 module.exports = { EnergyPriceCalculator };
 ```
 
-The important part is `MeterLogic.NetConsumptionKWh(...)`. It is a remote call, but your JavaScript code still reads like a local dependency.
-
-## Step 5. Rebuild and test
-
-If this service is hosted through Graftcode Gateway, restart it and open its Graftcode Vision page.
-
-Run `getMyCurrentCost` with sample values such as `100` and `150`.
-
-> This is the same Graftcode model as frontend-to-backend integration: install the service as a dependency, configure the host, and call methods directly. No REST client layer is required between your services.
+The important part is `MeterLogic.NetConsumptionKWh(...)`. It is a remote call, but your JavaScript code still reads like a local dependency. Just like with a local class, you can see all available methods on `MeterLogic`, `BillingLogic` and any other class from that service. In your IDE, you can use autocomplete to discover what the remote service exposes.
