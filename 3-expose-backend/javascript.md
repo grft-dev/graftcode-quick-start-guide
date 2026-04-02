@@ -150,3 +150,5 @@ Exposing backend logic for remote consumption typically requires:
 - When you add or change a method, consumers update with one command — like any other dependency
 
 > Your JavaScript module is now a fully accessible backend service — with one Dockerfile and two commands. Any public method you add is instantly discoverable and callable from any language and any platform. No endpoint design, no client SDK maintenance, no integration glue.
+
+![Old Way vs Graftcode](../assets/BackendOldWayNewWay.png)
