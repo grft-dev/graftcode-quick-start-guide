@@ -30,7 +30,7 @@ This is perfect for:
 - experiments and prototypes,
 - trying it out with LLM-driven development.
 
-If this is all you need — you’re good to go.
+If this is all you need - you’re good to go.
 
 ---
 
@@ -50,7 +50,7 @@ Once you start building real services, a free Graftcode account unlocks importan
 - **Project-level management**  
   Group gateways and services under a single project using a `Project Key`.
 
-None of this is required to start — but it becomes essential for real-world usage.
+None of this is required to start - but it becomes essential for real-world usage.
 
 ---
 
@@ -94,4 +94,4 @@ We’re building Graftcode in the open and shipping new features **every few day
 
 Your feedback directly shapes the product.
 
-Stay tuned — a lot more is coming 🚀
+Stay tuned - a lot more is coming 🚀

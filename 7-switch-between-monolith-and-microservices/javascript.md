@@ -1,17 +1,17 @@
 ---
 title: "JavaScript"
-description: "Build a JavaScript service with a Python module running in-process, then extract it to a separate microservice by changing one configuration line — no code changes, no new clients, no new endpoints."
+description: "Build a JavaScript service with a Python module running in-process, then extract it to a separate microservice by changing one configuration line - no code changes, no new clients, no new endpoints."
 ---
 
 ## Goal
 
-Build a JavaScript service that uses a Python module in a single process (monolith), then split that module into a separate microservice — by changing only one line of configuration.
+Build a JavaScript service that uses a Python module in a single process (monolith), then split that module into a separate microservice - by changing only one line of configuration.
 
 ### What You'll See
 
 - Create a JavaScript service that calls a Python currency converter module in-process.
 - Extract that Python module into its own container as a standalone microservice.
-- Switch from monolith to microservice by changing one configuration value — zero code changes.
+- Switch from monolith to microservice by changing one configuration value - zero code changes.
 - Verify the call now travels over the network to the separate service.
 
 ### Prerequisites
@@ -54,7 +54,7 @@ class CurrencyService {
 module.exports = { CurrencyService };
 ```
 
-The code reads its Graft configuration entirely from the `GRAFT_CONFIG` environment variable. It has no knowledge of whether the Python module runs in-process or on a remote host — that decision lives outside the code, in the deployment configuration. This is the key to switching architectures without code changes.
+The code reads its Graft configuration entirely from the `GRAFT_CONFIG` environment variable. It has no knowledge of whether the Python module runs in-process or on a remote host - that decision lives outside the code, in the deployment configuration. This is the key to switching architectures without code changes.
 
 ## Step 2. Host the service with Graftcode Gateway
 
@@ -91,11 +91,11 @@ docker run -d \
   --name js_currency_service js-currency-service:test
 ```
 
-`host=inMemory` tells Graftcode to load and execute the Python module inside the same process — no network calls, no separate service.
+`host=inMemory` tells Graftcode to load and execute the Python module inside the same process - no network calls, no separate service.
 
 Open [http://localhost:81/GV](http://localhost:81/GV) and try calling `CurrencyService.convertCurrency` with values like `100`, `"USD"`, `"EUR"`.
 
-At this point, everything runs inside **one container** — your JavaScript logic and the Python currency converter module share a single process. This is your monolith.
+At this point, everything runs inside **one container** - your JavaScript logic and the Python currency converter module share a single process. This is your monolith.
 
 ## Step 3. Extract the Python module as a separate microservice
 
@@ -141,7 +141,7 @@ You can verify the Python module is running independently at [http://localhost:9
 
 ## Step 4. Switch from monolith to microservice
 
-Stop and restart your JavaScript service with a different value for `GRAFT_CONFIG` — pointing at the remote Python service instead of in-memory execution:
+Stop and restart your JavaScript service with a different value for `GRAFT_CONFIG` - pointing at the remote Python service instead of in-memory execution:
 
 ```bash
 docker stop js_currency_service
@@ -162,9 +162,9 @@ host=inMemory
 host=pythoncurrencyservice:9092
 ```
 
-That is the only difference. The same Docker image, the same JavaScript code — just a different environment variable.
+That is the only difference. The same Docker image, the same JavaScript code - just a different environment variable.
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and call `CurrencyService.convertCurrency` again with the same inputs. Same method, same result — but the Python execution now happens over the network in a separate container.
+Open [http://localhost:81/GV](http://localhost:81/GV) and call `CurrencyService.convertCurrency` again with the same inputs. Same method, same result - but the Python execution now happens over the network in a separate container.
 
 ## Step 5. Prove the call goes over the network
 
@@ -174,7 +174,7 @@ Want proof that the call is truly remote? Stop the Python service:
 docker stop pythoncurrencyservice
 ```
 
-Call `convertCurrency` again in Graftcode Vision — you'll see a connection error because the remote service is down.
+Call `convertCurrency` again in Graftcode Vision - you'll see a connection error because the remote service is down.
 
 Start it again:
 
@@ -182,7 +182,7 @@ Start it again:
 docker start pythoncurrencyservice
 ```
 
-The method works again. Your JavaScript code didn't change at any point — only the deployment topology did.
+The method works again. Your JavaScript code didn't change at any point - only the deployment topology did.
 
 ## Old Way vs New Way
 
@@ -199,8 +199,8 @@ Extracting a module into a microservice typically requires:
 
 ### With Graftcode
 
-- Host any public module as a standalone microservice — as-is, no modifications needed
+- Host any public module as a standalone microservice - as-is, no modifications needed
 - Switch between monolith and microservice with one configuration value and a container restart
 - No new code, no new clients, no new endpoints
 
-> With Graftcode, migrating between monolith and microservices (or back) is not a rewrite — it's a configuration change. Your code stays focused on business logic while the architecture adapts to your operational needs.
+> With Graftcode, migrating between monolith and microservices (or back) is not a rewrite - it's a configuration change. Your code stays focused on business logic while the architecture adapts to your operational needs.

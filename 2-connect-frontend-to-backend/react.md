@@ -1,18 +1,18 @@
 ---
 title: "React"
-description: "Connect a React frontend to a live backend service with Graftcode — no REST clients, no DTOs, no handwritten integration code. Install a strongly typed Graft and call backend methods directly from your component."
+description: "Connect a React frontend to a live backend service with Graftcode - no REST clients, no DTOs, no handwritten integration code. Install a strongly typed Graft and call backend methods directly from your component."
 ---
 
 ## Goal
 
-Connect a React app to backend logic with Graftcode — no REST clients, no DTOs, no handwritten integration code.
+Connect a React app to backend logic with Graftcode - no REST clients, no DTOs, no handwritten integration code.
 
 ### What You'll See
 
 - Install a typed Graft from a live backend service instead of writing REST client code.
 - Configure the generated client to point at a sample backend server.
 - Call a backend method directly from a React component as if it were local code.
-- Use IDE autocompletion on backend methods and types — powered by the installed Graft package.
+- Use IDE autocompletion on backend methods and types - powered by the installed Graft package.
 
 ### Prerequisites
 
@@ -59,7 +59,7 @@ import { BillingLogic, GraftConfig } from "@graft/nuget-energypriceservice";
 GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 ```
 
-`@graft/nuget-energypriceservice` is the Graft you installed — it exposes the backend's public classes and methods as normal JavaScript imports. Setting `GraftConfig.host` tells the client where the backend is running.
+`@graft/nuget-energypriceservice` is the Graft you installed - it exposes the backend's public classes and methods as normal JavaScript imports. Setting `GraftConfig.host` tells the client where the backend is running.
 
 ## Step 5. Call a backend method
 
@@ -79,11 +79,29 @@ export default App;
 
 `BillingLogic.CalculateMonthlyBill(...)` is a backend call, but in your code it feels like a normal dependency.
 
-## Step 6. Explore more methods
+## Step 6. Run the app
 
-Run the app and then go back to Graftcode Vision to inspect more methods on `BillingLogic`.
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Open the URL shown in the terminal (typically [http://localhost:5173](http://localhost:5173)). You should see the calculated energy bill rendered on the page.
+
+## Step 7. Explore more methods and keep up with backend changes
+
+Go back to [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) to inspect more methods on `BillingLogic`. 
 
 Your IDE can autocomplete available methods and arguments because the service is installed as a typed package, not consumed through handwritten API code. Your AI can now generate frontend code using backend methods as easily as using other npm modules you imported.
+
+When the backend evolves - new methods, changed signatures, updated types - the Graft package version updates just like any other npm package. You see the change in your `package.json`, update with a single command, and your IDE immediately reflects the new API surface:
+
+```bash
+npm update @graft/nuget-energypriceservice
+```
+
+No need to regenerate clients, rewrite fetch calls, or re-sync OpenAPI specs. Backend changes flow through the same package manager workflow you already use for every other dependency.
 
 ## Old Way vs New Way
 
@@ -102,8 +120,8 @@ Connecting a frontend to a backend typically requires:
 
 - Install the backend as a strongly-typed Graft via `npm install`
 - Import classes and call methods directly from your React components
-- When the backend changes, update the Graft with a single `npm install` command — no client rewrites
+- When the backend changes, update the Graft with a single `npm install` command - no client rewrites
 
-> With Graftcode, connecting a React frontend to any backend is as simple as installing an npm package. No REST clients, no DTOs, no contract maintenance — just import and call.
+> With Graftcode, connecting a React frontend to any backend is as simple as installing an npm package. No REST clients, no DTOs, no contract maintenance - just import and call.
 
-![Old Way vs Graftcode](assets/CompareOldWaysNewWays.png)
+![Old Way vs Graftcode](../assets/CompareOldWaysNewWays.png)
