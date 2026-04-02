@@ -9,9 +9,9 @@ Connect a React app to backend logic with Graftcode without building REST client
 
 ### What You'll See
 
-- Install a typed Graft from a live backend service.
-- Configure the generated client in a React app.
-- Call a backend method directly from your component.
+- Install a typed Graft from a live backend service instead of writing REST client code.
+- Configure the generated client to call our sample backend server.
+- Call a backend method directly from your component like calling local dependency.
 
 ## Step 1. Start with a React app
 
@@ -19,7 +19,6 @@ Connect a React app to backend logic with Graftcode without building REST client
 git clone https://github.com/grft-dev/react-hello-world
 cd react-hello-world
 npm install
-npm run dev
 ```
 
 This gives you a working React app where you can add your first Graft.
@@ -28,7 +27,7 @@ This gives you a working React app where you can add your first Graft.
 
 Before you install anything, compare the two views of the same backend:
 
-- [Swagger](http://gc-d-ca-polc-demo-ecws-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io:8090/swagger/index.html) shows routes, verbs, and payloads.
+- [Swagger](https://gc-d-ca-polc-demo-ecws-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/swagger/index.html) shows routes, verbs, and payloads.
 - [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) shows public classes and methods and gives you the package manager command to install them.
 
 This is the key Graftcode shift: instead of reading an API spec and building a client, you install the service as a dependency and call methods directly.
@@ -50,8 +49,10 @@ Open `src/App.jsx` and connect the generated client to the service host:
 
 ```javascript
 import { useEffect, useState } from "react";
+//This line imports Graft module you installed with npm
 import { BillingLogic, GraftConfig } from "@graft/nuget-energypriceservice";
 
+//This line configure Graft to call our sample backend.
 GraftConfig.host =
   "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 ```
@@ -80,6 +81,6 @@ export default App;
 
 Run the app and then go back to Graftcode Vision to inspect more methods on `BillingLogic`.
 
-Your IDE can autocomplete available methods and arguments because the service is installed as a typed package, not consumed through handwritten API code.
+Your IDE can autocomplete available methods and arguments because the service is installed as a typed package, not consumed through handwritten API code. Your AI can now generate frontend code using backend methods as easily as using other npm modules you imported.
 
-> With Graftcode, the main workflow is: expose public methods, install the generated Graft, and call those methods directly. That removes the usual client-generation and maintenance work between frontend and backend.
+> With Graftcode, the main workflow is: expose public methods, install the generated Graft, and call those methods directly. Whenever backend evolves you just update your imported npm modules. That removes the usual client-generation and maintenance work between frontend and backend.
