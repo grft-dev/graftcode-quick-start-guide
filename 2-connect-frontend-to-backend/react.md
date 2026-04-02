@@ -1,27 +1,32 @@
 ---
 title: "React"
-description: "Connect a React frontend to backend logic with Graftcode by installing a typed Graft, configuring the generated client, and calling backend methods directly from your component."
+description: "Connect a React frontend to a live backend service with Graftcode — no REST clients, no DTOs, no handwritten integration code. Install a strongly typed Graft and call backend methods directly from your component."
 ---
 
 ## Goal
 
-Connect a React app to backend logic with Graftcode without building REST clients, mapping DTOs, or maintaining integration code by hand.
+Connect a React app to backend logic with Graftcode — no REST clients, no DTOs, no handwritten integration code.
 
 ### What You'll See
 
 - Install a typed Graft from a live backend service instead of writing REST client code.
-- Configure the generated client to call our sample backend server.
-- Call a backend method directly from your component like calling local dependency.
+- Configure the generated client to point at a sample backend server.
+- Call a backend method directly from a React component as if it were local code.
+- Use IDE autocompletion on backend methods and types — powered by the installed Graft package.
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) installed locally
 
 ## Step 1. Start with a React app
+
+This gives you a working React app where you can add your first Graft.
 
 ```bash
 git clone https://github.com/grft-dev/react-hello-world
 cd react-hello-world
 npm install
 ```
-
-This gives you a working React app where you can add your first Graft.
 
 ## Step 2. Open the backend in Graftcode Vision
 
@@ -34,14 +39,14 @@ This is the key Graftcode shift: instead of reading an API spec and building a c
 
 ## Step 3. Install the Graft
 
+Open Graftcode Vision, pick `npm`, and copy the generated install command.
+
+`javonet-nodejs-sdk` is still required for this example today, but that extra step is temporary.
+
 ```bash
 npm install javonet-nodejs-sdk
 npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-energypriceservice@1.2.0
 ```
-
-Open Graftcode Vision, pick `npm`, and copy the generated install command.
-
-`javonet-nodejs-sdk` is still required for this example today, but that extra step is temporary.
 
 ## Step 4. Configure the generated client
 
@@ -49,14 +54,12 @@ Open `src/App.jsx` and connect the generated client to the service host:
 
 ```javascript
 import { useEffect, useState } from "react";
-//This line imports Graft module you installed with npm
 import { BillingLogic, GraftConfig } from "@graft/nuget-energypriceservice";
 
-//This line configure Graft to call our sample backend.
 GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 ```
 
-The installed package exposes the backend's public classes and methods as normal JavaScript imports.
+`@graft/nuget-energypriceservice` is the Graft you installed — it exposes the backend's public classes and methods as normal JavaScript imports. Setting `GraftConfig.host` tells the client where the backend is running.
 
 ## Step 5. Call a backend method
 
@@ -82,4 +85,25 @@ Run the app and then go back to Graftcode Vision to inspect more methods on `Bil
 
 Your IDE can autocomplete available methods and arguments because the service is installed as a typed package, not consumed through handwritten API code. Your AI can now generate frontend code using backend methods as easily as using other npm modules you imported.
 
-> With Graftcode, the main workflow is: expose public methods, install the generated Graft, and call those methods directly. Whenever backend evolves you just update your imported npm modules. That removes the usual client-generation and maintenance work between frontend and backend.
+## Old Way vs New Way
+
+### Without Graftcode
+
+Connecting a frontend to a backend typically requires:
+
+- Designing REST or GraphQL endpoints on the backend for every operation
+- Defining request and response DTOs and validation logic
+- Generating or hand-writing a client SDK for the frontend
+- Mapping API responses back to frontend types manually
+- Updating and re-testing the client every time the backend changes
+- Maintaining separate documentation or OpenAPI specs for the API contract
+
+### With Graftcode
+
+- Install the backend as a strongly-typed Graft via `npm install`
+- Import classes and call methods directly from your React components
+- When the backend changes, update the Graft with a single `npm install` command — no client rewrites
+
+> With Graftcode, connecting a React frontend to any backend is as simple as installing an npm package. No REST clients, no DTOs, no contract maintenance — just import and call.
+
+![Old Way vs Graftcode](assets/CompareOldWaysNewWays.png)
