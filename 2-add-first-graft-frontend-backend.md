@@ -43,7 +43,7 @@ You can see the app running at [http://localhost:5173](http://localhost:5173)
 
 Before calling backend service, let's see how it looks like. We prepared it in both old REST based approach and one exposed with Graftcode. 
 
-- [With REST in Swagger](http://gc-d-ca-polc-demo-ecws-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io:8090/swagger/index.html), you'll see a list of  endpoints - raw routes, HTTP verbs, and payloads.
+- [With REST in Swagger](https://gc-d-ca-polc-demo-ecws-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/swagger/index.html), you'll see a list of  endpoints - raw routes, HTTP verbs, and payloads.
 
 - [With Graftcode in Vision Portal](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), you'll see the same backend but exposed as regular classes and methods + package manager command to install it as dependency in any technology.
 
