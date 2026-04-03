@@ -151,6 +151,6 @@ Exposing backend logic for remote consumption typically requires:
 - Consumers install a typed Graft via their package manager and call methods directly
 - When you add or change a method, consumers update with one command - like any other dependency
 
-> Your JavaScript module is now a fully accessible backend service - with one Dockerfile and two commands. Any public method you add is instantly discoverable and callable from any language and any platform. No endpoint design, no client SDK maintenance, no integration glue.
+> Your JavaScript module is now a fully accessible backend service - with one Dockerfile and two commands. Any public method you add is instantly discoverable and callable from any language and any platform. No endpoint design, no client SDK maintenance, no integration code.
 
 ![Old Way vs Graftcode](../assets/BackendOldWayNewWay.png)
