@@ -1,7 +1,6 @@
----
-title: "Graftcode Introduction"
-description: "A quick overview of what Graftcode is and what this guide covers - pick the scenario that fits your needs."
----
+# Graftcode Quick Start Guide
+
+Hands-on tutorials that take you from zero to working Graftcode integration - each one self-contained, each completable in minutes.
 
 ## What is Graftcode?
 
@@ -24,23 +23,30 @@ On top of that, Graftcode also:
 
 <iframe src="https://share.descript.com/embed/xDrYh06ZJfd" width="640" height="360" frameborder="0" allowfullscreen></iframe>
 
-## What This Guide Covers
+## Tutorials
 
-Each tutorial below is **self-contained** - pick the scenario that interests you and follow it from start to finish. No previous tutorial is required.
+Each tutorial is **self-contained** - pick the scenario that interests you and follow it from start to finish. No previous tutorial is required.
 
-| Tutorial | What you'll do |
-|----------|----------------|
-| **Connect Frontend to Backend** | Call a live backend service from a React app using a Graft - no REST client, no DTOs. |
-| **Expose a Backend Service** | Turn a JavaScript module into a remotely callable service with Graftcode Gateway and Docker. |
-| **Connect Microservices** | Connect one backend service to another by installing a Graft and calling remote methods like local code. |
-| **Use Modules from Any Technology** | Use a Python module directly in a JavaScript service - no REST wrapper, no rewrite. |
-| **Expose MCP for AI** | Make your service callable by AI agents through the Model Context Protocol. |
-| **Switch Between Monolith and Microservices** | Run a module in-process, then extract it as a separate microservice - by changing one config value. |
+| # | Tutorial | What you'll do |
+|---|----------|----------------|
+| 1 | [**Connect Frontend to Backend**](1-connect-frontend-to-backend/react.md) | Call a live backend service from a React app using a Graft - no REST client, no DTOs. |
+| 2 | [**Expose a Backend Service**](2-expose-backend/javascript.md) | Turn a JavaScript module into a remotely callable service with Graftcode Gateway and Docker. |
+| 3 | [**Connect Microservices**](3-connect-microservices/javascript.md) | Connect one backend service to another by installing a Graft and calling remote methods like local code. |
+| 4 | [**Use Modules from Any Technology**](4-use-modules-from-any-technology/javascript.md) | Use a Python module directly in a JavaScript service - no REST wrapper, no rewrite. |
+| 5 | [**Expose MCP for AI**](5-expose-mcp/javascript.md) | Make your service callable by AI agents through the Model Context Protocol. |
+| 6 | [**Switch Between Monolith and Microservices**](6-switch-between-monolith-and-microservices/javascript.md) | Run a module in-process, then extract it as a separate microservice - by changing one config value. |
 
-### Prerequisites (common to all tutorials)
+### Prerequisites
+
+These are common to all tutorials:
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
 - [Node.js](https://nodejs.org/) installed locally (for JavaScript tutorials)
 - No Graftcode account needed - everything works locally out of the box
+
+## Learn More
+
+- [graftcode.com](https://graftcode.com/) - product overview, features, and how-it-works walkthrough
+- [Graftcode Academy](https://academy.dev.graftcode.com/documentation) - full documentation covering core concepts, integration patterns, security, and performance
 
 > Ready? Pick a tutorial above and start building.

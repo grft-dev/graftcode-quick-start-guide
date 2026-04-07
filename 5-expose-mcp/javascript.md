@@ -32,7 +32,7 @@ npm init -y
 
 ## Step 2. Write a JavaScript module with public methods
 
-Create a file `src/energyPriceCalculator.js`:
+Create a file `index.js`:
 
 ```javascript
 class EnergyPriceCalculator {
@@ -73,20 +73,20 @@ RUN apt-get update \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "--modules", "/usr/app/src/energyPriceCalculator.js"]
+CMD ["gg"]
 ```
 
-`gg` (Graftcode Gateway) inspects your JavaScript module, discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and as MCP tools for AI agents. Port `80` handles service calls and the MCP endpoint, port `81` serves Graftcode Vision.
+`gg` (Graftcode Gateway) reads your `package.json`, discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and as MCP tools for AI agents. Port `80` handles service calls and the MCP endpoint, port `81` serves Graftcode Vision.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
 - **FROM node:24** - Uses the official Node.js 24 image as the base runtime environment.
-- **COPY . /usr/app/** - Copies your project files (including `src/energyPriceCalculator.js`) into the container.
+- **COPY . /usr/app/** - Copies your project files (including `index.js`) into the container.
 - **RUN apt-get update && apt-get install -y wget** - Installs tools needed to download Graftcode Gateway.
 - **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
 - **EXPOSE 80** - Declares the port used for service communication, including the MCP endpoint.
 - **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
-- **CMD ["gg", "--modules", ...]** - Runs Graftcode Gateway, pointing it at your JavaScript module. It discovers public methods and exposes them as both Grafts and MCP tools.
+- **CMD ["gg"]** - Runs Graftcode Gateway. It reads `package.json` to find your module, discovers public methods, and exposes them as both Grafts and MCP tools.
 
 </collapsible>
 
@@ -157,7 +157,7 @@ Everything above works without any account - perfect for learning and local deve
 Then pass the key when starting your gateway:
 
 ```dockerfile
-CMD ["gg", "--modules", "/usr/app/src/energyPriceCalculator.js", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 A Project Key gives you:

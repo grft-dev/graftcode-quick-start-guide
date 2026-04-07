@@ -18,29 +18,35 @@ Use a module from any supported technology directly in a JavaScript service with
 - [Docker](https://docs.docker.com/get-docker/) installed and running
 - [Node.js](https://nodejs.org/) installed locally (for `npm` commands)
 
-## Step 1. Create a project and install a module from another technology
+## Step 1. Create a project folder
 
-Create a new folder, initialize a Node.js project, and install the Graftcode SDK together with a Python currency converter Graft we'll use as our example:
+Create a new folder and initialize a Node.js project:
 
 ```bash
 mkdir js-python-module-demo
 cd js-python-module-demo
 npm init -y
+```
+
+## Step 2. Install a module from another technology
+
+For this example we'll use a Python currency converter from PyPI ([sdncenter-currency-converter](https://pypi.org/project/sdncenter-currency-converter/)), but the same approach works with any module from a supported repository - `npm`, `PyPI`, or `NuGet`.
+
+`javonet-nodejs-sdk` is still required for this example today, but that extra step is temporary.
+
+```bash
 npm install javonet-nodejs-sdk
 npm install --registry https://grft.dev graft.pypi.sdncenter-currency-converter
 ```
 
-That last command installs a **Graft** - a strongly-typed JavaScript client generated from a module in another technology. In this case it's a Python package from PyPI ([sdncenter-currency-converter](https://pypi.org/project/sdncenter-currency-converter/)), but the same approach works with any module from a supported repository - `npm`, `PyPI`, or `NuGet`.
+This installs a **Graft** - a strongly-typed JavaScript client generated from the module. You import and call it like any other npm package, regardless of which technology the module was originally written in.
 
-## Step 2. Write a service that uses the module
+## Step 3. Write a service that uses the module
 
-Create `src/currencyService.js`:
+Create `index.js`:
 
 ```javascript
-const {
-  GraftConfig,
-  SimpleCurrencyConverter,
-} = require("graft.pypi.sdncenter-currency-converter");
+const { GraftConfig, SimpleCurrencyConverter} = require("graft.pypi.sdncenter-currency-converter");
 
 GraftConfig.setConfig(process.env.GRAFT_CONFIG);
 
@@ -55,7 +61,7 @@ module.exports = { CurrencyService };
 
 `SimpleCurrencyConverter` comes from a Python package, but in JavaScript it looks like a regular import. The code reads its configuration entirely from the `GRAFT_CONFIG` environment variable - it has no knowledge of which technology the module was written in or whether it runs in-process or on a remote host.
 
-## Step 3. Host the service with Graftcode Gateway
+## Step 4. Host the service with Graftcode Gateway
 
 Create a `Dockerfile` in the project root:
 
@@ -77,20 +83,20 @@ RUN apt-get update \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "--modules", "/usr/app/src/currencyService.js"]
+CMD ["gg"]
 ```
 
-`gg` (Graftcode Gateway) inspects your JavaScript module, discovers all public methods, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
+`gg` (Graftcode Gateway) reads your `package.json`, discovers all public methods, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
 - **FROM node:24** - Uses the official Node.js 24 image as the base runtime environment.
-- **COPY . /usr/app/** - Copies your project files (including `src/currencyService.js`) into the container.
+- **COPY . /usr/app/** - Copies your project files (including `index.js`) into the container.
 - **RUN apt-get update && apt-get install -y wget** - Installs tools needed to download Graftcode Gateway.
 - **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
 - **EXPOSE 80** - Declares the port used for service communication (Grafts connect here).
 - **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
-- **CMD ["gg", "--modules", ...]** - Runs Graftcode Gateway, pointing it at your JavaScript module. It discovers public methods and makes them callable.
+- **CMD ["gg"]** - Runs Graftcode Gateway. It reads `package.json` to find your module, discovers public methods, and makes them callable.
 
 </collapsible>
 
@@ -106,20 +112,20 @@ docker run -d \
 
 `host=inMemory` tells Graftcode to load and execute the module inside the same process - no network calls, no separate service.
 
-## Step 4. Test the cross-language call in Graftcode Vision
+## Step 5. Test the cross-language call in Graftcode Vision
 
 Open [http://localhost:81/GV](http://localhost:81/GV) in your browser.
 
 You will see `CurrencyService.convertUsdToEur` listed with its parameter types. Click **"Try it out"** and call it with a value like `100` - the result is a live currency conversion, executed by the Python module running inside your JavaScript service. The same workflow applies to any module from any supported technology.
 
-## Step 5. Run with a Project Key (recommended for real-world usage)
+## Step 6. Run with a Project Key (recommended for real-world usage)
 
 Everything above works without any account - perfect for learning and local development. When you're ready for real-world usage, create a free account at [portal.graftcode.com](https://portal.graftcode.com), set up a project, and copy its **Project Key**.
 
 Then pass the key when starting your gateway:
 
 ```dockerfile
-CMD ["gg", "--modules", "/usr/app/src/currencyService.js", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 A Project Key gives you:
