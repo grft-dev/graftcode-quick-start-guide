@@ -54,10 +54,10 @@ Graftcode saves you from writing, generating  and maintaining client code - prov
 
 ## Step 3. Add your first Graft
 
-Before we add our first Graft, we need to install _javonet-nodejs-sdk_ package. This is done manually for now, but we are working on making it automatic.
+Before we add our first Graft, we need to install hypertube-nodejs-sdk_ package. This is done manually for now, but we are working on making it automatic.
 
 ```bash
-npm install javonet-nodejs-sdk
+npm install hypertube-nodejs-sdk
 ```
 
 Once the package is installed, we can proceed with adding the Graft that will allow us to call the .NET backend service. The installation command is provided in the Graftcode Vision portal. Select preferred package manager from the dropdown and copy the command to your terminal window. As we're creating React app, we'll use NPM.
