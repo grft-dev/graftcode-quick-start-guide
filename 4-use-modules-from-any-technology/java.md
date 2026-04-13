@@ -15,7 +15,7 @@ Use a module from any supported technology directly in a Java service with Graft
 
 ### Prerequisites
 
-- [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
+- [JDK 17+](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
 
 ## Step 1. Create a project folder
 
@@ -41,8 +41,8 @@ Create a `pom.xml`:
     <version>1.0.0</version>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -55,14 +55,9 @@ Create a `pom.xml`:
 
     <dependencies>
         <dependency>
-            <groupId>com.hypertube</groupId>
-            <artifactId>hypertube-java-sdk</artifactId>
-            <version>2.5.0</version>
-        </dependency>
-        <dependency>
             <groupId>graft.pypi</groupId>
             <artifactId>sdncenter-currency-converter</artifactId>
-            <version>1.0.0</version>
+            <version>0.6.1</version>
         </dependency>
     </dependencies>
 </project>
@@ -72,7 +67,11 @@ Create a `pom.xml`:
 
 For this example we'll use a Python currency converter from PyPI ([sdncenter-currency-converter](https://pypi.org/project/sdncenter-currency-converter/)), but the same approach works with any module from a supported repository - `npm`, `PyPI`, `Maven` or `NuGet`.
 
-`hypertube-java-sdk` is still required for this example today, but that extra step is temporary.
+Run following command to checkout selected python module to local directory. We need it as we will run it within same process:
+
+```bash
+python -m pip install sdncenter-currency-converter --target ./
+```
 
 The dependencies declared in `pom.xml` above install a **Graft** - a strongly-typed Java client generated from the module. You import and call it like any other Maven dependency, regardless of which technology the module was originally written in.
 
@@ -111,14 +110,14 @@ Create `src/main/java/energy/Main.java`:
 ```java
 package energy;
 
-import graft.pypi.sdncentercurrencyconverter.GraftConfig;
-import graft.pypi.sdncentercurrencyconverter.SimpleCurrencyConverter;
+import graft.pypi.sdncenter_currency_converter.GraftConfig;
+import graft.pypi.sdncenter_currency_converter.currency_converter.converter.SimpleCurrencyConverter;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         GraftConfig.host = "inMemory";
 
-        var result = SimpleCurrencyConverter.convert(100, "USD", "EUR");
+        double result = SimpleCurrencyConverter.convert(100, "USD", "EUR");
         System.out.println("Converted amount: " + result);
     }
 }
