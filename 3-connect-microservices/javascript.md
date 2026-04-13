@@ -39,7 +39,10 @@ Graftcode Vision shows all public classes and methods exposed by the remote serv
 
 Open Graftcode Vision, pick `npm`, and copy the generated install command.
 
+`hypertube-nodejs-sdk` is still required for this example today, but that extra step is temporary.
+
 ```bash
+npm install hypertube-nodejs-sdk
 npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-energypriceservice@1.2.0
 ```
 

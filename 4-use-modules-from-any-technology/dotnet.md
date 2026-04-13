@@ -33,7 +33,10 @@ Delete the auto-generated `Class1.cs` - we'll create our own file in the next st
 
 For this example we'll use a Python currency converter from PyPI ([sdncenter-currency-converter](https://pypi.org/project/sdncenter-currency-converter/)), but the same approach works with any module from a supported repository - `npm`, `PyPI`, or `NuGet`.
 
+`Hypertube.Netcore.Sdk` is still required for this example today, but that extra step is temporary.
+
 ```bash
+dotnet add package Hypertube.Netcore.Sdk
 dotnet nuget add source https://grft.dev --name graftcode
 dotnet add package Graft.PyPI.SdncenterCurrencyConverter
 ```

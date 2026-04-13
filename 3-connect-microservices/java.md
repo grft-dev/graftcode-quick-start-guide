@@ -38,6 +38,8 @@ Graftcode Vision shows all public classes and methods exposed by the remote serv
 
 Open Graftcode Vision, pick `Maven`, and copy the generated dependency coordinates.
 
+`hypertube-java-sdk` is still required for this example today, but that extra step is temporary.
+
 Create a `pom.xml` with the Graft dependency and the Graftcode repository:
 
 ```xml
@@ -66,6 +68,11 @@ Create a `pom.xml` with the Graft dependency and the Graftcode repository:
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>com.hypertube</groupId>
+            <artifactId>hypertube-java-sdk</artifactId>
+            <version>2.5.0</version>
+        </dependency>
         <dependency>
             <groupId>graft.nuget</groupId>
             <artifactId>energypriceservice</artifactId>

@@ -151,11 +151,12 @@ Now that the price calculator runs on its own gateway, install its **Graft** - t
 From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **NuGet** and copy the generated install command:
 
 ```bash
+dotnet add package Hypertube.Netcore.Sdk
 dotnet nuget add source "http://localhost:91/nuget/v3/index.json" --name graftcode-local
 dotnet add package Graft.NuGet.EnergyPriceCalculator
 ```
 
-> The exact package name and source URL are shown in Graftcode Vision - copy them from there.
+> The exact package name and source URL are shown in Graftcode Vision - copy them from there. `Hypertube.Netcore.Sdk` is still required for this example today, but that extra step is temporary.
 
 Update `BillingService.cs` to use the Graft instead of the direct reference:
 
