@@ -16,7 +16,6 @@ Connect a JavaScript backend service to another remote service using Graftcode -
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) installed and running
 - [Node.js](https://nodejs.org/) installed locally
 
 ## Step 1. Create a JavaScript service
