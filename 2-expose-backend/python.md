@@ -34,10 +34,9 @@ Create a file `energy_price_calculator.py`:
 ```python
 import random
 
-
 class EnergyPriceCalculator:
     @staticmethod
-    def get_price():
+    def get_price() -> int:        
         return random.randint(100, 104)
 ```
 
