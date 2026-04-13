@@ -29,7 +29,7 @@ npm init -y
 
 ## Step 2. Install a module from another technology
 
-For this example we'll use a Python currency converter from PyPI ([sdncenter-currency-converter](https://pypi.org/project/sdncenter-currency-converter/)), but the same approach works with any module from a supported repository - `npm`, `PyPI`, or `NuGet`.
+For this example we'll use a Python currency converter from PyPI ([sdncenter-currency-converter](https://pypi.org/project/sdncenter-currency-converter/)), but the same approach works with any module from a supported repository - `npm`, `PyPI`, `Maven` or `NuGet`.
 
 `hypertube-nodejs-sdk` is still required for this example today, but that extra step is temporary.
 
@@ -40,7 +40,29 @@ npm install --registry https://grft.dev @graft/pypi-sdncenter-currency-converter
 
 This installs a **Graft** - a strongly-typed JavaScript client generated from the module. You import and call it like any other npm package, regardless of which technology the module was originally written in.
 
-## Step 3. Call the cross-language module and run it
+## Step 3. Set the SDK key
+
+Set the `HYPERTUBE_KEY` environment variable in your terminal before running the project:
+
+**PowerShell:**
+
+```powershell
+$env:HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
+```
+
+**Bash (macOS / Linux):**
+
+```bash
+export HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
+```
+
+**Windows CMD:**
+
+```cmd
+set HYPERTUBE_KEY=Fe2w-p2GK-Mn26-j8ZY-Xe25
+```
+
+## Step 4. Call the cross-language module and run it
 
 Create `index.js`:
 
@@ -63,7 +85,7 @@ node index.js
 
 You should see the converted amount printed in your terminal. `SimpleCurrencyConverter.convert(...)` comes from a Python package, but your code reads like a regular method call - no HTTP request, no response parsing, no serialization. `GraftConfig.host = "inMemory"` tells Graftcode to load and execute the Python module inside the same process.
 
-## Step 4. Run with a Project Key (recommended for real-world usage)
+## Step 5. Run with a Project Key (recommended for real-world usage)
 
 Everything above works without any account - perfect for learning and local development. When you're ready for real-world usage, create a free account at [portal.graftcode.com](https://portal.graftcode.com), set up a project, and copy its **Project Key**.
 
