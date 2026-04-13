@@ -16,8 +16,7 @@ Connect a Java backend service to another remote service using Graftcode - so th
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) installed and running
-- [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
+- [JDK 17+](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
 
 ## Step 1. Create a Java service
 
@@ -92,7 +91,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 
-        var consumption = MeterLogic.netConsumptionKWh(1000, 1150);
+        int consumption = MeterLogic.netConsumptionKWh(1000, 1150);
         System.out.println("Net consumption: " + consumption);
     }
 }

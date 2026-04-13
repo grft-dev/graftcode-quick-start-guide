@@ -16,7 +16,6 @@ Connect a Python backend service to another remote service using Graftcode - so 
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) installed and running
 - [Python](https://www.python.org/downloads/) installed locally
 
 ## Step 1. Create a Python service
