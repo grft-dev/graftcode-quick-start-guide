@@ -42,8 +42,7 @@ Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.po
 
 ```bash
 dotnet add package Hypertube.Netcore.Sdk
-dotnet nuget add source "https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free" --name graftcode
-dotnet add package graft.nuget.energypriceservice --version 1.2.0
+dotnet add package -s https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft.nuget.energypriceservice --version 1.2.0
 ```
 
 This adds the generated strongly-typed client for the remote service to your project.
@@ -53,8 +52,7 @@ This adds the generated strongly-typed client for the remote service to your pro
 The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Replace the contents of `Program.cs`:
 
 ```csharp
-using graft.nuget.energypriceservice;
-
+using graft.nuget.EnergyPriceService;
 GraftConfig.Host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 
 var consumption = await MeterLogic.NetConsumptionKWh(1000, 1150);

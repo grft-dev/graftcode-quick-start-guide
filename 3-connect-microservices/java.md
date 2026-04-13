@@ -43,56 +43,15 @@ Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.po
 Create a `pom.xml` with the Graft dependency and the Graftcode repository:
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <groupId>com.example</groupId>
-    <artifactId>energy-consumer</artifactId>
-    <version>1.0.0</version>
-
-    <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
-    <repositories>
-        <repository>
-            <id>graftcode</id>
-            <url>https://grft.dev/maven2/4b4e411f-60a0-4868-b8a6-46f5dee07448__free</url>
-        </repository>
-    </repositories>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.hypertube</groupId>
-            <artifactId>hypertube-java-sdk</artifactId>
-            <version>2.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>graft.nuget</groupId>
-            <artifactId>energypriceservice</artifactId>
-            <version>1.2.0</version>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.5.0</version>
-                <configuration>
-                    <mainClass>energy.Main</mainClass>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-</project>
+<dependency>
+  <groupId>graft.nuget</groupId>
+  <artifactId>energypriceservice</artifactId>
+  <version>1.2.0</version>
+</dependency>
+<repository>
+  <id>graft-repository</id>
+  <url>https://grft.dev/maven2/4b4e411f-60a0-4868-b8a6-46f5dee07448__free</url>
+</repository>
 ```
 
 This adds the generated strongly-typed client for the remote service to your project.

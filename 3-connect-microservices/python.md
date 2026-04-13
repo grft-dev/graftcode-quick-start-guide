@@ -42,7 +42,7 @@ Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.po
 
 ```bash
 pip install hypertube-python-sdk
-pip install graft-nuget-energypriceservice==1.2.0 --extra-index-url https://grft.dev/simple/4b4e411f-60a0-4868-b8a6-46f5dee07448__free
+python -m pip install --extra-index-url https://grft.dev/simple/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft-nuget-energypriceservice==1.2.0
 ```
 
 This adds the generated strongly-typed client for the remote service to your project.
