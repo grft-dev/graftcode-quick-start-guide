@@ -39,7 +39,7 @@ This is the key Graftcode shift: instead of reading an API spec and building a c
 
 ## Step 3. Install the Graft
 
-Open Graftcode Vision, pick `npm`, and copy the generated install command.
+Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `npm`, and copy the generated install command.
 
 `hypertube-nodejs-sdk` is still required for this example today, but that extra step is temporary.
 
@@ -50,7 +50,7 @@ npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__fr
 
 ## Step 4. Configure the generated client
 
-Open `src/App.jsx` and connect the generated client to the service host:
+Open `src/App.jsx` and connect the generated client to the service host. The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab:
 
 ```javascript
 import { useEffect, useState } from "react";
@@ -62,6 +62,8 @@ GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandce
 `@graft/nuget-energypriceservice` is the Graft you installed - it exposes the backend's public classes and methods as normal JavaScript imports. Setting `GraftConfig.host` tells the client where the backend is running.
 
 ## Step 5. Call a backend method
+
+`BillingLogic` is a class from the backend, and `CalculateMonthlyBill(...)` is one of its public methods - the same ones you browsed in Graftcode Vision. You call it like any other imported function.
 
 ```javascript
 function App() {
@@ -77,8 +79,6 @@ function App() {
 export default App;
 ```
 
-`BillingLogic.CalculateMonthlyBill(...)` is a backend call, but in your code it feels like a normal dependency.
-
 ## Step 6. Run the app
 
 Start the development server:
@@ -88,6 +88,32 @@ npm run dev
 ```
 
 Open the URL shown in the terminal (typically [http://localhost:5173](http://localhost:5173)). You should see the calculated energy bill rendered on the page.
+
+If something is not working, expand below to see the full `src/App.jsx` source:
+
+<details>
+<summary>Full <code>src/App.jsx</code></summary>
+
+```javascript
+import { useEffect, useState } from "react";
+import { BillingLogic, GraftConfig } from "@graft/nuget-energypriceservice";
+
+GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+
+function App() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    BillingLogic.CalculateMonthlyBill(88.4, 1.4, 23).then(setData);
+  }, []);
+
+  return <h1>Calculated Energy Monthly Bill is: {data?.toFixed(2)}</h1>;
+}
+
+export default App;
+```
+
+</details>
 
 ## Step 7. Explore more methods and keep up with backend changes
 

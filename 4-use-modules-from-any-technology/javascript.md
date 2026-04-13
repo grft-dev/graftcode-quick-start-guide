@@ -83,7 +83,7 @@ RUN apt-get update \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg"]
+CMD ["gg", "./package.json"]
 ```
 
 `gg` (Graftcode Gateway) reads your `package.json`, discovers all public methods, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
@@ -96,7 +96,7 @@ CMD ["gg"]
 - **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
 - **EXPOSE 80** - Declares the port used for service communication (Grafts connect here).
 - **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
-- **CMD ["gg"]** - Runs Graftcode Gateway. It reads `package.json` to find your module, discovers public methods, and makes them callable.
+- **CMD ["gg", "./package.json"]** - Runs Graftcode Gateway, pointing it at your `package.json` to find your module, discover public methods, and make them callable.
 
 </collapsible>
 

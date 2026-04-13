@@ -85,7 +85,7 @@ RUN apt-get update \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg"]
+CMD ["gg", "./package.json"]
 ```
 
 Build and run:
