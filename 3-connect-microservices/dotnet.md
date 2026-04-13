@@ -30,13 +30,13 @@ cd EnergyConsumer
 
 ## Step 2. Find the remote method in Graftcode Vision
 
-Open the hosted [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) portal.
+We're hosting this sample service for you so you can see exactly what connecting to another team's service looks like in practice - open it in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) to explore.
 
 Graftcode Vision shows all public classes and methods exposed by the remote service - their names, parameter types, and return types. It also gives you the exact package manager command needed to install that service as a Graft.
 
 ## Step 3. Install the Graft
 
-Open Graftcode Vision, pick `NuGet`, and copy the generated install command.
+Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `NuGet`, and copy the generated install command.
 
 `Hypertube.Netcore.Sdk` is still required for this example today, but that extra step is temporary.
 
@@ -50,7 +50,7 @@ This adds the generated strongly-typed client for the remote service to your pro
 
 ## Step 4. Call the remote method and run it
 
-Replace the contents of `Program.cs`:
+The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Replace the contents of `Program.cs`:
 
 ```csharp
 using Graft.NuGet.EnergyPriceService;

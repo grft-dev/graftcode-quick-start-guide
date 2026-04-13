@@ -91,8 +91,7 @@ Open the URL shown in the terminal (typically [http://localhost:5173](http://loc
 
 If something is not working, expand below to see the full `src/App.jsx` source:
 
-<details>
-<summary>Full <code>src/App.jsx</code></summary>
+<collapsible title="Full src/App.jsx code">
 
 ```javascript
 import { useEffect, useState } from "react";
@@ -113,7 +112,7 @@ function App() {
 export default App;
 ```
 
-</details>
+</collapsible>
 
 ## Step 7. Explore more methods and keep up with backend changes
 
