@@ -16,8 +16,7 @@ Connect a Java backend service to another remote service using Graftcode - so th
 
 ### Prerequisites
 
-- [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
-* minimum JDK 17
+- [JDK 17+](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
 
 ## Step 1. Create a Java service
 
