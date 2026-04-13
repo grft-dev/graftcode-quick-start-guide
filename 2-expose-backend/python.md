@@ -41,6 +41,16 @@ class EnergyPriceCalculator:
         return random.randint(100, 104)
 ```
 
+Create module meta data file `pyproject.toml`:
+
+```python
+[project]
+name = "energy-service"
+version = "1.0.0"
+requires-python = ">=3.8"
+description = "Test module for local directory analysis"
+```
+
 This is a plain Python class - no decorators, no frameworks, no special annotations. Any public method you write here will automatically become available for remote consumption once hosted through Graftcode Gateway.
 
 ## Step 3. Host it with Graftcode Gateway
@@ -52,7 +62,8 @@ FROM python:3.13-bookworm
 
 WORKDIR /usr/app
 
-COPY . /usr/app/
+COPY ./energy_price_calculator.py /usr/app/energy-service/
+COPY ./pyproject.toml /usr/app/energy-service/
 
 RUN apt-get update \ 
  && apt-get install -y wget \
@@ -65,7 +76,7 @@ RUN apt-get update \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg","--modules","energy_price_calculator.py"]
+CMD ["gg","--modules","./energy-service/"]
 ```
 
 The key line is the last one - `gg` (Graftcode Gateway) reads your `setup.py`, discovers all public methods in your module, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
