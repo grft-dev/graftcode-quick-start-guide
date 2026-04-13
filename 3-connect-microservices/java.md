@@ -43,15 +43,37 @@ Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.po
 Create a `pom.xml` with the Graft dependency and the Graftcode repository:
 
 ```xml
-<dependency>
-  <groupId>graft.nuget</groupId>
-  <artifactId>energypriceservice</artifactId>
-  <version>1.2.0</version>
-</dependency>
-<repository>
-  <id>graft-repository</id>
-  <url>https://grft.dev/maven2/4b4e411f-60a0-4868-b8a6-46f5dee07448__free</url>
-</repository>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>energy</groupId>
+    <artifactId>java-energy-consumer</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>graft-repository</id>
+            <url>https://grft.dev/maven2/4b4e411f-60a0-4868-b8a6-46f5dee07448__free</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>graft.nuget</groupId>
+            <artifactId>energypriceservice</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+    </dependencies>
+</project>
 ```
 
 This adds the generated strongly-typed client for the remote service to your project.
@@ -63,14 +85,14 @@ The exact configuration snippet for your language is available in [Graftcode Vis
 ```java
 package energy;
 
-import graft.nuget.energypriceservice.GraftConfig;
-import graft.nuget.energypriceservice.MeterLogic;
+import graft.nuget.EnergyPriceService.GraftConfig;
+import graft.nuget.EnergyPriceService.EnergyPriceService.MeterLogic;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 
-        var consumption = MeterLogic.NetConsumptionKWh(1000, 1150);
+        var consumption = MeterLogic.netConsumptionKWh(1000, 1150);
         System.out.println("Net consumption: " + consumption);
     }
 }
@@ -79,7 +101,7 @@ public class Main {
 Run it:
 
 ```bash
-mvn compile exec:java
+mvn compile exec:java "-Dexec.mainClass=energy.Main"
 ```
 
 You should see the net consumption value printed in your terminal. `MeterLogic.NetConsumptionKWh(...)` is a remote call, but your code reads like a normal method invocation - no HTTP request, no response parsing, no serialization.
