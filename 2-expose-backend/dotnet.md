@@ -73,7 +73,7 @@ EXPOSE 81
 CMD ["gg", "--modules", "EnergyService.dll"]
 ```
 
-The key line is the last one - `gg` (Graftcode Gateway) reads your `.csproj`, discovers all public methods in your assembly, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
+The key line is the last one - `gg` (Graftcode Gateway) analyzes your `EnergyService.dll`, discovers all public methods in your assembly, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
@@ -84,7 +84,7 @@ The key line is the last one - `gg` (Graftcode Gateway) reads your `.csproj`, di
 - **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
 - **EXPOSE 80** - Declares the port used for service communication (Grafts connect here).
 - **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
-- **CMD ["gg"]** - Runs Graftcode Gateway. It reads the `.csproj` to find your assembly, discovers public methods, and makes them callable.
+- **CMD ["gg"]** - Runs Graftcode Gateway. It reads indicate `.dll` file, discovers public methods, and makes them callable.
 
 </collapsible>
 
