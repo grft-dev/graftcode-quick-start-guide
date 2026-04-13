@@ -16,6 +16,7 @@ Use a module from any supported technology directly in a JavaScript service with
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) installed locally
+- [Python](https://www.python.org/) installed locally
 
 ## Step 1. Create a project folder
 
@@ -36,9 +37,12 @@ For this example we'll use a Python currency converter from PyPI ([sdncenter-cur
 ```bash
 npm install hypertube-nodejs-sdk
 npm install --registry https://grft.dev/ @graft/pypi-sdncenter-currency-converter
+pip install sdncenter-currency-converter
 ```
 
-This installs a **Graft** - a strongly-typed JavaScript client generated from the module. You import and call it like any other npm package, regardless of which technology the module was originally written in.
+`npm install --registry https://grft.dev/ @graft/pypi-sdncenter-currency-converter` installs a **Graft** - a strongly-typed JavaScript client generated from the module. You import and call it like any other npm package, regardless of which technology the module was originally written in.
+
+The `pip install` command installs the Python package to your Python environment, which Graftcode uses to execute the module in-process.
 
 ## Step 3. Set the SDK key
 
