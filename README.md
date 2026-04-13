@@ -16,7 +16,7 @@ Behind the scenes, communication is handled through Graftcode's Hypertube protoc
 
 On top of that, Graftcode also:
 - **Exposes MCP automatically** - every hosted service gets a [Model Context Protocol](https://modelcontextprotocol.io/) endpoint out of the box, so AI agents can call your methods directly. If your project already has a REST API, it stays intact - Graftcode adds this new layer alongside it.
-- **Lets you use modules from any language** - install a Python, Java, or .NET module into a JavaScript project (or any other combination) through your package manager and call it like a native import.
+- **Lets you use modules from any language** - install a module from Python, Java, .NET, or JavaScript into any project through your package manager and call it like a native import.
 - **Switches between monolith and microservices** - run a module in-process or as a remote service, and move between the two by changing one configuration value. No rewrite, no new clients, no new endpoints.
 
 > Watch the short intro video to see Graftcode in action:
@@ -25,24 +25,30 @@ On top of that, Graftcode also:
 
 ## Tutorials
 
-Each tutorial is **self-contained** - pick the scenario that interests you and follow it from start to finish. No previous tutorial is required.
+Each tutorial is **self-contained** - pick the scenario that interests you and follow it from start to finish. No previous tutorial is required. Every tutorial is available in multiple languages - choose the one that matches your stack.
 
-| # | Tutorial | What you'll do |
-|---|----------|----------------|
-| 1 | [**Connect Frontend to Backend**](1-connect-frontend-to-backend/react.md) | Call a live backend service from a React app using a Graft - no REST client, no DTOs. |
-| 2 | [**Expose a Backend Service**](2-expose-backend/javascript.md) | Turn a JavaScript module into a remotely callable service with Graftcode Gateway and Docker. |
-| 3 | [**Connect Microservices**](3-connect-microservices/javascript.md) | Connect one backend service to another by installing a Graft and calling remote methods like local code. |
-| 4 | [**Use Modules from Any Technology**](4-use-modules-from-any-technology/javascript.md) | Use a Python module directly in a JavaScript service - no REST wrapper, no rewrite. |
-| 5 | [**Expose MCP for AI**](5-expose-mcp/javascript.md) | Make your service callable by AI agents through the Model Context Protocol. |
-| 6 | [**Switch Between Monolith and Microservices**](6-switch-between-monolith-and-microservices/javascript.md) | Run a module in-process, then extract it as a separate microservice - by changing one config value. |
+| # | Tutorial | What you'll do | Languages |
+|---|----------|----------------|-----------|
+| 1 | [**Connect Frontend to Backend**](1-connect-frontend-to-backend/) | Call a live backend service from a React app using a Graft - no REST client, no DTOs. | [React](1-connect-frontend-to-backend/react.md) |
+| 2 | [**Expose a Backend Service**](2-expose-backend/) | Turn a class or module into a remotely callable service with Graftcode Gateway and Docker. | [JavaScript](2-expose-backend/javascript.md) · [.NET](2-expose-backend/dotnet.md) · [Python](2-expose-backend/python.md) · [Java](2-expose-backend/java.md) |
+| 3 | [**Connect Microservices**](3-connect-microservices/) | Connect one backend service to another by installing a Graft and calling remote methods like local code. | [JavaScript](3-connect-microservices/javascript.md) · [.NET](3-connect-microservices/dotnet.md) · [Python](3-connect-microservices/python.md) · [Java](3-connect-microservices/java.md) |
+| 4 | [**Use Modules from Any Technology**](4-use-modules-from-any-technology/) | Use a module from another language directly in your service - no REST wrapper, no rewrite. | [JavaScript](4-use-modules-from-any-technology/javascript.md) · [.NET](4-use-modules-from-any-technology/dotnet.md) · [Python](4-use-modules-from-any-technology/python.md) · [Java](4-use-modules-from-any-technology/java.md) |
+| 5 | [**Expose MCP for AI**](5-expose-mcp/) | Make your service callable by AI agents through the Model Context Protocol. | [JavaScript](5-expose-mcp/javascript.md) · [.NET](5-expose-mcp/dotnet.md) · [Python](5-expose-mcp/python.md) · [Java](5-expose-mcp/java.md) |
+| 6 | [**Switch Between Monolith and Microservices**](6-switch-between-monolith-and-microservices/) | Run a module in-process, then extract it as a separate microservice - by changing one config value. | [JavaScript](6-switch-between-monolith-and-microservices/javascript.md) · [.NET](6-switch-between-monolith-and-microservices/dotnet.md) · [Python](6-switch-between-monolith-and-microservices/python.md) · [Java](6-switch-between-monolith-and-microservices/java.md) |
 
 ### Prerequisites
 
-These are common to all tutorials:
+All tutorials require:
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [Node.js](https://nodejs.org/) installed locally (for JavaScript tutorials)
 - No Graftcode account needed - everything works locally out of the box
+
+Depending on the language you choose, you'll also need one of:
+
+- [Node.js](https://nodejs.org/) - for JavaScript / React tutorials
+- [.NET SDK](https://dotnet.microsoft.com/download) - for .NET tutorials
+- [Python](https://www.python.org/downloads/) - for Python tutorials
+- [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) - for Java tutorials
 
 ## Learn More
 
