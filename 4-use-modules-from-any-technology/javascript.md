@@ -35,7 +35,7 @@ For this example we'll use a Python currency converter from PyPI ([sdncenter-cur
 
 ```bash
 npm install hypertube-nodejs-sdk
-npm install --registry https://grft.dev @graft/pypi-sdncenter-currency-converter
+npm install --registry https://grft.dev/ @graft/pypi-sdncenter-currency-converter
 ```
 
 This installs a **Graft** - a strongly-typed JavaScript client generated from the module. You import and call it like any other npm package, regardless of which technology the module was originally written in.
@@ -67,7 +67,7 @@ set HYPERTUBE_KEY=Fe2w-p2GK-Mn26-j8ZY-Xe25
 Create `index.js`:
 
 ```javascript
-const { GraftConfig, SimpleCurrencyConverter } = require("graft.pypi.sdncenter-currency-converter");
+const { GraftConfig, SimpleCurrencyConverter } = require("@graft/pypi-sdncenter-currency-converter");
 
 GraftConfig.host = "inMemory";
 
