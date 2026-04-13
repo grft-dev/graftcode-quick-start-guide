@@ -152,8 +152,8 @@ From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), selec
 
 ```bash
 dotnet add package Hypertube.Netcore.Sdk
-dotnet nuget add source "http://localhost:91/nuget/v3/index.json" --name graftcode-local
-dotnet add package Graft.NuGet.EnergyPriceCalculator
+dotnet nuget add source "http://localhost:91/" --name graftcode-local
+dotnet add package graft.nuget.energypricecalculator
 ```
 
 > The exact package name and source URL are shown in Graftcode Vision - copy them from there. `Hypertube.Netcore.Sdk` is still required for this example today, but that extra step is temporary.
@@ -161,7 +161,7 @@ dotnet add package Graft.NuGet.EnergyPriceCalculator
 Update `BillingService.cs` to use the Graft instead of the direct reference:
 
 ```csharp
-using Pricing = Graft.NuGet.EnergyPriceCalculator;
+using Pricing = graft.nuget.energypricecalculator;
 
 namespace EnergyPlatform;
 
@@ -193,7 +193,7 @@ docker build --no-cache --pull -t dotnet-energy-platform:test .
 docker network create mynetwork
 docker network connect mynetwork price_calculator
 docker run -d --network mynetwork \
-  -e GRAFT_CONFIG="name=Graft.NuGet.EnergyPriceCalculator;host=price_calculator:9092;runtime=dotnet;modules=/usr/app/publish" \
+  -e GRAFT_CONFIG="name=graft.nuget.energypricecalculator;host=price_calculator:9092;runtime=dotnet;modules=/usr/app/publish" \
   -p 80:80 -p 81:81 \
   --name energy_platform dotnet-energy-platform:test
 ```
@@ -208,7 +208,7 @@ Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
 docker stop energy_platform
 docker rm energy_platform
 docker run -d \
-  -e GRAFT_CONFIG="name=Graft.NuGet.EnergyPriceCalculator;host=inMemory;modules=/usr/app/publish/EnergyPlatform.dll;runtime=dotnet" \
+  -e GRAFT_CONFIG="name=graft.nuget.energypricecalculator;host=inMemory;modules=/usr/app/publish/EnergyPlatform.dll;runtime=dotnet" \
   -p 80:80 -p 81:81 \
   --name energy_platform dotnet-energy-platform:test
 ```
@@ -233,7 +233,7 @@ Switch back to microservice mode to verify the call is truly remote:
 docker stop energy_platform
 docker rm energy_platform
 docker run -d --network mynetwork \
-  -e GRAFT_CONFIG="name=Graft.NuGet.EnergyPriceCalculator;host=price_calculator:9092;runtime=dotnet;modules=/usr/app/publish" \
+  -e GRAFT_CONFIG="name=graft.nuget.energypricecalculator;host=price_calculator:9092;runtime=dotnet;modules=/usr/app/publish" \
   -p 80:80 -p 81:81 \
   --name energy_platform dotnet-energy-platform:test
 ```

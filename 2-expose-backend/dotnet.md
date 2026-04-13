@@ -127,7 +127,7 @@ A Project Key gives you:
 Your service is now accessible from any application. From Graftcode Vision, select your target package type - for example `NuGet` - and copy the generated install command. That installs a **Graft**: a strongly-typed client that lets any app call your service methods directly.
 
 ```csharp
-using Graft.NuGet.EnergyPriceCalculator;
+using graft.nuget.energypricecalculator;
 
 var price = await EnergyPriceCalculator.GetPrice();
 Console.WriteLine(price);

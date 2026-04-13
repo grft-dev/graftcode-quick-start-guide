@@ -176,7 +176,7 @@ Add the Graftcode repository and Graft dependency to your `pom.xml`:
 <repositories>
     <repository>
         <id>graftcode-local</id>
-        <url>http://localhost:91/maven</url>
+        <url>http://localhost:91/maven2</url>
     </repository>
 </repositories>
 

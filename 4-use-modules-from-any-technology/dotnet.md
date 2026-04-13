@@ -37,8 +37,8 @@ For this example we'll use a Python currency converter from PyPI ([sdncenter-cur
 
 ```bash
 dotnet add package Hypertube.Netcore.Sdk
-dotnet nuget add source https://grft.dev --name graftcode
-dotnet add package Graft.PyPI.SdncenterCurrencyConverter
+dotnet nuget add source "https://grft.dev/" --name graftcode
+dotnet add package graft.pypi.sdncenter-currency-converter
 ```
 
 This installs a **Graft** - a strongly-typed C# client generated from the module. You import and call it like any other NuGet package, regardless of which technology the module was originally written in.
@@ -48,7 +48,7 @@ This installs a **Graft** - a strongly-typed C# client generated from the module
 Create `CurrencyService.cs`:
 
 ```csharp
-using Graft.PyPI.SdncenterCurrencyConverter;
+using graft.pypi.sdncentercurrencyconverter;
 
 namespace CurrencyDemo;
 
@@ -115,7 +115,7 @@ Build and run the container, passing the Graft configuration through an environm
 ```bash
 docker build --no-cache --pull -t dotnet-python-module-demo:test .
 docker run -d \
-  -e GRAFT_CONFIG="name=Graft.PyPI.SdncenterCurrencyConverter;host=inMemory;modules=currency_converter;runtime=python" \
+  -e GRAFT_CONFIG="name=graft.pypi.sdncentercurrencyconverter;host=inMemory;modules=currency_converter;runtime=python" \
   -p 80:80 -p 81:81 \
   --name dotnet_python_demo dotnet-python-module-demo:test
 ```

@@ -155,7 +155,7 @@ From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), selec
 
 ```bash
 pip install hypertube-python-sdk
-pip install --target=./lib --extra-index-url http://localhost:91/pypi/simple/ graft-pypi-energypricecalculator
+pip install --target=./lib --extra-index-url http://localhost:91/simple/ graft-pypi-energypricecalculator
 ```
 
 > The exact package name and registry URL are shown in Graftcode Vision - copy them from there. `hypertube-python-sdk` is still required for this example today, but that extra step is temporary. The `--target=./lib` flag installs packages into a local `lib/` directory so they get copied into the container alongside your project - similar to how `npm install` stores packages in `node_modules/`.

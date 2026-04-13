@@ -63,7 +63,7 @@ Create a `pom.xml` with the Graft dependency and the Graftcode repository:
     <repositories>
         <repository>
             <id>graftcode</id>
-            <url>https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free/maven</url>
+            <url>https://grft.dev/maven2/4b4e411f-60a0-4868-b8a6-46f5dee07448__free</url>
         </repository>
     </repositories>
 

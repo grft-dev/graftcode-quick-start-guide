@@ -50,7 +50,7 @@ Create a `pom.xml`:
     <repositories>
         <repository>
             <id>graftcode</id>
-            <url>https://grft.dev/maven</url>
+            <url>https://grft.dev/maven2</url>
         </repository>
     </repositories>
 

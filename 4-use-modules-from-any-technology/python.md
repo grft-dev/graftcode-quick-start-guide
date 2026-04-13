@@ -47,7 +47,7 @@ For this example we'll use a JavaScript currency converter from npm, but the sam
 
 ```bash
 pip install hypertube-python-sdk
-pip install graft-npm-simple-currency-converter --extra-index-url https://grft.dev
+pip install graft-npm-simple-currency-converter --extra-index-url https://grft.dev/simple/
 ```
 
 This installs a **Graft** - a strongly-typed Python client generated from the module. You import and call it like any other pip package, regardless of which technology the module was originally written in.
@@ -83,7 +83,7 @@ WORKDIR /usr/app
 COPY . /usr/app/
 
 RUN pip install hypertube-python-sdk \
- && pip install graft-npm-simple-currency-converter --extra-index-url https://grft.dev
+ && pip install graft-npm-simple-currency-converter --extra-index-url https://grft.dev/simple/
 
 RUN apt-get update \
  && apt-get install -y wget \
