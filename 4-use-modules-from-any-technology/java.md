@@ -56,7 +56,7 @@ Create a `pom.xml`:
 
     <dependencies>
         <dependency>
-            <groupId>com.graft.pypi</groupId>
+            <groupId>graft.pypi</groupId>
             <artifactId>sdncenter-currency-converter</artifactId>
             <version>1.0.0</version>
         </dependency>
@@ -83,8 +83,8 @@ Create `src/main/java/energy/CurrencyService.java`:
 ```java
 package energy;
 
-import com.graft.pypi.sdncentercurrencyconverter.GraftConfig;
-import com.graft.pypi.sdncentercurrencyconverter.SimpleCurrencyConverter;
+import graft.pypi.sdncentercurrencyconverter.GraftConfig;
+import graft.pypi.sdncentercurrencyconverter.SimpleCurrencyConverter;
 
 public class CurrencyService {
     static {
@@ -146,7 +146,7 @@ Build and run the container, passing the Graft configuration through an environm
 ```bash
 docker build --no-cache --pull -t java-python-module-demo:test .
 docker run -d \
-  -e GRAFT_CONFIG="name=com.graft.pypi.sdncentercurrencyconverter;host=inMemory;modules=currency_converter;runtime=python" \
+  -e GRAFT_CONFIG="name=graft.pypi.sdncentercurrencyconverter;host=inMemory;modules=currency_converter;runtime=python" \
   -p 80:80 -p 81:81 \
   --name java_python_demo java-python-module-demo:test
 ```

@@ -67,7 +67,7 @@ Create a `pom.xml` with the Graft dependency and the Graftcode repository:
 
     <dependencies>
         <dependency>
-            <groupId>com.graft.nuget</groupId>
+            <groupId>graft.nuget</groupId>
             <artifactId>energypriceservice</artifactId>
             <version>1.2.0</version>
         </dependency>
@@ -97,8 +97,8 @@ Create `src/main/java/energy/Main.java`:
 ```java
 package energy;
 
-import com.graft.nuget.energypriceservice.GraftConfig;
-import com.graft.nuget.energypriceservice.MeterLogic;
+import graft.nuget.energypriceservice.GraftConfig;
+import graft.nuget.energypriceservice.MeterLogic;
 
 public class Main {
     public static void main(String[] args) throws Exception {
