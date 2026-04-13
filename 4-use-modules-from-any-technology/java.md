@@ -56,11 +56,6 @@ Create a `pom.xml`:
 
     <dependencies>
         <dependency>
-            <groupId>com.javonet</groupId>
-            <artifactId>javonet-java-sdk</artifactId>
-            <version>2.5.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.graft.pypi</groupId>
             <artifactId>sdncenter-currency-converter</artifactId>
             <version>1.0.0</version>
@@ -72,8 +67,6 @@ Create a `pom.xml`:
 ## Step 2. Install a module from another technology
 
 For this example we'll use a Python currency converter from PyPI ([sdncenter-currency-converter](https://pypi.org/project/sdncenter-currency-converter/)), but the same approach works with any module from a supported repository - `npm`, `PyPI`, or `NuGet`.
-
-`javonet-java-sdk` is still required for this example today, but that extra step is temporary.
 
 The dependencies declared in `pom.xml` above install a **Graft** - a strongly-typed Java client generated from the module. You import and call it like any other Maven dependency, regardless of which technology the module was originally written in.
 

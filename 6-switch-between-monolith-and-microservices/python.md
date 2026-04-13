@@ -154,11 +154,10 @@ Now that the price calculator runs on its own gateway, install its **Graft** - t
 From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **PyPI** and copy the generated install command:
 
 ```bash
-pip install javonet-python-sdk
 pip install --target=./lib --extra-index-url http://localhost:91/pypi/simple/ graft-pypi-energypricecalculator
 ```
 
-> The exact package name and registry URL are shown in Graftcode Vision - copy them from there. `javonet-python-sdk` is still required for this example today, but that extra step is temporary. The `--target=./lib` flag installs packages into a local `lib/` directory so they get copied into the container alongside your project - similar to how `npm install` stores packages in `node_modules/`.
+> The exact package name and registry URL are shown in Graftcode Vision - copy them from there. The `--target=./lib` flag installs packages into a local `lib/` directory so they get copied into the container alongside your project - similar to how `npm install` stores packages in `node_modules/`.
 
 Update `src/billing_service.py` to use the Graft instead of the direct import:
 

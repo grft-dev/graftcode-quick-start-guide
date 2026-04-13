@@ -43,10 +43,7 @@ setup(
 
 For this example we'll use a JavaScript currency converter from npm, but the same approach works with any module from a supported repository - `npm`, `PyPI`, or `NuGet`.
 
-`javonet-python-sdk` is still required for this example today, but that extra step is temporary.
-
 ```bash
-pip install javonet-python-sdk
 pip install graft-npm-simple-currency-converter --extra-index-url https://grft.dev
 ```
 
@@ -82,8 +79,7 @@ WORKDIR /usr/app
 
 COPY . /usr/app/
 
-RUN pip install javonet-python-sdk \
- && pip install graft-npm-simple-currency-converter --extra-index-url https://grft.dev
+RUN pip install graft-npm-simple-currency-converter --extra-index-url https://grft.dev
 
 RUN apt-get update \
  && apt-get install -y wget \

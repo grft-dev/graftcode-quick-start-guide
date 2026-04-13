@@ -168,7 +168,7 @@ Now that the price calculator runs on its own gateway, install its **Graft** - t
 
 From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **Maven** and copy the generated dependency coordinates.
 
-> The exact group ID, artifact ID, and repository URL are shown in Graftcode Vision - copy them from there. `javonet-java-sdk` is still required for this example today, but that extra step is temporary.
+> The exact group ID, artifact ID, and repository URL are shown in Graftcode Vision - copy them from there.
 
 Add the Graftcode repository and Graft dependency to your `pom.xml`:
 
@@ -181,11 +181,6 @@ Add the Graftcode repository and Graft dependency to your `pom.xml`:
 </repositories>
 
 <dependencies>
-    <dependency>
-        <groupId>com.javonet</groupId>
-        <artifactId>javonet-java-sdk</artifactId>
-        <version>2.5.0</version>
-    </dependency>
     <dependency>
         <groupId>com.graft.maven</groupId>
         <artifactId>energypricecalculator</artifactId>

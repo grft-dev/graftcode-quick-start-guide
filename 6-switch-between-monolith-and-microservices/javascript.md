@@ -144,11 +144,10 @@ Now that the price calculator runs on its own gateway, install its **Graft** - t
 From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **npm** and copy the generated install command:
 
 ```bash
-npm install javonet-nodejs-sdk
 npm install --registry http://localhost:91 @graft/npm-energypricecalculator
 ```
 
-> The exact package name and registry URL are shown in Graftcode Vision - copy them from there. `javonet-nodejs-sdk` is still required for this example today, but that extra step is temporary.
+> The exact package name and registry URL are shown in Graftcode Vision - copy them from there.
 
 Update `src/billingService.js` to use the Graft instead of the direct import:
 

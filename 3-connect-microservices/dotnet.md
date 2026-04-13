@@ -38,10 +38,7 @@ Graftcode Vision shows all public classes and methods exposed by the remote serv
 
 Open Graftcode Vision, pick `NuGet`, and copy the generated install command.
 
-`Javonet.Netcore.Sdk` is still required for this example today, but that extra step is temporary.
-
 ```bash
-dotnet add package Javonet.Netcore.Sdk
 dotnet nuget add source "https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free/nuget/v3/index.json" --name graftcode
 dotnet add package Graft.NuGet.EnergyPriceService --version 1.2.0
 ```

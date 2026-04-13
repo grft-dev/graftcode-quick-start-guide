@@ -32,10 +32,7 @@ npm init -y
 
 For this example we'll use a Python currency converter from PyPI ([sdncenter-currency-converter](https://pypi.org/project/sdncenter-currency-converter/)), but the same approach works with any module from a supported repository - `npm`, `PyPI`, or `NuGet`.
 
-`javonet-nodejs-sdk` is still required for this example today, but that extra step is temporary.
-
 ```bash
-npm install javonet-nodejs-sdk
 npm install --registry https://grft.dev graft.pypi.sdncenter-currency-converter
 ```
 

@@ -41,10 +41,7 @@ This is the key Graftcode shift: instead of reading an API spec and building a c
 
 Open Graftcode Vision, pick `npm`, and copy the generated install command.
 
-`javonet-nodejs-sdk` is still required for this example today, but that extra step is temporary.
-
 ```bash
-npm install javonet-nodejs-sdk
 npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-energypriceservice@1.2.0
 ```
 
