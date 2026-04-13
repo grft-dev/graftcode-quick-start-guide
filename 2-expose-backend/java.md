@@ -80,7 +80,7 @@ COPY . /usr/app/
 
 RUN mvn package -q
 
-RUN apt-get update \
+RUN apt-get update \ 
  && apt-get install -y wget \
  && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
  && dpkg -i /usr/app/gg.deb \
@@ -91,7 +91,8 @@ RUN apt-get update \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg"]
+CMD ["gg","--modules", "/usr/app/target/energy-service-1.0.0.jar"]
+ 
 ```
 
 The key line is the last one - `gg` (Graftcode Gateway) reads your `pom.xml`, discovers all public methods in your compiled classes, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.

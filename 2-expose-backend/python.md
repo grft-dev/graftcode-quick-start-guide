@@ -27,18 +27,6 @@ mkdir py-energy-service
 cd py-energy-service
 ```
 
-Create a `setup.py`:
-
-```python
-from setuptools import setup
-
-setup(
-    name="energy-service",
-    version="1.0.0",
-    py_modules=["energy_price_calculator"],
-)
-```
-
 ## Step 2. Write a Python module with public methods
 
 Create a file `energy_price_calculator.py`:
@@ -60,13 +48,13 @@ This is a plain Python class - no decorators, no frameworks, no special annotati
 Create a `Dockerfile` in the project root:
 
 ```dockerfile
-FROM python:3.13
+FROM python:3.13-bookworm
 
 WORKDIR /usr/app
 
 COPY . /usr/app/
 
-RUN apt-get update \
+RUN apt-get update \ 
  && apt-get install -y wget \
  && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
  && dpkg -i /usr/app/gg.deb \
@@ -77,7 +65,7 @@ RUN apt-get update \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg"]
+CMD ["gg","--modules","energy_price_calculator.py"]
 ```
 
 The key line is the last one - `gg` (Graftcode Gateway) reads your `setup.py`, discovers all public methods in your module, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
