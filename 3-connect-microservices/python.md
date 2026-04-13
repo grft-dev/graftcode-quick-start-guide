@@ -52,18 +52,17 @@ This adds the generated strongly-typed client for the remote service to your pro
 The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Create `main.py`:
 
 ```python
-import asyncio
-from graft_nuget_energypriceservice import GraftConfig, MeterLogic
+from graft_nuget_energypriceservice.graft.nuget.EnergyPriceService import GraftConfig
+from graft_nuget_energypriceservice.meterlogic import MeterLogic
 
 GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws"
 
 
-async def main():
-    consumption = await MeterLogic.NetConsumptionKWh(1000, 1150)
+def main():
+    consumption = MeterLogic.netConsumptionKWh(1000, 1150)
     print(f"Net consumption: {consumption}")
 
-
-asyncio.run(main())
+main()
 ```
 
 Run it:
