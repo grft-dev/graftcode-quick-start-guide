@@ -46,10 +46,10 @@ module.exports = { EnergyPriceCalculator };
 
 ## Step 3. Write the billing service
 
-Create `src/billingService.js`:
+Create `index.js`:
 
 ```javascript
-const { EnergyPriceCalculator } = require("./priceCalculator");
+const { EnergyPriceCalculator } = require("./src/priceCalculator");
 
 class BillingService {
   static calculateBill(kwhUsed) {
@@ -105,6 +105,17 @@ At this point, everything runs inside **one container** - both modules share a s
 
 Now let's say the price calculator needs to scale independently, or another team wants to own it. We'll extract it into its own container.
 
+Create `src/priceCalculator.package.json` - a dedicated package.json for the standalone price calculator service:
+
+```json
+{
+  "name": "price-calculator",
+  "version": "1.0.0",
+  "main": "priceCalculator.js",
+  "license": "ISC"
+}
+```
+
 Create `Dockerfile.priceCalculator` in the project root:
 
 ```dockerfile
@@ -112,7 +123,8 @@ FROM node:24
 
 WORKDIR /usr/app
 
-COPY ./priceCalculator.js /usr/app/
+COPY ./src/priceCalculator.js /usr/app/
+COPY ./src/priceCalculator.package.json /usr/app/package.json
 
 RUN apt-get update \
  && apt-get install -y wget \
@@ -125,14 +137,15 @@ RUN apt-get update \
 EXPOSE 90
 EXPOSE 91
 
-CMD ["gg", "--modules", "/usr/app/priceCalculator.js", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
+CMD ["gg", "./package.json", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
 ```
 
 Build and run the price calculator as a standalone service:
 
 ```bash
 docker build --no-cache --pull -f Dockerfile.priceCalculator -t price-calculator:test .
-docker run -d -p 90:90 -p 91:91 -p 9092:9092 --name price_calculator price-calculator:test
+docker network create graftcode_demo
+docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name price_calculator price-calculator:test
 ```
 
 Open [http://localhost:91/GV](http://localhost:91/GV) - the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.getPrice` listed with its return type.
@@ -145,18 +158,18 @@ From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), selec
 
 ```bash
 npm install hypertube-nodejs-sdk
-npm install --registry http://localhost:91 @graft/npm-energypricecalculator
+npm install --registry http://localhost:91 @graft/npm-price-calculator
 ```
 
 > The exact package name and registry URL are shown in Graftcode Vision - copy them from there. `hypertube-nodejs-sdk` is still required for this example today, but that extra step is temporary.
 
-Update `src/billingService.js` to use the Graft instead of the direct import:
+Update `index.js` to use the Graft instead of the direct import:
 
 ```javascript
 const {
   GraftConfig,
   EnergyPriceCalculator,
-} = require("@graft/npm-energypricecalculator");
+} = require("@graft/npm-price-calculator");
 
 GraftConfig.setConfig(process.env.GRAFT_CONFIG);
 
@@ -180,10 +193,8 @@ Stop the monolith container, rebuild the image with the updated code, and run th
 docker stop energy_platform
 docker rm energy_platform
 docker build --no-cache --pull -t js-energy-platform:test .
-docker network create mynetwork
-docker network connect mynetwork price_calculator
-docker run -d --network mynetwork \
-  -e GRAFT_CONFIG="name=@graft/npm-energypricecalculator;host=price_calculator:9092;runtime=nodejs;modules=/usr/app" \
+docker run -d --network graftcode_demo \
+  -e GRAFT_CONFIG="name=@graft/npm-price-calculator;host=price_calculator:9092;runtime=nodejs;modules=/usr/app" \
   -p 80:80 -p 81:81 \
   --name energy_platform js-energy-platform:test
 ```
@@ -198,7 +209,7 @@ Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
 docker stop energy_platform
 docker rm energy_platform
 docker run -d \
-  -e GRAFT_CONFIG="name=@graft/npm-energypricecalculator;host=inMemory;modules=/usr/app/src/priceCalculator.js;runtime=nodejs" \
+  -e GRAFT_CONFIG="name=@graft/npm-price-calculator;host=inMemory;modules=/usr/app/src/priceCalculator.js;runtime=nodejs" \
   -p 80:80 -p 81:81 \
   --name energy_platform js-energy-platform:test
 ```
@@ -222,8 +233,8 @@ Switch back to microservice mode to verify the call is truly remote:
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker run -d --network mynetwork \
-  -e GRAFT_CONFIG="name=@graft/npm-energypricecalculator;host=price_calculator:9092;runtime=nodejs;modules=/usr/app" \
+docker run -d --network graftcode_demo \
+  -e GRAFT_CONFIG="name=@graft/npm-price-calculator;host=price_calculator:9092;runtime=nodejs;modules=/usr/app" \
   -p 80:80 -p 81:81 \
   --name energy_platform js-energy-platform:test
 ```
@@ -251,7 +262,7 @@ Everything above works without any account - perfect for learning and local deve
 Then pass the key when starting your gateways:
 
 ```dockerfile
-CMD ["gg", "--modules", "/usr/app/src/billingService.js", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "./package.json", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 A Project Key gives you:
