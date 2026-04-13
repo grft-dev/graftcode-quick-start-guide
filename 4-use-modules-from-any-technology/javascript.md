@@ -36,6 +36,7 @@ For this example we'll use a Python currency converter from PyPI ([sdncenter-cur
 
 ```bash
 npm install hypertube-nodejs-sdk
+npm install hypertube-binaries
 npm install --registry https://grft.dev/ @graft/pypi-sdncenter-currency-converter
 pip install sdncenter-currency-converter
 ```
