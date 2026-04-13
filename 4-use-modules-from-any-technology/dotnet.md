@@ -30,12 +30,8 @@ cd CurrencyDemo
 
 For this example we'll use a Python currency converter from PyPI ([sdncenter-currency-converter](https://pypi.org/project/sdncenter-currency-converter/)), but the same approach works with any module from a supported repository - `npm`, `PyPI`, `Maven` or `NuGet`.
 
-`Hypertube.Netcore.Sdk` is still required for this example today, but that extra step is temporary.
-
 ```bash
-dotnet add package Hypertube.Netcore.Sdk
-dotnet nuget add source "https://grft.dev/" --name graftcode
-dotnet add package graft.pypi.sdncenter-currency-converter
+dotnet add package -s https://grft.dev/ graft.pypi.sdncenter-currency-converter
 ```
 
 This installs a **Graft** - a strongly-typed C# client generated from the module. You import and call it like any other NuGet package, regardless of which technology the module was originally written in.
@@ -67,11 +63,12 @@ set HYPERTUBE_KEY=Fe2w-p2GK-Mn26-j8ZY-Xe25
 Replace the contents of `Program.cs`:
 
 ```csharp
-using graft.pypi.sdncentercurrencyconverter;
+using graft.pypi.sdncenter_currency_converter;
+using graft.pypi.currency_converter.converter;
 
 GraftConfig.Host = "inMemory";
 
-var result = SimpleCurrencyConverter.Convert(100, "USD", "EUR");
+var result = SimpleCurrencyConverter.convert(100, "USD", "EUR");
 Console.WriteLine($"Converted amount: {result}");
 ```
 
