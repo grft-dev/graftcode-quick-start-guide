@@ -16,7 +16,6 @@ Connect a .NET backend service to another remote service using Graftcode - so th
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) installed and running
 - [.NET SDK](https://dotnet.microsoft.com/download) installed locally
 
 ## Step 1. Create a .NET service
@@ -38,10 +37,7 @@ Graftcode Vision shows all public classes and methods exposed by the remote serv
 
 Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `NuGet`, and copy the generated install command.
 
-`Hypertube.Netcore.Sdk` is still required for this example today, but that extra step is temporary.
-
 ```bash
-dotnet add package Hypertube.Netcore.Sdk
 dotnet add package -s https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft.nuget.energypriceservice --version 1.2.0
 ```
 
