@@ -54,7 +54,7 @@ Graftcode saves you from writing, generating  and maintaining client code - prov
 
 ## Step 3. Add your first Graft
 
-Before we add our first Graft, we need to install hypertube-nodejs-sdk_ package. This is done manually for now, but we are working on making it automatic.
+Before we add our first Graft, we need to install hypertube-nodejs-sdk package. This is done manually for now, but we are working on making it automatic.
 
 ```bash
 npm install hypertube-nodejs-sdk
