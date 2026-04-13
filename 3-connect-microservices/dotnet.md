@@ -55,7 +55,7 @@ The exact configuration snippet for your language is available in [Graftcode Vis
 using graft.nuget.EnergyPriceService;
 GraftConfig.Host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 
-var consumption = await MeterLogic.NetConsumptionKWh(1000, 1150);
+var consumption = MeterLogic.NetConsumptionKWh(1000, 1150);
 Console.WriteLine($"Net consumption: {consumption}");
 ```
 
