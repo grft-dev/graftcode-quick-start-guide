@@ -83,7 +83,7 @@ With a Project Key, point `GraftConfig.host` at your project's stable registry U
 - **Portal visibility** - see all your gateways and services in one place at [gateways.graftcode.com](https://gateways.graftcode.com/).
 - **Access control** - decide who can download your Grafts using package manager authentication and permissions.
 
-## Old Way vs New Way
+<collapsible title="Old Way vs New Way">
 
 ### Without Graftcode
 
@@ -103,3 +103,5 @@ Connecting one backend service to another typically requires:
 - When the remote service changes, update with one command - like any other package
 
 > Connecting two backend services with Graftcode is as simple as installing an npm package. No REST routes, no DTOs, no client generation - just import and call.
+
+</collapsible>

@@ -56,20 +56,21 @@ WORKDIR /usr/app
 
 COPY . /usr/app/
 
-RUN dotnet publish -c Release -o /usr/app/publish
+RUN dotnet build
+RUN dotnet publish -c Release -o /usr/app/
 
 RUN apt-get update \
- && apt-get install -y wget \
- && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
- && dpkg -i /usr/app/gg.deb \
- && rm /usr/app/gg.deb \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+&& apt-get install -y wget \
+&& wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
+&& dpkg -i /usr/app/gg.deb \
+&& rm /usr/app/gg.deb \
+&& apt-get clean \
+&& rm -rf /var/lib/apt/lists/*
 
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg"]
+CMD ["gg", "--modules", "EnergyService.dll"]
 ```
 
 The key line is the last one - `gg` (Graftcode Gateway) reads your `.csproj`, discovers all public methods in your assembly, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
@@ -135,7 +136,7 @@ Console.WriteLine(price);
 
 No REST clients, no request/response models, no endpoint URLs in your code. When you add or update a public method, consumers update their Graft with a single package manager command.
 
-## Old Way vs New Way
+<collapsible title="Old Way vs New Way">
 
 ### Without Graftcode
 
@@ -158,3 +159,5 @@ Exposing backend logic for remote consumption typically requires:
 > Your .NET class is now a fully accessible backend service - with one Dockerfile and two commands. Any public method you add is instantly discoverable and callable from any language and any platform. No endpoint design, no client SDK maintenance, no integration code.
 
 ![Old Way vs Graftcode](../assets/BackendOldWayNewWay.png)
+
+</collapsible>

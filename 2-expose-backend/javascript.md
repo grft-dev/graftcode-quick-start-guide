@@ -131,7 +131,7 @@ console.log(price);
 
 No REST clients, no request/response models, no endpoint URLs in your code. When you add or update a public method, consumers update their Graft with a single package manager command.
 
-## Old Way vs New Way
+<collapsible title="Old Way vs New Way">
 
 ### Without Graftcode
 
@@ -154,3 +154,5 @@ Exposing backend logic for remote consumption typically requires:
 > Your JavaScript module is now a fully accessible backend service - with one Dockerfile and two commands. Any public method you add is instantly discoverable and callable from any language and any platform. No endpoint design, no client SDK maintenance, no integration code.
 
 ![Old Way vs Graftcode](../assets/BackendOldWayNewWay.png)
+
+</collapsible>

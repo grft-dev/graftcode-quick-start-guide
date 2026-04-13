@@ -112,7 +112,7 @@ FROM node:24
 
 WORKDIR /usr/app
 
-COPY . /usr/app/
+COPY ./priceCalculator.js /usr/app/
 
 RUN apt-get update \
  && apt-get install -y wget \
@@ -125,7 +125,7 @@ RUN apt-get update \
 EXPOSE 90
 EXPOSE 91
 
-CMD ["gg", "--modules", "/usr/app/src/priceCalculator.js", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
+CMD ["gg", "--modules", "/usr/app/priceCalculator.js", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
 ```
 
 Build and run the price calculator as a standalone service:
@@ -260,7 +260,7 @@ A Project Key gives you:
 - **Portal visibility** - see all your gateways and exposed services in one place at [gateways.graftcode.com](https://gateways.graftcode.com/).
 - **Access control** - decide who can download your Grafts using package manager authentication and permissions.
 
-## Old Way vs New Way
+<collapsible title="Old Way vs New Way">
 
 ### Without Graftcode
 
@@ -282,3 +282,5 @@ Extracting a module from a monolith into a microservice typically requires:
 - Switch between monolith and microservice (and back) with one environment variable
 
 > With Graftcode, extracting a module from a monolith is not a rewrite - it's a one-time import change followed by a configuration switch. After that, your code stays focused on business logic while the architecture adapts to your operational needs.
+
+</collapsible>

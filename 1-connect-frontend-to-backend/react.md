@@ -128,7 +128,7 @@ npm update @graft/nuget-energypriceservice
 
 No need to regenerate clients, rewrite fetch calls, or re-sync OpenAPI specs. Backend changes flow through the same package manager workflow you already use for every other dependency.
 
-## Old Way vs New Way
+<collapsible title="Old Way vs New Way">
 
 ### Without Graftcode
 
@@ -150,3 +150,5 @@ Connecting a frontend to a backend typically requires:
 > With Graftcode, connecting a React frontend to any backend is as simple as installing an npm package. No REST clients, no DTOs, no contract maintenance - just import and call.
 
 ![Old Way vs Graftcode](../assets/CompareOldWaysNewWays.png)
+
+</collapsible>

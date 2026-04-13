@@ -172,7 +172,7 @@ A Project Key gives you:
 - **Portal visibility** - see all your gateways and exposed services in one place at [gateways.graftcode.com](https://gateways.graftcode.com/).
 - **Access control** - decide who can access your MCP endpoint and download your Grafts using package manager authentication and permissions.
 
-## Old Way vs New Way
+<collapsible title="Old Way vs New Way">
 
 ### Without Graftcode
 
@@ -193,3 +193,5 @@ Making backend methods callable by AI agents typically requires:
 - When you add or change a method, AI tools discover the update immediately
 
 > Your .NET class is now an AI-callable backend service - with one Dockerfile and two commands. Any public method you add is instantly discoverable by AI agents through MCP. No tool definitions, no API design, no integration code.
+
+</collapsible>

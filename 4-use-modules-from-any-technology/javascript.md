@@ -134,7 +134,7 @@ A Project Key gives you:
 - **Portal visibility** - see all your gateways and exposed services in one place at [gateways.graftcode.com](https://gateways.graftcode.com/).
 - **Access control** - decide who can download your Grafts using package manager authentication and permissions.
 
-## Old Way vs New Way
+<collapsible title="Old Way vs New Way">
 
 ### Without Graftcode
 
@@ -154,3 +154,5 @@ Using a module from another language in JavaScript typically requires:
 - The module runs in-process or on a remote host, controlled by one environment variable
 
 > Technology choice stops being an integration constraint. You can keep writing JavaScript and use the best libraries from any ecosystem - Python, .NET, Java - as if they were native npm packages.
+
+</collapsible>
