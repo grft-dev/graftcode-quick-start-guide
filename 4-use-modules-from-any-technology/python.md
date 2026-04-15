@@ -66,14 +66,18 @@ set HYPERTUBE_KEY=Fe2w-p2GK-Mn26-j8ZY-Xe25
 Create `main.py`:
 
 ```python
-import os
-from graft_npm_simple_currency_converter import GraftConfig, SimpleCurrencyConverter
-
+from graft_nuget_sdntestsimplecar.simplecar import SimpleCar, GraftConfig
+ 
 GraftConfig.host = "inMemory"
+ 
+car = SimpleCar("Toyota", "Corolla", 2022, "car-001")
+ 
+print(car.toString())
+print("Running:", car.isRunning)
 
-result = SimpleCurrencyConverter.convert(100, "USD", "EUR")
-print(f"Converted amount: {result}")
-os._exit(0)
+//Now let's call some method!
+car.start();
+print("Running:", car.isRunning)
 ```
 
 Run it:
