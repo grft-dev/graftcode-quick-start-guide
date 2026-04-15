@@ -113,7 +113,7 @@ Everything above works without any account - perfect for learning and local deve
 Then pass the key when starting your gateway:
 
 ```dockerfile
-CMD ["gg", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "--modules", "EnergyService.dll", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 A Project Key gives you:
