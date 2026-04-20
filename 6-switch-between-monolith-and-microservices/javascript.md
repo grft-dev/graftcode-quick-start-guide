@@ -12,7 +12,7 @@ Start with two JavaScript modules in a single project running as a monolith, the
 - Create two JavaScript modules in the same project - a price calculator and a billing service that calls it directly.
 - Host both in a single container as a monolith.
 - Extract the price calculator into its own container as a standalone microservice.
-- Connect the billing service to it through a Graft.
+- Update the billing service to use a Graft - the only code change in the entire tutorial.
 - Switch between monolith and microservice by changing one environment variable - no code changes from that point on.
 
 ### Prerequisites
@@ -95,7 +95,7 @@ docker build --no-cache --pull -t js-energy-platform:test .
 docker run -d -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
 ```
 
-`gg` (Graftcode Gateway) discovers both modules automatically, and exposes all their public methods. Port `80` handles service calls, port `81` serves Graftcode Vision.
+`gg` (Graftcode Gateway) discovers both modules automatically and exposes all their public methods. Port `80` handles service calls, port `81` serves Graftcode Vision.
 
 Open [http://localhost:81/GV](http://localhost:81/GV) and try calling `BillingService.calculateBill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
 
@@ -154,11 +154,11 @@ Open [http://localhost:91/GV](http://localhost:91/GV) - the price calculator is 
 
 Now that the price calculator runs on its own gateway, install its **Graft** - the strongly-typed client that Graftcode generates automatically.
 
-From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **npm** and copy the generated install command:
+From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **npm** and copy the generated install command. Note that the `--registry` address shown in your Graftcode Vision interface may be different than the example provided below.
 
 ```bash
 npm install hypertube-nodejs-sdk
-npm install --registry http://localhost:91 @graft/npm-price-calculator
+npm install --registry https://grft.dev/54ee6507-ca20-48c0-8c31-7248fac7faf6__free @graft/npm-price-calculator@1.0.0
 ```
 
 > The exact package name and registry URL are shown in Graftcode Vision - copy them from there. `hypertube-nodejs-sdk` is still required for this example today, but that extra step is temporary.
@@ -166,10 +166,7 @@ npm install --registry http://localhost:91 @graft/npm-price-calculator
 Update `index.js` to use the Graft instead of the direct import:
 
 ```javascript
-const {
-  GraftConfig,
-  EnergyPriceCalculator,
-} = require("@graft/npm-price-calculator");
+const { GraftConfig, EnergyPriceCalculator } = require("@graft/npm-price-calculator");
 
 GraftConfig.setConfig(process.env.GRAFT_CONFIG);
 
@@ -193,10 +190,7 @@ Stop the monolith container, rebuild the image with the updated code, and run th
 docker stop energy_platform
 docker rm energy_platform
 docker build --no-cache --pull -t js-energy-platform:test .
-docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=@graft/npm-price-calculator;host=price_calculator:9092;runtime=nodejs;modules=/usr/app" \
-  -p 80:80 -p 81:81 \
-  --name energy_platform js-energy-platform:test
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=./modules;runtime=nodejs;host=ws://price_calculator:90/ws" -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
 ```
 
 Open [http://localhost:81/GV](http://localhost:81/GV) and call `BillingService.calculateBill` with `250`. Same method, same result - but the price calculation now happens over the network in a separate container.
@@ -208,21 +202,20 @@ Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker run -d \
-  -e GRAFT_CONFIG="name=@graft/npm-price-calculator;host=inMemory;modules=/usr/app/src/priceCalculator.js;runtime=nodejs" \
-  -p 80:80 -p 81:81 \
-  --name energy_platform js-energy-platform:test
+docker run -d -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=./modules;runtime=nodejs;host=inMemory" -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
 ```
 
 Compare the two configurations side by side:
 
 ```text
 # Monolith (in-process)
-host=inMemory
+name=@graft/npm-price-calculator;modules=./modules;runtime=nodejs;host=inMemory
 
 # Microservice (remote)
-host=price_calculator:9092
+name=@graft/npm-price-calculator;modules=./modules;runtime=nodejs;host=ws://price_calculator:90/ws
 ```
+
+> We're still working on the best way to pass the configuration so that it's intuitive and user friendly.
 
 Same Docker image, same code - just a different environment variable. You can switch back and forth as many times as you need.
 
@@ -233,10 +226,7 @@ Switch back to microservice mode to verify the call is truly remote:
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=@graft/npm-price-calculator;host=price_calculator:9092;runtime=nodejs;modules=/usr/app" \
-  -p 80:80 -p 81:81 \
-  --name energy_platform js-energy-platform:test
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=./modules;runtime=nodejs;host=ws://price_calculator:90/ws" -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
 ```
 
 Stop the price calculator:
