@@ -66,18 +66,27 @@ GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandce
 
 `BillingLogic` is a class from the backend, and `CalculateMonthlyBill(...)` is one of its public methods - the same ones you browsed in Graftcode Vision. You call it like any other imported function.
 
+The Graft client can resolve **outside Angular's usual change-detection timing** (for example when the transport uses WebSockets). If the UI stays on `loading...` while the value is correct in the console, hold the displayed value in a **`signal`** and call **`set(...)`** when the promise resolves. Signal updates schedule a template refresh reliably in modern Angular.
+
+Add `signal` to your `@angular/core` import, then use:
+
 ```typescript
+import { Component, OnInit, signal } from "@angular/core";
+import { BillingLogic, GraftConfig } from "@graft/nuget-energypriceservice";
+
+GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+
 @Component({
   selector: "app-root",
   standalone: true,
-  template: `<h1>Calculated Energy Monthly Bill is: {{ bill }}</h1>`,
+  template: `<h1>Calculated Energy Monthly Bill is: {{ bill() }}</h1>`,
 })
 export class AppComponent implements OnInit {
-  bill: string = "loading...";
+  readonly bill = signal("loading...");
 
   async ngOnInit() {
     const result = await BillingLogic.CalculateMonthlyBill(88.4, 1.4, 23);
-    this.bill = result.toFixed(2);
+    this.bill.set(result.toFixed(2));
   }
 }
 ```
@@ -97,7 +106,7 @@ If something is not working, expand below to see the full `src/app/app.component
 <collapsible title="Full src/app/app.component.ts code">
 
 ```typescript
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, signal } from "@angular/core";
 import { BillingLogic, GraftConfig } from "@graft/nuget-energypriceservice";
 
 GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
@@ -105,14 +114,14 @@ GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandce
 @Component({
   selector: "app-root",
   standalone: true,
-  template: `<h1>Calculated Energy Monthly Bill is: {{ bill }}</h1>`,
+  template: `<h1>Calculated Energy Monthly Bill is: {{ bill() }}</h1>`,
 })
 export class AppComponent implements OnInit {
-  bill: string = "loading...";
+  readonly bill = signal("loading...");
 
   async ngOnInit() {
     const result = await BillingLogic.CalculateMonthlyBill(88.4, 1.4, 23);
-    this.bill = result.toFixed(2);
+    this.bill.set(result.toFixed(2));
   }
 }
 ```
