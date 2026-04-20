@@ -96,7 +96,7 @@ export class AppComponent implements OnInit {
 Start the development server:
 
 ```bash
-ng serve
+npm run dev
 ```
 
 Open the URL shown in the terminal (typically [http://localhost:4200](http://localhost:4200)). You should see the calculated energy bill rendered on the page.
