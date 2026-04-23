@@ -64,7 +64,8 @@ WORKDIR /usr/app
 
 COPY . /usr/app/
 
-RUN dotnet publish -c Release -o /usr/app/publish
+RUN dotnet build
+RUN dotnet publish -c Release -o /usr/app/
 
 RUN apt-get update \
  && apt-get install -y wget \
@@ -77,10 +78,10 @@ RUN apt-get update \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg"]
+CMD ["gg", "EnergyService.dll"]
 ```
 
-`gg` (Graftcode Gateway) reads your `.csproj`, discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and as MCP tools for AI agents. Port `80` handles service calls and the MCP endpoint, port `81` serves Graftcode Vision.
+`gg` (Graftcode Gateway) reads your `.dll`, discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and for static methods also as MCP tools for AI agents. Port `80` handles service calls and the MCP endpoint, port `81` serves Graftcode Vision.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
@@ -117,29 +118,19 @@ You will see all public methods from your .NET class - their names, parameter ty
 
 Graftcode Gateway exposes an [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) endpoint alongside your service automatically. Point your AI tool at it.
 
-**For Cursor**, create or edit `.cursor/mcp.json` in your project root:
+**For Cursor**, create or edit `.cursor/mcp.json` in your project root (or navigate to **File > Preferences > Cursor Settings > Tools & MCP** and press **New MCP Server** and add definition from below):
 
 ```json
 {
   "mcpServers": {
     "energy-service": {
-      "url": "http://localhost/mcp"
+      "url": "http://localhost:81/mcp"
     }
   }
 }
 ```
 
-**For Claude Desktop**, edit your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "energy-service": {
-      "url": "http://localhost/mcp"
-    }
-  }
-}
-```
+The same can be applied **For Claude Desktop**, editing your `claude_desktop_config.json`:
 
 The AI tool now sees your .NET methods as callable tools - with their names, parameters, and return types - discovered automatically through MCP.
 
@@ -162,12 +153,11 @@ Everything above works without any account - perfect for learning and local deve
 Then pass the key when starting your gateway:
 
 ```dockerfile
-CMD ["gg", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "EnergyService.dll",  "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 A Project Key gives you:
 
-- **Stable MCP URL** - AI tools connect to a permanent endpoint that doesn't change when you redeploy.
 - **Stable registry URL** - consumers always find and update your Graft through a permanent address, so install commands don't change when you redeploy.
 - **Portal visibility** - see all your gateways and exposed services in one place at [gateways.graftcode.com](https://gateways.graftcode.com/).
 - **Access control** - decide who can access your MCP endpoint and download your Grafts using package manager authentication and permissions.
