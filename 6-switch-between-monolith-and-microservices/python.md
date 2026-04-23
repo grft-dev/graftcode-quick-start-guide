@@ -29,17 +29,14 @@ mkdir py-energy-platform
 cd py-energy-platform
 ```
 
-Create a `setup.py`:
+Create a `pyproject.toml`:
 
-```python
-from setuptools import setup
-
-setup(
-    name="energy-platform",
-    version="1.0.0",
-    package_dir={"": "src"},
-    py_modules=["price_calculator", "billing_service"],
-)
+```toml
+[project]
+name = "energy-platform"
+version = "1.0.0"
+requires-python = ">=3.8"
+description = "Energy platform - switches between monolith and microservice deployments"
 ```
 
 ## Step 2. Write the price calculator module
@@ -52,7 +49,7 @@ import random
 
 class EnergyPriceCalculator:
     @staticmethod
-    def get_price():
+    def get_price() -> int:
         return random.randint(100, 104)
 ```
 
@@ -66,7 +63,7 @@ from price_calculator import EnergyPriceCalculator
 
 class BillingService:
     @staticmethod
-    def calculate_bill(kwh_used):
+    def calculate_bill(kwh_used: int) -> int:
         price = EnergyPriceCalculator.get_price()
         return kwh_used * price
 ```
@@ -78,7 +75,7 @@ A regular import - the billing service imports the price calculator directly as 
 Create a `Dockerfile` in the project root:
 
 ```dockerfile
-FROM python:3.13
+FROM python:3.13-bookworm
 
 WORKDIR /usr/app
 
@@ -95,7 +92,7 @@ RUN apt-get update \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg"]
+CMD ["gg", "--modules", "./src/"]
 ```
 
 Build and run:
@@ -105,7 +102,7 @@ docker build --no-cache --pull -t py-energy-platform:test .
 docker run -d -p 80:80 -p 81:81 --name energy_platform py-energy-platform:test
 ```
 
-`gg` (Graftcode Gateway) discovers both modules automatically, and exposes all their public methods. Port `80` handles service calls, port `81` serves Graftcode Vision.
+`gg` (Graftcode Gateway) scans the `./src/` directory, discovers both modules, and exposes all their public methods. Port `80` handles service calls, port `81` serves Graftcode Vision.
 
 Open [http://localhost:81/GV](http://localhost:81/GV) and try calling `BillingService.calculate_bill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
 
@@ -118,7 +115,7 @@ Now let's say the price calculator needs to scale independently, or another team
 Create `Dockerfile.priceCalculator` in the project root:
 
 ```dockerfile
-FROM python:3.13
+FROM python:3.13-bookworm
 
 WORKDIR /usr/app
 
@@ -142,7 +139,8 @@ Build and run the price calculator as a standalone service:
 
 ```bash
 docker build --no-cache --pull -f Dockerfile.priceCalculator -t price-calculator-py:test .
-docker run -d -p 90:90 -p 91:91 -p 9092:9092 --name price_calculator price-calculator-py:test
+docker network create graftcode_demo
+docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name price_calculator price-calculator-py:test
 ```
 
 Open [http://localhost:91/GV](http://localhost:91/GV) - the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.get_price` listed with its return type.
@@ -151,7 +149,7 @@ Open [http://localhost:91/GV](http://localhost:91/GV) - the price calculator is 
 
 Now that the price calculator runs on its own gateway, install its **Graft** - the strongly-typed client that Graftcode generates automatically.
 
-From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **PyPI** and copy the generated install command:
+From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **PyPI** and copy the generated install command. Note that the `--extra-index-url` address shown in your Graftcode Vision interface may be different than the example provided below.
 
 ```bash
 pip install hypertube-python-sdk
@@ -171,7 +169,7 @@ GraftConfig.set_config(os.environ.get("GRAFT_CONFIG"))
 
 class BillingService:
     @staticmethod
-    async def calculate_bill(kwh_used):
+    async def calculate_bill(kwh_used: int) -> int:
         price = await EnergyPriceCalculator.get_price()
         return kwh_used * price
 ```
@@ -186,9 +184,7 @@ Stop the monolith container, rebuild the image with the updated code, and run th
 docker stop energy_platform
 docker rm energy_platform
 docker build --no-cache --pull -t py-energy-platform:test .
-docker network create mynetwork
-docker network connect mynetwork price_calculator
-docker run -d --network mynetwork \
+docker run -d --network graftcode_demo \
   -e GRAFT_CONFIG="name=graft-pypi-energypricecalculator;host=price_calculator:9092;runtime=python;modules=/usr/app/src" \
   -e PYTHONPATH=/usr/app/lib \
   -p 80:80 -p 81:81 \
@@ -205,7 +201,7 @@ Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
 docker stop energy_platform
 docker rm energy_platform
 docker run -d \
-  -e GRAFT_CONFIG="name=graft-pypi-energypricecalculator;host=inMemory;modules=/usr/app/src/price_calculator.py;runtime=python" \
+  -e GRAFT_CONFIG="name=graft-pypi-energypricecalculator;host=inMemory;runtime=python;modules=/usr/app/src" \
   -e PYTHONPATH=/usr/app/lib \
   -p 80:80 -p 81:81 \
   --name energy_platform py-energy-platform:test
@@ -215,11 +211,13 @@ Compare the two configurations side by side:
 
 ```text
 # Monolith (in-process)
-host=inMemory
+name=graft-pypi-energypricecalculator;host=inMemory;runtime=python;modules=/usr/app/src
 
 # Microservice (remote)
-host=price_calculator:9092
+name=graft-pypi-energypricecalculator;host=price_calculator:9092;runtime=python;modules=/usr/app/src
 ```
+
+> We're still working on the best way to pass the configuration so that it's intuitive and user friendly.
 
 Same Docker image, same code - just a different environment variable. You can switch back and forth as many times as you need.
 
@@ -230,7 +228,7 @@ Switch back to microservice mode to verify the call is truly remote:
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker run -d --network mynetwork \
+docker run -d --network graftcode_demo \
   -e GRAFT_CONFIG="name=graft-pypi-energypricecalculator;host=price_calculator:9092;runtime=python;modules=/usr/app/src" \
   -e PYTHONPATH=/usr/app/lib \
   -p 80:80 -p 81:81 \
@@ -260,7 +258,7 @@ Everything above works without any account - perfect for learning and local deve
 Then pass the key when starting your gateways:
 
 ```dockerfile
-CMD ["gg", "--modules", "/usr/app/src/billing_service.py", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "--modules", "./src/", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 A Project Key gives you:
