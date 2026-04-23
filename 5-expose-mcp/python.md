@@ -29,16 +29,14 @@ mkdir py-ai-backend
 cd py-ai-backend
 ```
 
-Create a `setup.py`:
+Create module meta data file `pyproject.toml`:
 
 ```python
-from setuptools import setup
-
-setup(
-    name="energy-service",
-    version="1.0.0",
-    py_modules=["energy_price_calculator"],
-)
+[project]
+name = "energy-service"
+version = "1.0.0"
+requires-python = ">=3.8"
+description = "Test module for local directory analysis"
 ```
 
 ## Step 2. Write a Python module with public methods
@@ -84,10 +82,10 @@ RUN apt-get update \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg"]
+CMD ["gg","--modules","./energy-service/"]
 ```
 
-`gg` (Graftcode Gateway) reads your `setup.py`, discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and as MCP tools for AI agents. Port `80` handles service calls and the MCP endpoint, port `81` serves Graftcode Vision.
+`gg` (Graftcode Gateway) reads your `python module`, discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and for static methods also as MCP tools for AI agents. Port `80` handles service calls, port `81` serves Graftcode Vision and the MCP endpoint.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
@@ -123,29 +121,19 @@ You will see all public methods from your Python module - their names, parameter
 
 Graftcode Gateway exposes an [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) endpoint alongside your service automatically. Point your AI tool at it.
 
-**For Cursor**, create or edit `.cursor/mcp.json` in your project root:
+**For Cursor**, create or edit `.cursor/mcp.json` in your project root (or navigate to **File > Preferences > Cursor Settings > Tools & MCP** and press **New MCP Server** and add definition from below):
 
 ```json
 {
   "mcpServers": {
     "energy-service": {
-      "url": "http://localhost/mcp"
+      "url": "http://localhost:81/mcp"
     }
   }
 }
 ```
 
-**For Claude Desktop**, edit your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "energy-service": {
-      "url": "http://localhost/mcp"
-    }
-  }
-}
-```
+The same can be applied **For Claude Desktop**, editing your `claude_desktop_config.json`.
 
 The AI tool now sees your Python methods as callable tools - with their names, parameters, and return types - discovered automatically through MCP.
 
