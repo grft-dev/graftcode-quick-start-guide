@@ -130,7 +130,7 @@ Graftcode Gateway exposes an [MCP](https://modelcontextprotocol.io/) (Model Cont
 }
 ```
 
-The same can be applied **For Claude Desktop**, editing your `claude_desktop_config.json`:
+The same can be applied **For Claude Desktop**, editing your `claude_desktop_config.json`.
 
 The AI tool now sees your .NET methods as callable tools - with their names, parameters, and return types - discovered automatically through MCP.
 
