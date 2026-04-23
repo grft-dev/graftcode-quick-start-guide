@@ -81,7 +81,7 @@ EXPOSE 81
 CMD ["gg", "EnergyService.dll"]
 ```
 
-`gg` (Graftcode Gateway) reads your `.dll`, discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and for static methods also as MCP tools for AI agents. Port `80` handles service calls and the MCP endpoint, port `81` serves Graftcode Vision.
+`gg` (Graftcode Gateway) reads your `.dll`, discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and for static methods also as MCP tools for AI agents. Port `80` handles service calls, port `81` serves Graftcode Vision and the MCP endpoint.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
