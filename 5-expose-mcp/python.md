@@ -69,7 +69,8 @@ FROM python:3.13
 
 WORKDIR /usr/app
 
-COPY . /usr/app/
+COPY ./energy_price_calculator.py /usr/app/energy-service/
+COPY ./pyproject.toml /usr/app/energy-service/
 
 RUN apt-get update \
  && apt-get install -y wget \
