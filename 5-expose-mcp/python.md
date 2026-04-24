@@ -65,7 +65,7 @@ This is a plain Python class - no decorators, no frameworks, no MCP-specific ann
 Create a `Dockerfile` in the project root:
 
 ```dockerfile
-FROM python:3.13
+FROM python:3.13-bookworm
 
 WORKDIR /usr/app
 
