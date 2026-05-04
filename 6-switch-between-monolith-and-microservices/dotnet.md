@@ -224,7 +224,7 @@ Build and run the price calculator as a standalone service:
 ```bash
 docker build --no-cache --pull -f Dockerfile.priceCalculator -t price-calculator-dotnet:test .
 docker network create graftcode_demo
-docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name price_calculator price-calculator-dotnet:test
+docker run -d --network graftcode_demo -p 90:90 -p 91:91 --name price_calculator price-calculator-dotnet:test
 ```
 
 Open [http://localhost:91/GV](http://localhost:91/GV) — the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.GetPrice` listed with its return type.
@@ -273,7 +273,7 @@ Stop the monolith container, rebuild the image with the updated code, and run th
 docker stop energy_platform
 docker rm energy_platform
 docker build --no-cache --pull -t dotnet-energy-platform:test .
-docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.nuget.energypricecalculator;host=price_calculator:9092;runtime=dotnet;modules=/usr/app/publish" -p 80:80 -p 81:81 --name energy_platform dotnet-energy-platform:test
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.nuget.EnergyPriceCalculator;host=ws://price_calculator:90/ws;runtime=netcore" -p 80:80 -p 81:81 --name energy_platform dotnet-energy-platform:test
 ```
 
 Open [http://localhost:81/GV](http://localhost:81/GV) and call `BillingService.CalculateBill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
@@ -283,11 +283,10 @@ Open [http://localhost:81/GV](http://localhost:81/GV) and call `BillingService.C
 Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
 
 ```bash
-docker stop energy_platform && docker rm energy_platform
-docker run -d \
-  -e GRAFT_CONFIG="name=graft.nuget.energypricecalculator;host=inMemory;runtime=dotnet;modules=/usr/app/publish" \
-  -p 80:80 -p 81:81 \
-  --name energy_platform dotnet-energy-platform:test
+docker stop energy_platform
+docker rm energy_platform
+docker build --no-cache --pull -t dotnet-energy-platform:test .
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.nuget.EnergyPriceCalculator;host=inMemory;runtime=netcore;modules=/usr/app/publish" -p 80:80 -p 81:81 --name energy_platform dotnet-energy-platform:test
 ```
 
 Compare the two configurations side by side:
