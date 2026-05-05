@@ -54,6 +54,7 @@ class EnergyPriceCalculator:
 
     @staticmethod
     def calculate_bill(kwh_used):
+        kwh_used = float(kwh_used)
         price_per_kwh = random.randint(100, 104)
         return kwh_used * price_per_kwh
 ```
