@@ -23,18 +23,18 @@ On top of that, Graftcode also:
 
 <iframe src="https://share.descript.com/embed/xDrYh06ZJfd" width="640" height="360" frameborder="0" allowfullscreen></iframe>
 
-## Tutorials
+## Conference Lottery — Tutorials
 
-Each tutorial is **self-contained** - pick the scenario that interests you and follow it from start to finish. No previous tutorial is required. Every tutorial is available in multiple languages - choose the one that matches your stack.
+Each challenge is **self-contained** — pick a scenario, run it, and the remote method adds tickets to the conference lottery pool. The more challenges you complete, the more tickets you collect. Every tutorial is available in multiple languages — choose the one that matches your stack.
 
-| # | Tutorial | What you'll do | Languages |
-|---|----------|----------------|-----------|
-| 1 | [**Connect Frontend to Backend**](/quick-start/connect-frontend-to-backend) | Call a live backend service from a React app using a Graft - no REST client, no DTOs. | [React](1-connect-frontend-to-backend/react.md) |
-| 2 | [**Expose a Backend Service**](/quick-start/expose-backend/) | Turn a class or module into a remotely callable service with Graftcode Gateway and Docker. | [JavaScript](2-expose-backend/javascript.md) · [.NET](2-expose-backend/dotnet.md) · [Python](2-expose-backend/python.md) · [Java](2-expose-backend/java.md) |
-| 3 | [**Connect Microservices**](/quick-start/connect-microservices/) | Connect one backend service to another by installing a Graft and calling remote methods like local code. | [JavaScript](3-connect-microservices/javascript.md) · [.NET](3-connect-microservices/dotnet.md) · [Python](3-connect-microservices/python.md) · [Java](3-connect-microservices/java.md) |
-| 4 | [**Use Modules from Any Technology**](/quick-start/use-modules-from-any-technology/) | Use a module from another language directly in your service - no REST wrapper, no rewrite. | [JavaScript](4-use-modules-from-any-technology/javascript.md) · [.NET](4-use-modules-from-any-technology/dotnet.md) · [Python](4-use-modules-from-any-technology/python.md) · [Java](4-use-modules-from-any-technology/java.md) |
-| 5 | [**Expose MCP for AI**](/quick-start/expose-mcp/) | Make your service callable by AI agents through the Model Context Protocol. | [JavaScript](5-expose-mcp/javascript.md) · [.NET](5-expose-mcp/dotnet.md) · [Python](5-expose-mcp/python.md) · [Java](5-expose-mcp/java.md) |
-| 6 | [**Switch Between Monolith and Microservices**](/quick-start/switch-between-monolith-and-microservices/) | Run a module in-process, then extract it as a separate microservice - by changing one config value. | [JavaScript](6-switch-between-monolith-and-microservices/javascript.md) · [.NET](6-switch-between-monolith-and-microservices/dotnet.md) · [Python](6-switch-between-monolith-and-microservices/python.md) · [Java](6-switch-between-monolith-and-microservices/java.md) |
+| # | Challenge | What you'll do | Languages |
+|---|-----------|----------------|-----------|
+| 1 | [**Connect Frontend to Backend**](/quick-start/connect-frontend-to-backend) | Call `Challenge1.AddTickets(email)` from a frontend app — no REST client, no DTOs. | [React](1-connect-frontend-to-backend/react.md) · [Vue](1-connect-frontend-to-backend/vue.md) · [Angular](1-connect-frontend-to-backend/angular.md) |
+| 2 | [**Expose a Backend Service**](/quick-start/expose-backend/) | Build and host your own `LotteryService.AddTicket(email)` with Graftcode Gateway and Docker. | [JavaScript](2-expose-backend/javascript.md) · [.NET](2-expose-backend/dotnet.md) · [Python](2-expose-backend/python.md) · [Java](2-expose-backend/java.md) · [Kotlin](2-expose-backend/kotlin.md) · [Groovy](2-expose-backend/groovy.md) |
+| 3 | [**Connect Microservices**](/quick-start/connect-microservices/) | Call `Challenge3.AddTickets(email)` from your own backend by installing a Graft. | [JavaScript](3-connect-microservices/javascript.md) · [.NET](3-connect-microservices/dotnet.md) · [Python](3-connect-microservices/python.md) · [Java](3-connect-microservices/java.md) |
+| 4 | [**Use Modules from Any Technology**](/quick-start/use-modules-from-any-technology/) | Use the cross-language `Challenge4.AddTickets(email)` module in-process — no REST wrapper, no rewrite. | [JavaScript](4-use-modules-from-any-technology/javascript.md) · [.NET](4-use-modules-from-any-technology/dotnet.md) · [Python](4-use-modules-from-any-technology/python.md) · [Java](4-use-modules-from-any-technology/java.md) |
+| 5 | [**Expose MCP for AI**](/quick-start/expose-mcp/) | Let an AI agent enter you in the lottery via MCP — `Lottery.addTicket(email)` becomes an AI tool. | [JavaScript](5-expose-mcp/javascript.md) · [.NET](5-expose-mcp/dotnet.md) · [Python](5-expose-mcp/python.md) · [Java](5-expose-mcp/java.md) |
+| 6 | [**Switch Between Monolith and Microservices**](/quick-start/switch-between-monolith-and-microservices/) | Run `LotteryService` + `TicketCounter` as a monolith, split into a microservice, switch with one config value. | [JavaScript](6-switch-between-monolith-and-microservices/javascript.md) · [.NET](6-switch-between-monolith-and-microservices/dotnet.md) · [Python](6-switch-between-monolith-and-microservices/python.md) · [Java](6-switch-between-monolith-and-microservices/java.md) |
 
 ### Prerequisites
 

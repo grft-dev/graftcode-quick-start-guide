@@ -1,18 +1,11 @@
 ---
 title: "Angular"
-description: "Connect an Angular frontend to a live backend service with Graftcode - no REST clients, no DTOs, no handwritten integration code. Install a strongly typed Graft and call backend methods directly from your component."
+description: "Challenge 1 — call the lottery service from an Angular app with Graftcode. Submit your email, win tickets, no REST client."
 ---
 
 ## Goal
 
-Connect an Angular app to backend logic with Graftcode - no REST clients, no DTOs, no handwritten integration code.
-
-### What You'll See
-
-- Install a typed Graft from a live backend service instead of writing REST client code.
-- Configure the generated client to point at a sample backend server.
-- Call a backend method directly from an Angular component as if it were local code.
-- Use IDE autocompletion on backend methods and types - powered by the installed Graft package.
+Call the **Challenge 1 lottery service** directly from an Angular component using Graftcode — no REST client, no DTOs. You submit your email and the remote method adds tickets to your pool.
 
 ### Prerequisites
 
@@ -21,148 +14,58 @@ Connect an Angular app to backend logic with Graftcode - no REST clients, no DTO
 
 ## Step 1. Start with an Angular app
 
-This gives you a working Angular app where you can add your first Graft.
-
 ```bash
 git clone https://github.com/grft-dev/angular-hello-world
 cd angular-hello-world
 npm install
 ```
 
-## Step 2. Open the backend in Graftcode Vision
+## Step 2. Install the Graft
 
-Before you install anything, compare the two views of the same backend:
-
-- [Swagger](https://gc-d-ca-polc-demo-ecws-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/swagger/index.html) shows routes, verbs, and payloads.
-- [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) shows public classes and methods and gives you the package manager command to install them.
-
-This is the key Graftcode shift: instead of reading an API spec and building a client, you install the service as a dependency and call methods directly.
-
-## Step 3. Install the Graft
-
-Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `npm`, and copy the generated install command.
-
-`hypertube-nodejs-sdk` is still required for this example today, but that extra step is temporary.
+Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `npm`, and copy the install command. Each challenge ships its own service — for Challenge 1 that's `@graft/npm-lotterychallenge1`.
 
 ```bash
 npm install hypertube-nodejs-sdk
-npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-energypriceservice@1.2.0
+npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/npm-lotterychallenge1@1.0.0
 ```
 
-## Step 4. Configure the generated client
+## Step 3. Call the lottery method
 
-Open `src/app/app.component.ts` and connect the generated client to the service host. The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab:
-
-```typescript
-import { Component, OnInit } from "@angular/core";
-import { BillingLogic, GraftConfig } from "@graft/nuget-energypriceservice";
-
-GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
-```
-
-`@graft/nuget-energypriceservice` is the Graft you installed - it exposes the backend's public classes and methods as normal TypeScript imports. Setting `GraftConfig.host` tells the client where the backend is running.
-
-## Step 5. Call a backend method
-
-`BillingLogic` is a class from the backend, and `CalculateMonthlyBill(...)` is one of its public methods - the same ones you browsed in Graftcode Vision. You call it like any other imported function.
-
-The Graft client can resolve **outside Angular's usual change-detection timing** (for example when the transport uses WebSockets). If the UI stays on `loading...` while the value is correct in the console, hold the displayed value in a **`signal`** and call **`set(...)`** when the promise resolves. Signal updates schedule a template refresh reliably in modern Angular.
-
-Add `signal` to your `@angular/core` import, then use:
+Replace `src/app/app.component.ts`. Use a `signal` so the WebSocket-driven update reaches the template reliably:
 
 ```typescript
 import { Component, OnInit, signal } from "@angular/core";
-import { BillingLogic, GraftConfig } from "@graft/nuget-energypriceservice";
+import { Challenge1, GraftConfig } from "@graft/npm-lotterychallenge1";
 
 GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+
+const MY_EMAIL = "you@example.com";
 
 @Component({
   selector: "app-root",
   standalone: true,
-  template: `<h1>Calculated Energy Monthly Bill is: {{ bill() }}</h1>`,
+  template: `<h1>Challenge 1 complete — tickets in pool: {{ tickets() }}</h1>`,
 })
 export class AppComponent implements OnInit {
-  readonly bill = signal("loading...");
+  readonly tickets = signal("...");
 
   async ngOnInit() {
-    const result = await BillingLogic.CalculateMonthlyBill(88.4, 1.4, 23);
-    this.bill.set(result.toFixed(2));
+    const total = await Challenge1.AddTickets(MY_EMAIL);
+    this.tickets.set(String(total));
   }
 }
 ```
 
-## Step 6. Run the app
-
-Start the development server:
+## Step 4. Run the app
 
 ```bash
 npm run dev
 ```
 
-Open the URL shown in the terminal (typically [http://localhost:4200](http://localhost:4200)). You should see the calculated energy bill rendered on the page.
+Open [http://localhost:4200](http://localhost:4200). The remote `Challenge1.AddTickets(email)` call runs like a local function — your IDE autocompletes it because the Graft is a real npm package.
 
-If something is not working, expand below to see the full `src/app/app.component.ts` source:
+## Step 5. Use a Project Key for production
 
-<collapsible title="Full src/app/app.component.ts code">
+For real-world use, create a free project at [portal.graftcode.com](https://portal.graftcode.com) and point `GraftConfig.host` at your project's stable registry URL. You get a permanent address, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
 
-```typescript
-import { Component, OnInit, signal } from "@angular/core";
-import { BillingLogic, GraftConfig } from "@graft/nuget-energypriceservice";
-
-GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
-
-@Component({
-  selector: "app-root",
-  standalone: true,
-  template: `<h1>Calculated Energy Monthly Bill is: {{ bill() }}</h1>`,
-})
-export class AppComponent implements OnInit {
-  readonly bill = signal("loading...");
-
-  async ngOnInit() {
-    const result = await BillingLogic.CalculateMonthlyBill(88.4, 1.4, 23);
-    this.bill.set(result.toFixed(2));
-  }
-}
-```
-
-</collapsible>
-
-## Step 7. Explore more methods and keep up with backend changes
-
-Go back to [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) to inspect more methods on `BillingLogic`. 
-
-Your IDE can autocomplete available methods and arguments because the service is installed as a typed package, not consumed through handwritten API code. Your AI can now generate frontend code using backend methods as easily as using other npm modules you imported.
-
-When the backend evolves - new methods, changed signatures, updated types - the Graft package version updates just like any other npm package. You see the change in your `package.json`, update with a single command, and your IDE immediately reflects the new API surface:
-
-```bash
-npm update @graft/nuget-energypriceservice
-```
-
-No need to regenerate clients, rewrite fetch calls, or re-sync OpenAPI specs. Backend changes flow through the same package manager workflow you already use for every other dependency.
-
-<collapsible title="Old Way vs New Way">
-
-### Without Graftcode
-
-Connecting a frontend to a backend typically requires:
-
-- Designing REST or GraphQL endpoints on the backend for every operation
-- Defining request and response DTOs and validation logic
-- Generating or hand-writing a client SDK for the frontend
-- Mapping API responses back to frontend types manually
-- Updating and re-testing the client every time the backend changes
-- Maintaining separate documentation or OpenAPI specs for the API contract
-
-### With Graftcode
-
-- Install the backend as a strongly-typed Graft via `npm install`
-- Import classes and call methods directly from your Angular components
-- When the backend changes, update the Graft with a single `npm install` command - no client rewrites
-
-> With Graftcode, connecting an Angular frontend to any backend is as simple as installing an npm package. No REST clients, no DTOs, no contract maintenance - just import and call.
-
-![Old Way vs Graftcode](../assets/CompareOldWaysNewWays.png)
-
-</collapsible>
+> No REST routes, no DTOs, no generated SDKs — just `npm install` and call.

@@ -1,17 +1,11 @@
 ---
 title: "Kotlin"
-description: "Turn a Kotlin class into a remotely callable backend service with Graftcode Gateway - no Spring, no REST routes, no OpenAPI specs. Any public method becomes instantly available to call from any language."
+description: "Challenge 2 — turn a Kotlin class into a remotely callable lottery service with Graftcode Gateway. No Spring, no REST, no specs."
 ---
 
 ## Goal
 
-Turn a Kotlin class into a remotely callable backend service using Graftcode Gateway - no Spring, no REST routes, no OpenAPI specs needed.
-
-### What You'll See
-
-- Create a small Kotlin class with public methods.
-- Host it through Graftcode Gateway using Docker.
-- Explore the exposed methods in Graftcode Vision - your service is now accessible from any app as a strongly-typed client.
+Expose your own **lottery service** built in Kotlin — any public method becomes instantly callable from any language, no Spring, no REST routes, no OpenAPI specs.
 
 ### Prerequisites
 
@@ -20,34 +14,25 @@ Turn a Kotlin class into a remotely callable backend service using Graftcode Gat
 
 ## Step 1. Create a project folder
 
-Create a new folder and set up a Maven project:
-
 ```bash
-mkdir kotlin-energy-service
-cd kotlin-energy-service
+mkdir kotlin-lottery-service
+cd kotlin-lottery-service
 ```
 
-Create a `pom.xml`:
+Create `pom.xml`:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>com.example</groupId>
-    <artifactId>energy-service</artifactId>
+    <artifactId>lottery-service</artifactId>
     <version>1.0.0</version>
-
     <properties>
         <kotlin.version>2.0.21</kotlin.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -55,7 +40,6 @@ Create a `pom.xml`:
             <version>${kotlin.version}</version>
         </dependency>
     </dependencies>
-
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
         <plugins>
@@ -64,10 +48,7 @@ Create a `pom.xml`:
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin.version}</version>
                 <executions>
-                    <execution>
-                        <id>compile</id>
-                        <goals><goal>compile</goal></goals>
-                    </execution>
+                    <execution><id>compile</id><goals><goal>compile</goal></goals></execution>
                 </executions>
             </plugin>
         </plugins>
@@ -75,138 +56,71 @@ Create a `pom.xml`:
 </project>
 ```
 
-## Step 2. Write a Kotlin class with public methods
+## Step 2. Write the lottery class
 
-Create the directory structure and a file `src/main/kotlin/energy/EnergyPriceCalculator.kt`:
+Create `src/main/kotlin/lottery/Lottery.kt`:
 
 ```kotlin
-package energy
+package lottery
 
-class EnergyPriceCalculator {
+import java.util.concurrent.ConcurrentHashMap
+
+class Lottery {
     companion object {
+        private val pool = ConcurrentHashMap<String, Int>()
+
         @JvmStatic
-        fun getPrice(): Int {
-            return (100..104).random()
-        }
+        fun addTicket(email: String): Int =
+            pool.merge(email, 1, Int::plus)!!
     }
 }
 ```
 
-This is a plain Kotlin class - no annotations, no frameworks, no special interfaces. The `@JvmStatic` annotation ensures the method is exposed as a static method on the JVM, making it directly discoverable by Graftcode Gateway. Any public method you write here will automatically become available for remote consumption once hosted.
+`@JvmStatic` ensures the method is exposed as a static method on the JVM — Graftcode Gateway picks it up automatically.
 
 ## Step 3. Host it with Graftcode Gateway
 
-Create a `Dockerfile` in the project root:
+Create a `Dockerfile`:
 
 ```dockerfile
 FROM maven:3.9-eclipse-temurin-21
-
 WORKDIR /usr/app
-
 COPY . /usr/app/
 
 RUN mvn package -q
 
-RUN apt-get update \ 
- && apt-get install -y wget \
+RUN apt-get update && apt-get install -y wget \
  && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
- && dpkg -i /usr/app/gg.deb \
- && rm /usr/app/gg.deb \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+ && dpkg -i /usr/app/gg.deb && rm /usr/app/gg.deb \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg","--modules", "/usr/app/target/energy-service-1.0.0.jar"]
- 
+CMD ["gg", "--modules", "/usr/app/target/lottery-service-1.0.0.jar"]
 ```
 
-The key line is the last one - `gg` (Graftcode Gateway) reads your compiled JAR, discovers all public methods in your Kotlin classes, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
-
-<collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
-
-- **FROM maven:3.9-eclipse-temurin-21** - Uses the official Maven image with JDK 21 as the base, which includes everything needed to build and run Kotlin applications via Maven.
-- **COPY . /usr/app/** - Copies your project files (including `pom.xml` and source files) into the container.
-- **RUN mvn package -q** - Compiles the Kotlin source and packages it into a JAR in `target/`.
-- **RUN apt-get update && apt-get install -y wget** - Installs tools needed to download Graftcode Gateway.
-- **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
-- **EXPOSE 80** - Declares the port used for service communication (Grafts connect here).
-- **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
-- **CMD ["gg"]** - Runs Graftcode Gateway. It reads the compiled JAR, discovers public methods, and makes them callable.
-
-</collapsible>
-
-Build and run the container:
+Build and run:
 
 ```bash
-docker build --no-cache --pull -t myenergyservice-kotlin:test .
-docker run -d -p 80:80 -p 81:81 --name graftcode_demo_kotlin myenergyservice-kotlin:test
+docker build --no-cache --pull -t lottery-service-kotlin:test .
+docker run -d -p 80:80 -p 81:81 --name lottery_demo_kotlin lottery-service-kotlin:test
 ```
 
-Your Kotlin service is now running and exposed through Graftcode Gateway.
+`gg` discovers `Lottery.addTicket(String)` and exposes it. Port `80` handles service calls, port `81` serves Graftcode Vision.
 
-## Step 4. Explore the service in Graftcode Vision
+## Step 4. Try it in Graftcode Vision
 
-Open [http://localhost:81/GV](http://localhost:81/GV) in your browser.
+Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Lottery.addTicket` listed — hit **Try it out**, pass your email, and watch the ticket count grow.
 
-You will see all public methods from your Kotlin class - their names, parameter types, and return types. Graftcode Vision also provides:
+## Step 5. Project Key for production
 
-- A **"Try it out"** button to call methods live, directly from the browser.
-- A **package manager command** (npm, NuGet, PyPI, Maven, etc.) to install this service as a strongly-typed client in any other application.
-
-## Step 5. Run with a Project Key (recommended for real-world usage)
-
-Everything above works without any account - perfect for learning and local development. When you're ready for real-world usage, create a free account at [portal.graftcode.com](https://portal.graftcode.com), set up a project, and copy its **Project Key**.
-
-Then pass the key when starting your gateway:
+Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass it to the gateway:
 
 ```dockerfile
-CMD ["gg", "--modules", "/usr/app/target/energy-service-1.0.0.jar", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "--modules", "/usr/app/target/lottery-service-1.0.0.jar", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
-A Project Key gives you:
+You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), access control, and an [MCP endpoint](https://modelcontextprotocol.io/) for free.
 
-- **Stable registry URL** - consumers always find and update your Graft through a permanent address, so install commands don't change when you redeploy.
-- **Portal visibility** - see all your gateways and exposed services in one place at [gateways.graftcode.com](https://gateways.graftcode.com/).
-- **Access control** - decide who can download your Grafts using package manager authentication and permissions.
-- **MCP endpoint** - Graftcode Gateway automatically exposes an [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) endpoint alongside your service, making your methods callable by AI agents and LLM-based tools out of the box.
-
-## Step 6. Call it from another app
-
-Your service is now accessible from any application. From Graftcode Vision, select your target package type - for example `Maven` - and copy the generated install command. That installs a **Graft**: a strongly-typed client that lets any app call your service methods directly.
-
-```kotlin
-import com.graft.maven.energypricecalculator.EnergyPriceCalculator
-
-val price = EnergyPriceCalculator.getPrice()
-println(price)
-```
-
-No REST clients, no request/response models, no endpoint URLs in your code. When you add or update a public method, consumers update their Graft with a single package manager command.
-
-<collapsible title="Old Way vs New Way">
-
-### Without Graftcode
-
-Exposing backend logic for remote consumption typically requires:
-
-- Designing and implementing REST or gRPC endpoints for each operation
-- Defining request and response DTOs / schemas
-- Writing or generating an OpenAPI / Protobuf spec
-- Building or generating client SDKs for each consumer technology
-- Maintaining and versioning the API contract over time
-- Updating all clients whenever the backend changes
-
-### With Graftcode
-
-- Write your business logic as plain public methods - no Spring, no routes, no specs
-- Run it on Graftcode Gateway with one Dockerfile
-- Consumers install a typed Graft via their package manager and call methods directly
-- When you add or change a method, consumers update with one command - like any other dependency
-
-> Your Kotlin class is now a fully accessible backend service - with one Dockerfile and two commands. Any public method you add is instantly discoverable and callable from any language and any platform. No endpoint design, no client SDK maintenance, no integration code.
-
-![Old Way vs Graftcode](../assets/BackendOldWayNewWay.png)
-
-</collapsible>
+> One Dockerfile, no API design. Your `Lottery.addTicket(email)` is now callable from any app, in any language.

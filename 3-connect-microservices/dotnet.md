@@ -1,58 +1,42 @@
 ---
 title: ".NET"
-description: "Connect one .NET backend service to another with Graftcode - no REST clients, no DTOs, no handwritten integration code. Install a strongly-typed Graft and call remote methods directly from your service logic."
+description: "Challenge 3 — call the lottery service from another .NET service with Graftcode. Install a typed Graft and call remote methods like local code."
 ---
 
 ## Goal
 
-Connect a .NET backend service to another remote service using Graftcode - so the remote integration stays strongly typed and reads like a normal method call.
-
-### What You'll See
-
-- Install a remote service as a strongly-typed Graft via `NuGet`.
-- Configure the generated client to point at the remote host.
-- Call a remote method from your own service logic as if it were a local class.
-- Use IDE autocompletion on the remote service's methods and classes.
+Call the **Challenge 3 lottery service** from your own .NET backend using Graftcode — strongly typed, no REST client, no DTOs.
 
 ### Prerequisites
 
 - [.NET SDK](https://dotnet.microsoft.com/download) installed locally
 
-## Step 1. Create a .NET service
-
-Create a new console application for your backend service:
+## Step 1. Create a console app
 
 ```bash
-dotnet new console -n EnergyConsumer
-cd EnergyConsumer
+dotnet new console -n LotteryConsumer
+cd LotteryConsumer
 ```
 
-## Step 2. Find the remote method in Graftcode Vision
+## Step 2. Install the Graft
 
-We're hosting this sample service for you so you can see exactly what connecting to another team's service looks like in practice - open it in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) to explore.
-
-Graftcode Vision shows all public classes and methods exposed by the remote service - their names, parameter types, and return types. It also gives you the exact package manager command needed to install that service as a Graft.
-
-## Step 3. Install the Graft
-
-Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `NuGet`, and copy the generated install command.
+Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `NuGet`, and copy the install command. Each challenge has its own service — Challenge 3 ships as `graft.nuget.lotterychallenge3`.
 
 ```bash
-dotnet add package -s https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft.nuget.energypriceservice --version 1.2.0
+dotnet add package -s https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft.nuget.lotterychallenge3 --version 1.0.0
 ```
 
-This adds the generated strongly-typed client for the remote service to your project.
+## Step 3. Call the lottery method
 
-## Step 4. Call the remote method and run it
-
-The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Replace the contents of `Program.cs`:
+Replace `Program.cs`:
 
 ```csharp
-using graft.nuget.EnergyPriceService;
+using graft.nuget.LotteryChallenge3;
+
 GraftConfig.Host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 
-var consumption = MeterLogic.NetConsumptionKWh(1000, 1150);
-Console.WriteLine($"Net consumption: {consumption}");
+var tickets = Challenge3.AddTickets("you@example.com");
+Console.WriteLine($"Challenge 3 complete — tickets in pool: {tickets}");
 ```
 
 Run it:
@@ -61,41 +45,10 @@ Run it:
 dotnet run
 ```
 
-You should see the net consumption value printed in your terminal. `MeterLogic.NetConsumptionKWh(...)` is a remote call, but your code reads like a normal method invocation - no HTTP request, no response parsing, no serialization.
+`Challenge3.AddTickets(...)` is a remote call but reads like a normal method invocation. Your IDE autocompletes it because the Graft is a real NuGet package.
 
-Your IDE can autocomplete available methods on `MeterLogic`, `BillingLogic`, and any other class from that service because the Graft is a real installed package.
+## Step 4. Use a Project Key for production
 
-## Step 5. Run with a Project Key (recommended for real-world usage)
+For real-world use, create a free project at [portal.graftcode.com](https://portal.graftcode.com) and point `GraftConfig.Host` at your project's stable registry URL. You get a permanent address, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
 
-Everything above works without any account - perfect for learning and local development. When you're ready for real-world usage, create a free account at [portal.graftcode.com](https://portal.graftcode.com), set up a project, and copy its **Project Key**.
-
-With a Project Key, point `GraftConfig.Host` at your project's stable registry URL instead of a raw WebSocket address. A Project Key gives you:
-
-- **Stable registry URL** - the address for your Grafts stays permanent, so install commands don't change when you redeploy.
-- **Portal visibility** - see all your gateways and services in one place at [gateways.graftcode.com](https://gateways.graftcode.com/).
-- **Access control** - decide who can download your Grafts using package manager authentication and permissions.
-
-<collapsible title="Old Way vs New Way">
-
-### Without Graftcode
-
-Connecting one backend service to another typically requires:
-
-- Designing and implementing REST or gRPC endpoints in the remote service
-- Defining request/response DTOs for every operation
-- Writing or generating an OpenAPI or Protobuf spec
-- Building or generating a client SDK in the consuming service's language
-- Manually keeping both sides in sync when signatures change
-- Adding error handling, retry logic, and serialization code
-
-### With Graftcode
-
-- Install the remote service as a strongly-typed Graft via `dotnet add package`
-- Import its classes and call methods directly - no REST client code
-- When the remote service changes, update with one command - like any other package
-
-> Connecting two backend services with Graftcode is as simple as installing a NuGet package. No REST routes, no DTOs, no client generation - just add a reference and call.
-
-![Old Way vs Graftcode](../assets/BackendOldWayNewWay.png)
-
-</collapsible>
+> No REST clients, no DTOs, no spec syncing — just `dotnet add package` and call.

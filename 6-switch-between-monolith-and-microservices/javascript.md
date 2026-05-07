@@ -1,86 +1,72 @@
 ---
 title: "JavaScript"
-description: "Build two JavaScript modules in one project as a monolith, then extract one into a separate microservice with Graftcode - and switch freely between the two topologies with a single configuration change."
+description: "Challenge 6 — run two JavaScript modules as a monolith, then split one off as a microservice. Switch back and forth with one environment variable."
 ---
 
 ## Goal
 
-Start with two JavaScript modules in a single project running as a monolith, then extract one into a separate microservice using Graftcode. After that one-time setup, switch freely between monolith and microservice by changing a single configuration value - zero code changes.
-
-### What You'll See
-
-- Create two JavaScript modules in the same project - a price calculator and a billing service that calls it directly.
-- Host both in a single container as a monolith.
-- Extract the price calculator into its own container as a standalone microservice.
-- Update the billing service to use a Graft - the only code change in the entire tutorial.
-- Switch between monolith and microservice by changing one environment variable - no code changes from that point on.
+Start with two JavaScript modules — `LotteryService` and `TicketCounter` — running as a monolith. Extract `TicketCounter` into a standalone microservice. Then flip between monolith and microservice with **one environment variable** — zero code changes from then on.
 
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [Node.js](https://nodejs.org/) installed locally (for `npm` commands)
+- [Node.js](https://nodejs.org/) installed locally
 
-## Step 1. Create a project folder
-
-Create a new project folder and initialize a Node.js project:
+## Step 1. Create the project
 
 ```bash
-mkdir js-energy-platform
-cd js-energy-platform
+mkdir js-lottery-platform
+cd js-lottery-platform
 npm init -y
 ```
 
-## Step 2. Write the price calculator module
+## Step 2. Write the two modules
 
-Create `src/priceCalculator.js`:
+Create `src/ticketCounter.js`:
 
 ```javascript
-class EnergyPriceCalculator {
-  static getPrice() {
-    return Math.floor(Math.random() * 5) + 100;
+const pool = new Map();
+
+class TicketCounter {
+  static addTicket(email) {
+    const next = (pool.get(email) ?? 0) + 1;
+    pool.set(email, next);
+    return next;
   }
 }
 
-module.exports = { EnergyPriceCalculator };
+module.exports = { TicketCounter };
 ```
-
-## Step 3. Write the billing service
 
 Create `index.js`:
 
 ```javascript
-const { EnergyPriceCalculator } = require("./src/priceCalculator");
+const { TicketCounter } = require("./src/ticketCounter");
 
-class BillingService {
-  static calculateBill(kwhUsed) {
-    const price = EnergyPriceCalculator.getPrice();
-    return kwhUsed * price;
+class LotteryService {
+  static enter(email) {
+    return TicketCounter.addTicket(email);
   }
 }
 
-module.exports = { BillingService };
+module.exports = { LotteryService };
 ```
 
-A regular `require` - the billing service imports the price calculator directly as a local module. No Graftcode involved yet.
+A regular `require` — direct in-process call. No Graftcode involved yet.
 
-## Step 4. Host as a monolith
+## Step 3. Host as a monolith
 
-Create a `Dockerfile` in the project root:
+Create a `Dockerfile`:
 
 ```dockerfile
 FROM node:24
-
 WORKDIR /usr/app
-
 COPY . /usr/app/
 
-RUN apt-get update \
- && apt-get install -y wget \
+RUN apt-get update && apt-get install -y wget \
  && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
- && dpkg -i /usr/app/gg.deb \
- && rm /usr/app/gg.deb \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+ && dpkg -i /usr/app/gg.deb && rm /usr/app/gg.deb \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 80
 EXPOSE 81
@@ -91,48 +77,36 @@ CMD ["gg", "./package.json"]
 Build and run:
 
 ```bash
-docker build --no-cache --pull -t js-energy-platform:test .
-docker run -d -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
+docker build --no-cache --pull -t lottery-platform-js:test .
+docker run -d -p 80:80 -p 81:81 --name lottery_platform lottery-platform-js:test
 ```
 
-`gg` (Graftcode Gateway) discovers both modules automatically and exposes all their public methods. Port `80` handles service calls, port `81` serves Graftcode Vision.
+Open [http://localhost:81/GV](http://localhost:81/GV) and call `LotteryService.enter("you@example.com")`. Both modules run inside one container.
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and try calling `BillingService.calculateBill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
+## Step 4. Run TicketCounter as a standalone service
 
-At this point, everything runs inside **one container** - both modules share a single process. This is your monolith.
-
-## Step 5. Extract the price calculator as a separate microservice
-
-Now let's say the price calculator needs to scale independently, or another team wants to own it. We'll extract it into its own container.
-
-Create `src/priceCalculator.package.json` - a dedicated package.json for the standalone price calculator service:
+Create `src/ticketCounter.package.json`:
 
 ```json
 {
-  "name": "price-calculator",
+  "name": "ticket-counter",
   "version": "1.0.0",
-  "main": "priceCalculator.js",
-  "license": "ISC"
+  "main": "ticketCounter.js"
 }
 ```
 
-Create `Dockerfile.priceCalculator` in the project root:
+Create `Dockerfile.ticketCounter`:
 
 ```dockerfile
 FROM node:24
-
 WORKDIR /usr/app
+COPY ./src/ticketCounter.js /usr/app/
+COPY ./src/ticketCounter.package.json /usr/app/package.json
 
-COPY ./src/priceCalculator.js /usr/app/
-COPY ./src/priceCalculator.package.json /usr/app/package.json
-
-RUN apt-get update \
- && apt-get install -y wget \
+RUN apt-get update && apt-get install -y wget \
  && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
- && dpkg -i /usr/app/gg.deb \
- && rm /usr/app/gg.deb \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+ && dpkg -i /usr/app/gg.deb && rm /usr/app/gg.deb \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 90
 EXPOSE 91
@@ -140,148 +114,71 @@ EXPOSE 91
 CMD ["gg", "./package.json", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
 ```
 
-Build and run the price calculator as a standalone service:
-
 ```bash
-docker build --no-cache --pull -f Dockerfile.priceCalculator -t price-calculator:test .
+docker build --no-cache --pull -f Dockerfile.ticketCounter -t ticket-counter-js:test .
 docker network create graftcode_demo
-docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name price_calculator price-calculator:test
+docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name ticket_counter ticket-counter-js:test
 ```
 
-Open [http://localhost:91/GV](http://localhost:91/GV) - the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.getPrice` listed with its return type.
+Open [http://localhost:91/GV](http://localhost:91/GV) — `TicketCounter` is now its own service.
 
-## Step 6. Connect the billing service through a Graft
+## Step 5. Connect through a Graft
 
-Now that the price calculator runs on its own gateway, install its **Graft** - the strongly-typed client that Graftcode generates automatically.
-
-From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **npm** and copy the generated install command. Note that the `--registry` address shown in your Graftcode Vision interface may be different than the example provided below.
+From [http://localhost:91/GV](http://localhost:91/GV), copy the npm install command:
 
 ```bash
 npm install hypertube-nodejs-sdk
-npm install --registry https://grft.dev/54ee6507-ca20-48c0-8c31-7248fac7faf6__free @graft/npm-price-calculator@1.0.0
+npm install --registry https://grft.dev/YOUR_KEY__free @graft/npm-ticket-counter@1.0.0
 ```
 
-> The exact package name and registry URL are shown in Graftcode Vision - copy them from there. `hypertube-nodejs-sdk` is still required for this example today, but that extra step is temporary.
-
-Update `index.js` to use the Graft instead of the direct import:
+Update `index.js` — the **only code change** in the entire tutorial:
 
 ```javascript
-const { GraftConfig, EnergyPriceCalculator } = require("@graft/npm-price-calculator");
+const { GraftConfig, TicketCounter } = require("@graft/npm-ticket-counter");
 
 GraftConfig.setConfig(process.env.GRAFT_CONFIG);
 
-class BillingService {
-  static async calculateBill(kwhUsed) {
-    const price = await EnergyPriceCalculator.getPrice();
-    return kwhUsed * price;
+class LotteryService {
+  static async enter(email) {
+    return await TicketCounter.addTicket(email);
   }
 }
 
-module.exports = { BillingService };
+module.exports = { LotteryService };
 ```
 
-This is the only code change in the entire tutorial. The billing service now reads its configuration from the `GRAFT_CONFIG` environment variable and has no knowledge of whether the price calculator runs in-process or on a remote host. From this point on, switching between monolith and microservice is purely a configuration change.
+From now on, topology is controlled by `GRAFT_CONFIG`.
 
-## Step 7. Run as a microservice
-
-Stop the monolith container, rebuild the image with the updated code, and run the billing service pointing at the remote price calculator:
+## Step 6. Run as a microservice
 
 ```bash
-docker stop energy_platform
-docker rm energy_platform
-docker build --no-cache --pull -t js-energy-platform:test .
-docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=./modules;runtime=nodejs;host=ws://price_calculator:90/ws" -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
+docker stop lottery_platform && docker rm lottery_platform
+docker build --no-cache --pull -t lottery-platform-js:test .
+docker run -d --network graftcode_demo \
+  -e GRAFT_CONFIG="name=@graft/npm-ticket-counter;modules=./modules;runtime=nodejs;host=ws://ticket_counter:90/ws" \
+  -p 80:80 -p 81:81 --name lottery_platform lottery-platform-js:test
 ```
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and call `BillingService.calculateBill` with `250`. Same method, same result - but the price calculation now happens over the network in a separate container.
+Call `LotteryService.enter` in Vision — same result, but the call now hits a remote container.
 
-## Step 8. Switch back to monolith
-
-Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
+## Step 7. Switch back to monolith
 
 ```bash
-docker stop energy_platform
-docker rm energy_platform
-docker run -d -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=./modules;runtime=nodejs;host=inMemory" -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
+docker stop lottery_platform && docker rm lottery_platform
+docker run -d \
+  -e GRAFT_CONFIG="name=@graft/npm-ticket-counter;modules=./modules;runtime=nodejs;host=inMemory" \
+  -p 80:80 -p 81:81 --name lottery_platform lottery-platform-js:test
 ```
-
-Compare the two configurations side by side:
 
 ```text
-# Monolith (in-process)
-name=@graft/npm-price-calculator;modules=./modules;runtime=nodejs;host=inMemory
-
-# Microservice (remote)
-name=@graft/npm-price-calculator;modules=./modules;runtime=nodejs;host=ws://price_calculator:90/ws
+# Monolith:    host=inMemory
+# Microservice: host=ws://ticket_counter:90/ws
 ```
 
-> We're still working on the best way to pass the configuration so that it's intuitive and user friendly.
+Same image, same code — just one env var.
 
-Same Docker image, same code - just a different environment variable. You can switch back and forth as many times as you need.
+## Step 8. Project Key for production
 
-## Step 9. Prove the microservice call goes over the network
+Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass `--projectKey YOUR_PROJECT_KEY` to each gateway. You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
 
-Switch back to microservice mode to verify the call is truly remote:
-
-```bash
-docker stop energy_platform
-docker rm energy_platform
-docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=./modules;runtime=nodejs;host=ws://price_calculator:90/ws" -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
-```
-
-Stop the price calculator:
-
-```bash
-docker stop price_calculator
-```
-
-Call `calculateBill` in Graftcode Vision - you'll see a connection error because the remote service is down.
-
-Start it again:
-
-```bash
-docker start price_calculator
-```
-
-The method works again. The code never changed - only the deployment topology did.
-
-## Step 10. Run with a Project Key (recommended for real-world usage)
-
-Everything above works without any account - perfect for learning and local development. When you're ready for real-world usage, create a free account at [portal.graftcode.com](https://portal.graftcode.com), set up a project, and copy its **Project Key**.
-
-Then pass the key when starting your gateways:
-
-```dockerfile
-CMD ["gg", "./package.json", "--projectKey", "YOUR_PROJECT_KEY"]
-```
-
-A Project Key gives you:
-
-- **Stable registry URL** - consumers always find and update your Graft through a permanent address, so install commands don't change when you redeploy.
-- **Portal visibility** - see all your gateways and exposed services in one place at [gateways.graftcode.com](https://gateways.graftcode.com/).
-- **Access control** - decide who can download your Grafts using package manager authentication and permissions.
-
-<collapsible title="Old Way vs New Way">
-
-### Without Graftcode
-
-Extracting a module from a monolith into a microservice typically requires:
-
-- Building a new service with REST or gRPC endpoints wrapping the module
-- Defining request/response DTOs for every operation
-- Hosting and deploying the new service separately
-- Rewriting your consuming code to use HTTP or gRPC clients
-- Implementing client-side DTOs and response mapping
-- Redeploying your application with the new integration code
-- Repeating all of the above if you need to move it back
-
-### With Graftcode
-
-- Start with both modules in the same project as plain JavaScript - a normal monolith
-- When you're ready to extract, host the module on its own Graftcode Gateway and install the Graft
-- One import change in the consuming service - then topology is controlled by configuration forever
-- Switch between monolith and microservice (and back) with one environment variable
-
-> With Graftcode, extracting a module from a monolith is not a rewrite - it's a one-time import change followed by a configuration switch. After that, your code stays focused on business logic while the architecture adapts to your operational needs.
-
-</collapsible>
+> Extracting a module from a monolith is no longer a rewrite — it's one import change followed by a configuration switch.
