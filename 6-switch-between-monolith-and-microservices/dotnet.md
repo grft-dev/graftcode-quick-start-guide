@@ -30,11 +30,9 @@ dotnet new classlib -n EnergyPlatform
 cd EnergyPlatform
 ```
 
-Delete the auto-generated `Class1.cs` — we'll create our own files in the next steps.
-
 ## Step 2. Write the price calculator class
 
-Create `EnergyPriceCalculator.cs`:
+Delete the auto-generated `Class1.cs` and create `EnergyPriceCalculator.cs`:
 
 ```csharp
 namespace EnergyPlatform;
@@ -97,7 +95,7 @@ CMD ["gg", "--modules", "/usr/app/publish/EnergyPlatform.dll"]
 Build and run:
 
 ```bash
-docker build --no-cache --pull -t dotnet-energy-platform:test .
+docker build --pull -t dotnet-energy-platform:test .
 docker run -d -p 80:80 -p 81:81 --name energy_platform dotnet-energy-platform:test
 ```
 
@@ -152,7 +150,7 @@ EnergyPlatform/
     └── BillingService.cs
 ```
 
-The code in both `.cs` files is unchanged — same namespace, same method calls. The only difference is they now compile into **separate DLLs**.
+The code in both `.cs` files is unchanged — same method calls. The only difference is they now compile into **separate DLLs**.
 
 Update the `Dockerfile` to build the solution and load both modules:
 
@@ -184,13 +182,31 @@ Rebuild and run:
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker build --no-cache --pull -t dotnet-energy-platform:test .
+docker build --pull -t dotnet-energy-platform:test .
 docker run -d -p 80:80 -p 81:81 --name energy_platform dotnet-energy-platform:test
 ```
 
 Open [http://localhost:81/GV](http://localhost:81/GV) — everything works exactly as before. Both classes, same methods, same results. But now each module is its own DLL, ready to be deployed independently.
 
-## Step 6. Deploy the price calculator as a separate microservice
+## Step 6. Update the price calculator namespace
+
+Now that the price calculator lives in its own project, update its namespace to match the project name.
+
+Update `EnergyPriceCalculator/EnergyPriceCalculator.cs`:
+
+```csharp
+namespace EnergyPriceCalculator;
+
+public class EnergyPriceCalculator
+{
+    public static int GetPrice()
+    {
+        return new Random().Next(100, 105);
+    }
+}
+```
+
+## Step 7. Deploy the price calculator as a separate microservice
 
 Now let's say the price calculator needs to scale independently, or another team wants to own it. Because it's already its own project with its own DLL, we just need to host it on its own gateway.
 
@@ -222,42 +238,44 @@ CMD ["gg", "--modules", "/usr/app/publish/EnergyPriceCalculator.dll", "--httpPor
 Build and run the price calculator as a standalone service:
 
 ```bash
-docker build --no-cache --pull -f Dockerfile.priceCalculator -t price-calculator-dotnet:test .
+docker build --pull -f Dockerfile.priceCalculator -t price-calculator-dotnet:test .
 docker network create graftcode_demo
 docker run -d --network graftcode_demo -p 90:90 -p 91:91 --name price_calculator price-calculator-dotnet:test
 ```
 
 Open [http://localhost:91/GV](http://localhost:91/GV) — the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.GetPrice` listed with its return type.
 
-## Step 7. Connect the billing service through a Graft
+## Step 8. Connect the billing service through a Graft
 
 Now that the price calculator runs on its own gateway, install its **Graft** — the strongly-typed client that Graftcode generates automatically.
 
-From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **NuGet** and copy the generated install command. Note that the source URL shown in your Graftcode Vision interface may be different than the example provided below.
+From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **NuGet** and copy the generated install command. 
+
+> Note that the source URL shown in your Graftcode Vision interface may be different than the example provided below.
 
 ```bash
 dotnet add BillingService/BillingService.csproj package -s https://grft.dev/009f24d4-64b6-49af-9834-4119d581c64d__free graft.nuget.energypricecalculator --version 1.0.0
 ```
 
-> The exact package name and source URL are shown in Graftcode Vision — copy them from there. `Hypertube.Netcore.Sdk` is still required for this example today, but that extra step is temporary.
+> The exact package name and source URL are shown in Graftcode Vision — copy them from there.
 
 Update `BillingService/BillingService.cs` to use the Graft instead of the direct reference:
 
 ```csharp
-using Pricing = graft.nuget.energypricecalculator;
+using RemotePricing = graft.nuget.EnergyPriceCalculator;
 
 namespace EnergyPlatform;
 
-public class BillingService
+public static class BillingService
 {
     static BillingService()
     {
-        Pricing.GraftConfig.SetConfig(Environment.GetEnvironmentVariable("GRAFT_CONFIG"));
+        RemotePricing.GraftConfig.SetConfig(Environment.GetEnvironmentVariable("GRAFT_CONFIG"));
     }
 
-    public static async Task<int> CalculateBill(int kwhUsed)
+    public static int CalculateBill(int kwhUsed)
     {
-        var price = await Pricing.EnergyPriceCalculator.GetPrice();
+        var price = RemotePricing.EnergyPriceCalculator.GetPrice();
         return kwhUsed * price;
     }
 }
@@ -265,55 +283,36 @@ public class BillingService
 
 This is the **only code change** in the entire tutorial. The `Pricing` alias distinguishes the Graft's `EnergyPriceCalculator` from the local class of the same name. The billing service now reads its configuration from the `GRAFT_CONFIG` environment variable and has no knowledge of whether the price calculator runs in-process or on a remote host. From this point on, switching between monolith and microservice is purely a configuration change.
 
-## Step 8. Run as a microservice
+## Step 9. Add a NuGet config so Docker can find the dependency
+
+The Graft NuGet package lives on a custom feed. When `dotnet publish` runs inside Docker, it won't know about that feed unless you tell it. Create a `nuget.config` in the project root:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+    <add key="graft" value="https://grft.dev/009f24d4-64b6-49af-9834-4119d581c64d__free" allowInsecureConnections="true" />
+  </packageSources>
+</configuration>
+```
+
+> The `graft` source URL must match the one shown in Graftcode Vision for your price calculator gateway.
+
+## Step 10. Run as a microservice
 
 Stop the monolith container, rebuild the image with the updated code, and run the billing service pointing at the remote price calculator:
 
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker build --no-cache --pull -t dotnet-energy-platform:test .
+docker build --pull -t dotnet-energy-platform:test .
 docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.nuget.EnergyPriceCalculator;host=ws://price_calculator:90/ws;runtime=netcore" -p 80:80 -p 81:81 --name energy_platform dotnet-energy-platform:test
 ```
 
 Open [http://localhost:81/GV](http://localhost:81/GV) and call `BillingService.CalculateBill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
 
-## Step 9. Switch back to monolith
-
-Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
-
-```bash
-docker stop energy_platform
-docker rm energy_platform
-docker build --no-cache --pull -t dotnet-energy-platform:test .
-docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.nuget.EnergyPriceCalculator;host=inMemory;runtime=netcore;modules=/usr/app/publish" -p 80:80 -p 81:81 --name energy_platform dotnet-energy-platform:test
-```
-
-Compare the two configurations side by side:
-
-```text
-# Monolith (in-process)
-name=graft.nuget.energypricecalculator;host=inMemory;runtime=dotnet;modules=/usr/app/publish
-
-# Microservice (remote)
-name=graft.nuget.energypricecalculator;host=price_calculator:9092;runtime=dotnet;modules=/usr/app/publish
-```
-
-> We're still working on the best way to pass the configuration so that it's intuitive and user friendly.
-
-Same Docker image, same code — just a different environment variable. You can switch back and forth as many times as you need.
-
-## Step 10. Prove the microservice call goes over the network
-
-Switch back to microservice mode to verify the call is truly remote:
-
-```bash
-docker stop energy_platform && docker rm energy_platform
-docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=graft.nuget.energypricecalculator;host=price_calculator:9092;runtime=dotnet;modules=/usr/app/publish" \
-  -p 80:80 -p 81:81 \
-  --name energy_platform dotnet-energy-platform:test
-```
+## Step 11. Prove the microservice call goes over the network
 
 Stop the price calculator:
 
@@ -331,7 +330,32 @@ docker start price_calculator
 
 The method works again. The code never changed — only the deployment topology did.
 
-## Step 11. Run with a Project Key (recommended for real-world usage)
+## Step 12. Switch back to monolith
+
+Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
+
+```bash
+docker stop energy_platform
+docker rm energy_platform
+docker build --pull -t dotnet-energy-platform:test .
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.nuget.EnergyPriceCalculator;host=inMemory;runtime=netcore;modules=/usr/app/publish" -p 80:80 -p 81:81 --name energy_platform dotnet-energy-platform:test
+```
+
+Compare the two configurations side by side:
+
+```text
+# Monolith (in-process)
+name=graft.nuget.energypricecalculator;host=inMemory;runtime=dotnet;modules=/usr/app/publish
+
+# Microservice (remote)
+name=graft.nuget.energypricecalculator;host=price_calculator:9092;runtime=dotnet;modules=/usr/app/publish
+```
+
+> We're still working on the best way to pass the configuration so that it's intuitive and user friendly.
+
+Same Docker image, same code — just a different environment variable. You can switch back and forth as many times as you need.
+
+## Step 13. Run with a Project Key (recommended for real-world usage)
 
 Everything above works without any account — perfect for learning and local development. When you're ready for real-world usage, create a free account at [portal.graftcode.com](https://portal.graftcode.com), set up a project, and copy its **Project Key**.
 
