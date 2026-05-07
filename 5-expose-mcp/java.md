@@ -81,6 +81,8 @@ Create a `Dockerfile` in the project root:
 ```dockerfile
 FROM maven:3.9-eclipse-temurin-21
 
+ARG TARGETARCH
+
 WORKDIR /usr/app
 
 COPY . /usr/app/
@@ -89,7 +91,7 @@ RUN mvn package -q
 
 RUN apt-get update \
  && apt-get install -y wget \
- && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
+ && wget -O /usr/app/gg.deb "https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_${TARGETARCH}.deb" \
  && dpkg -i /usr/app/gg.deb \
  && rm /usr/app/gg.deb \
  && apt-get clean \
@@ -150,7 +152,24 @@ Graftcode Gateway exposes an [MCP](https://modelcontextprotocol.io/) (Model Cont
 }
 ```
 
-The same can be applied **For Claude Desktop**, editing your `claude_desktop_config.json`.
+**For Claude Desktop**, edit your `claude_desktop_config.json` (open it from **Claude > Settings > Developer > Edit Config**). Claude Desktop only supports stdio servers, so use [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) to bridge to the HTTP endpoint:
+
+```json
+{
+  "mcpServers": {
+    "energy-service": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://localhost:81/mcp"
+      ]
+    }
+  }
+}
+```
+
+Restart Claude Desktop after saving the config.
 
 The AI tool now sees your Java methods as callable tools - with their names, parameters, and return types - discovered automatically through MCP.
 
