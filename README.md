@@ -30,11 +30,11 @@ We host one central **Lottery** service with a single method: `Lottery.AddTicket
 | # | Challenge | What you'll do | Languages |
 |---|-----------|----------------|-----------|
 | 1 | [**Connect Frontend to Backend**](/quick-start/connect-frontend-to-backend) | Call our `Lottery.AddTicket(email)` directly from a frontend app — no REST client, no DTOs. | [React](1-connect-frontend-to-backend/react.md) · [Vue](1-connect-frontend-to-backend/vue.md) · [Angular](1-connect-frontend-to-backend/angular.md) |
-| 2 | [**Expose a Backend Service**](/quick-start/expose-backend/) | Host your own `Booth.CheckIn(email)` that internally calls our `Lottery.AddTicket(email)` — be a Graft consumer **and** a Graftcode producer. | [JavaScript](2-expose-backend/javascript.md) · [.NET](2-expose-backend/dotnet.md) · [Python](2-expose-backend/python.md) · [Java](2-expose-backend/java.md) · [Kotlin](2-expose-backend/kotlin.md) · [Groovy](2-expose-backend/groovy.md) |
-| 3 | [**Connect Microservices**](/quick-start/connect-microservices/) | Call `Lottery.AddTicket(email)` from your own backend by installing a typed Graft. | [JavaScript](3-connect-microservices/javascript.md) · [.NET](3-connect-microservices/dotnet.md) · [Python](3-connect-microservices/python.md) · [Java](3-connect-microservices/java.md) |
-| 4 | [**Use Modules from Any Technology**](/quick-start/use-modules-from-any-technology/) | Embed the Lottery module from a different language directly in your process — same `Lottery.AddTicket(email)`, in-memory. | [JavaScript](4-use-modules-from-any-technology/javascript.md) · [.NET](4-use-modules-from-any-technology/dotnet.md) · [Python](4-use-modules-from-any-technology/python.md) · [Java](4-use-modules-from-any-technology/java.md) |
-| 5 | [**Expose MCP for AI**](/quick-start/expose-mcp/) | Expose your `Booth.CheckIn(email)` (which calls `Lottery.AddTicket(email)` inside) so an AI agent can enter you in the draw via MCP. | [JavaScript](5-expose-mcp/javascript.md) · [.NET](5-expose-mcp/dotnet.md) · [Python](5-expose-mcp/python.md) · [Java](5-expose-mcp/java.md) |
-| 6 | [**Switch Between Monolith and Microservices**](/quick-start/switch-between-monolith-and-microservices/) | Run `Booth` + `LotterySubmitter` as a monolith, split `LotterySubmitter` into a microservice, switch with one config value — both topologies still call our `Lottery.AddTicket(email)`. | [JavaScript](6-switch-between-monolith-and-microservices/javascript.md) · [.NET](6-switch-between-monolith-and-microservices/dotnet.md) · [Python](6-switch-between-monolith-and-microservices/python.md) · [Java](6-switch-between-monolith-and-microservices/java.md) |
+| 2 | [**Expose a Backend Service**](/quick-start/expose-backend/) | Host your own `Booth.CheckIn(email)` that internally calls our `Lottery.AddTicket(email)` — be a Graft consumer **and** a Graftcode producer. | [JavaScript](2-expose-backend/javascript.md) · [.NET](2-expose-backend/dotnet.md) · [Python](2-expose-backend/python.md) · [Java](2-expose-backend/java.md) · [Kotlin](2-expose-backend/kotlin.md) · [Groovy](2-expose-backend/groovy.md) · [PHP](2-expose-backend/php.md) · [Ruby](2-expose-backend/ruby.md) |
+| 3 | [**Connect Microservices**](/quick-start/connect-microservices/) | Call `Lottery.AddTicket(email)` from your own backend by installing a typed Graft. | [JavaScript](3-connect-microservices/javascript.md) · [.NET](3-connect-microservices/dotnet.md) · [Python](3-connect-microservices/python.md) · [Java](3-connect-microservices/java.md) · [PHP](3-connect-microservices/php.md) · [Ruby](3-connect-microservices/ruby.md) |
+| 4 | [**Use Modules from Any Technology**](/quick-start/use-modules-from-any-technology/) | Embed the Lottery module from a different language directly in your process — same `Lottery.AddTicket(email)`, in-memory. | [JavaScript](4-use-modules-from-any-technology/javascript.md) · [.NET](4-use-modules-from-any-technology/dotnet.md) · [Python](4-use-modules-from-any-technology/python.md) · [Java](4-use-modules-from-any-technology/java.md) · [PHP](4-use-modules-from-any-technology/php.md) · [Ruby](4-use-modules-from-any-technology/ruby.md) |
+| 5 | [**Expose MCP for AI**](/quick-start/expose-mcp/) | Expose your `Booth.CheckIn(email)` (which calls `Lottery.AddTicket(email)` inside) so an AI agent can enter you in the draw via MCP. | [JavaScript](5-expose-mcp/javascript.md) · [.NET](5-expose-mcp/dotnet.md) · [Python](5-expose-mcp/python.md) · [Java](5-expose-mcp/java.md) · [PHP](5-expose-mcp/php.md) · [Ruby](5-expose-mcp/ruby.md) |
+| 6 | [**Switch Between Monolith and Microservices**](/quick-start/switch-between-monolith-and-microservices/) | Run `Booth` + `LotterySubmitter` as a monolith, split `LotterySubmitter` into a microservice, switch with one config value — both topologies still call our `Lottery.AddTicket(email)`. | [JavaScript](6-switch-between-monolith-and-microservices/javascript.md) · [.NET](6-switch-between-monolith-and-microservices/dotnet.md) · [Python](6-switch-between-monolith-and-microservices/python.md) · [Java](6-switch-between-monolith-and-microservices/java.md) · [PHP](6-switch-between-monolith-and-microservices/php.md) · [Ruby](6-switch-between-monolith-and-microservices/ruby.md) |
 
 ### Prerequisites
 
@@ -45,10 +45,12 @@ All tutorials require:
 
 Depending on the language you choose, you'll also need one of:
 
-- [Node.js](https://nodejs.org/) - for JavaScript / React tutorials
+- [Node.js](https://nodejs.org/) - for JavaScript / React / Vue / Angular tutorials
 - [.NET SDK](https://dotnet.microsoft.com/download) - for .NET tutorials
 - [Python](https://www.python.org/downloads/) - for Python tutorials
-- [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) - for Java tutorials
+- [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) - for Java / Kotlin / Groovy tutorials
+- [PHP 8.2+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) - for PHP tutorials
+- [Ruby 3.2+](https://www.ruby-lang.org/) and [Bundler](https://bundler.io/) - for Ruby tutorials
 
 ## Learn More
 
