@@ -50,8 +50,4 @@ python main.py
 
 `Lottery.addTicket(...)` is a remote call but reads like a normal function call. Your IDE autocompletes it because the Graft is a real pip package.
 
-## Step 4. Use a Project Key for production
-
-For real-world use, create a free project at [portal.graftcode.com](https://portal.graftcode.com) and point `GraftConfig.host` at your project's stable registry URL. You get a permanent address, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
-
 > No REST clients, no DTOs, no spec syncing — just `pip install` and call.

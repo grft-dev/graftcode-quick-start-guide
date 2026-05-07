@@ -74,7 +74,7 @@ RUN apt-get update && apt-get install -y wget \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "BoothService.dll"]
+CMD ["gg", "BoothService.dll", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 Build and run:
@@ -111,13 +111,5 @@ The agent discovers `Booth.CheckIn` through MCP and calls it. Inside, your code 
 > "How many lottery tickets does you@example.com have?"
 
 The agent calls `Booth.HowManyTickets`, which forwards to the central `Lottery.GetTickets`. No prompt engineering, no tool definitions in your code.
-
-## Step 7. Project Key for production
-
-```dockerfile
-CMD ["gg", "BoothService.dll", "--projectKey", "YOUR_PROJECT_KEY"]
-```
-
-You get a stable MCP URL, stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
 
 > Any public method on your booth becomes an MCP tool. Same `gg` workflow as Tutorial 2 — plus AI agents on top.

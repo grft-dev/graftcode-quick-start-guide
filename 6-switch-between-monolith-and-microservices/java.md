@@ -103,7 +103,7 @@ RUN apt-get update && apt-get install -y wget \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "--modules", "/usr/app/target/lottery-platform-1.0.0.jar"]
+CMD ["gg", "--modules", "/usr/app/target/lottery-platform-1.0.0.jar", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 Build and run:
@@ -160,7 +160,7 @@ RUN apt-get update && apt-get install -y wget \
 EXPOSE 90
 EXPOSE 91
 
-CMD ["gg", "--modules", "/usr/app/target/lottery-submitter-1.0.0.jar", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
+CMD ["gg", "--modules", "/usr/app/target/lottery-submitter-1.0.0.jar", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 ```bash
@@ -241,9 +241,5 @@ docker run -d \
 ```
 
 Same image, same code — just one env var. The central Lottery is always remote either way.
-
-## Step 8. Project Key for production
-
-Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass `--projectKey YOUR_PROJECT_KEY` to each gateway. You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
 
 > Splitting `LotterySubmitter` out of the monolith is no longer a rewrite — it's one import change followed by a configuration switch.

@@ -61,8 +61,4 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173). The remote `Lottery.AddTicket(email)` call runs like a local function — your IDE autocompletes it because the Graft is a real npm package.
 
-## Step 5. Use a Project Key for production
-
-For real-world use, create a free project at [portal.graftcode.com](https://portal.graftcode.com) and point `GraftConfig.host` at your project's stable registry URL. You get a permanent address, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
-
 > No REST routes, no DTOs, no generated SDKs — just `npm install` and call.

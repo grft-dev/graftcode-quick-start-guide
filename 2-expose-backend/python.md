@@ -79,7 +79,7 @@ ENV PYTHONPATH=/usr/app/booth-service/lib
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "--modules", "/usr/app/booth-service/booth.py"]
+CMD ["gg", "--modules", "/usr/app/booth-service/booth.py", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 Build and run:
@@ -94,15 +94,5 @@ Inside the container, `gg` exposes `Booth.check_in`. Your code reaches across th
 ## Step 5. Try it in Graftcode Vision
 
 Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Booth.check_in` — hit **Try it out**, pass your email, and the response shows your total ticket count from the central Lottery.
-
-## Step 6. Project Key for production
-
-Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass it to the gateway:
-
-```dockerfile
-CMD ["gg", "--modules", "/usr/app/booth-service/booth.py", "--projectKey", "YOUR_PROJECT_KEY"]
-```
-
-You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), access control, and a free [MCP endpoint](https://modelcontextprotocol.io/).
 
 > Your booth is both a producer (its `Booth.check_in` is callable) and a consumer (it calls remote `Lottery.addTicket`). Same `gg` workflow on both sides — no REST, no DTOs, no client code.

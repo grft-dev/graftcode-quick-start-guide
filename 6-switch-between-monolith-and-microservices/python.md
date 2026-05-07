@@ -89,7 +89,7 @@ ENV PYTHONPATH=/usr/app/lib
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "--modules", "./src/"]
+CMD ["gg", "--modules", "./src/", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 Build and run:
@@ -120,7 +120,7 @@ ENV PYTHONPATH=/usr/app/lib
 EXPOSE 90
 EXPOSE 91
 
-CMD ["gg", "--modules", "/usr/app/src/lottery_submitter.py", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
+CMD ["gg", "--modules", "/usr/app/src/lottery_submitter.py", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 ```bash
@@ -186,9 +186,5 @@ docker run -d \
 ```
 
 Same image, same code — just one env var. The central Lottery is always remote either way.
-
-## Step 9. Project Key for production
-
-Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass `--projectKey YOUR_PROJECT_KEY` to each gateway. You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
 
 > Splitting `LotterySubmitter` out of the monolith is no longer a rewrite — it's one import change followed by a configuration switch.

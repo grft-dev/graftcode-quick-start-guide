@@ -59,8 +59,4 @@ dotnet run
 
 `Lottery.AddTicket(...)` comes from a Python package, but reads like a normal C# call. `GraftConfig.Host = "inMemory"` tells Graftcode to load and execute the Python Lottery module inside your .NET process — your tickets are tracked locally, not in the central pool.
 
-## Step 5. Project Key for production
-
-Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and point `GraftConfig.Host` at your project's stable registry URL. You get a permanent address, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
-
 > Technology choice stops being an integration constraint — same Lottery API, embedded in your process from a Python package.

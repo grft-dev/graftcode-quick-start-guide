@@ -67,7 +67,7 @@ RUN apt-get update && apt-get install -y wget \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "./package.json"]
+CMD ["gg", "./package.json", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 Build and run:
@@ -82,15 +82,5 @@ Inside the container, `gg` exposes `Booth.checkIn`. Your code reaches across the
 ## Step 5. Try it in Graftcode Vision
 
 Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Booth.checkIn` — hit **Try it out**, pass your email, and the response shows your total ticket count from the central Lottery.
-
-## Step 6. Project Key for production
-
-Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass it to the gateway:
-
-```dockerfile
-CMD ["gg", "./package.json", "--projectKey", "YOUR_PROJECT_KEY"]
-```
-
-You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), access control, and a free [MCP endpoint](https://modelcontextprotocol.io/).
 
 > Your booth is both a producer (its `Booth.checkIn` is callable) and a consumer (it calls remote `Lottery.AddTicket`). Same `gg` workflow on both sides — no REST, no DTOs, no client code.
