@@ -1,11 +1,11 @@
 ---
 title: "Python"
-description: "Challenge 5 — make your Python lottery module callable by AI agents through MCP with Graftcode Gateway. Zero MCP server code, zero tool definitions."
+description: "Challenge 5 — expose your own Python booth service to AI agents through MCP. Internally it calls the central Lottery service."
 ---
 
 ## Goal
 
-Expose your **lottery service** as MCP tools so an AI agent (Cursor, Claude Desktop) can enter you in the draw on its own. Zero MCP server code, zero tool definitions.
+Build your own Python booth service that **internally calls the central Lottery service** (built and hosted by us), then expose it through Graftcode Gateway's MCP endpoint so an AI agent (Cursor, Claude Desktop) can enter you in the draw on its own.
 
 ### Prerequisites
 
@@ -16,79 +16,89 @@ Expose your **lottery service** as MCP tools so an AI agent (Cursor, Claude Desk
 ## Step 1. Create a project folder
 
 ```bash
-mkdir py-lottery-mcp
-cd py-lottery-mcp
+mkdir py-booth-mcp
+cd py-booth-mcp
 ```
 
 Create `pyproject.toml`:
 
 ```toml
 [project]
-name = "lottery-service"
+name = "booth-service"
 version = "1.0.0"
 requires-python = ">=3.8"
-description = "Conference lottery service"
+description = "Conference booth service"
 ```
 
-## Step 2. Write the lottery module
+## Step 2. Install the Lottery Graft
 
-Create `lottery.py`:
+```bash
+pip install hypertube-python-sdk
+pip install --target=./lib --extra-index-url https://grft.dev/simple/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft-nuget-lottery==1.0.0
+```
+
+## Step 3. Write the booth module
+
+Create `booth.py`:
 
 ```python
-_pool: dict[str, int] = {}
+import sys
+sys.path.insert(0, "./lib")
 
-class Lottery:
+from graft_nuget_lottery import GraftConfig, Lottery
+
+GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws"
+
+class Booth:
     @staticmethod
-    def add_ticket(email: str) -> int:
-        _pool[email] = _pool.get(email, 0) + 1
-        return _pool[email]
+    async def check_in(email: str) -> str:
+        tickets = await Lottery.addTicket(email)
+        return f"Welcome {email}! Total tickets in pool: {tickets}"
 
     @staticmethod
-    def get_tickets(email: str) -> int:
-        return _pool.get(email, 0)
+    async def how_many_tickets(email: str) -> int:
+        return await Lottery.getTickets(email)
 ```
 
-A plain Python class — no MCP-specific annotations. Every public method becomes a callable MCP tool once hosted.
+Both methods will be exposed as MCP tools automatically — no MCP server code, no tool definitions.
 
-## Step 3. Host it with Graftcode Gateway
+## Step 4. Host with Graftcode Gateway
 
-Create a `Dockerfile`:
+Create `Dockerfile`:
 
 ```dockerfile
 FROM python:3.13-bookworm
 WORKDIR /usr/app
-
-COPY ./lottery.py /usr/app/lottery-service/
-COPY ./pyproject.toml /usr/app/lottery-service/
+COPY . /usr/app/booth-service/
 
 RUN apt-get update && apt-get install -y wget \
  && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
  && dpkg -i /usr/app/gg.deb && rm /usr/app/gg.deb \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+ENV PYTHONPATH=/usr/app/booth-service/lib
+
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "--modules", "./lottery-service/"]
+CMD ["gg", "--modules", "/usr/app/booth-service/booth.py"]
 ```
 
 Build and run:
 
 ```bash
-docker build --no-cache --pull -t lottery-mcp-py:test .
-docker run -d -p 80:80 -p 81:81 --name lottery_mcp_py lottery-mcp-py:test
+docker build --no-cache --pull -t booth-mcp-py:test .
+docker run -d -p 80:80 -p 81:81 --name booth_mcp_py booth-mcp-py:test
 ```
 
-Static methods are exposed as MCP tools automatically. Port `80` handles service calls + MCP, port `81` serves Graftcode Vision.
-
-## Step 4. Connect your AI tool
+## Step 5. Connect your AI tool
 
 For Cursor, edit `.cursor/mcp.json`:
 
 ```json
 {
   "mcpServers": {
-    "lottery-service": {
+    "booth-service": {
       "url": "http://localhost:81/mcp"
     }
   }
@@ -97,26 +107,24 @@ For Cursor, edit `.cursor/mcp.json`:
 
 (Same idea for Claude Desktop in `claude_desktop_config.json`.)
 
-## Step 5. Let the AI enter you in the lottery
+## Step 6. Let the AI enter you in the lottery
 
 Ask in Cursor:
 
-> "Add a lottery ticket for my email: you@example.com"
+> "Check me in to the lottery, my email is you@example.com"
 
-The agent discovers `Lottery.add_ticket` through MCP and calls it. Try also:
+The agent discovers `Booth.check_in` through MCP and calls it. Inside, your code reaches the central Lottery. Try also:
 
-> "How many tickets does you@example.com have?"
+> "How many lottery tickets does you@example.com have?"
 
-The agent calls `Lottery.get_tickets("you@example.com")` and replies with the count. No prompt engineering, no tool definitions in your code.
+The agent calls `Booth.how_many_tickets`, which forwards to the central `Lottery.getTickets`. No prompt engineering, no tool definitions in your code.
 
-## Step 6. Project Key for production
-
-Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass it to the gateway:
+## Step 7. Project Key for production
 
 ```dockerfile
-CMD ["gg", "--modules", "./lottery-service/", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "--modules", "/usr/app/booth-service/booth.py", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 You get a stable MCP URL, stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
 
-> Any public method is instantly an MCP tool. No tool definitions, no schemas, no API design.
+> Any public method on your booth becomes an MCP tool. Same `gg` workflow as Tutorial 2 — plus AI agents on top.

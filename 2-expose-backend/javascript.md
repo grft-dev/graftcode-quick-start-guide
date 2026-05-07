@@ -1,11 +1,11 @@
 ---
 title: "JavaScript"
-description: "Challenge 2 — turn a JavaScript module into a remotely callable lottery service with Graftcode Gateway. No controllers, no REST, no specs."
+description: "Challenge 2 — expose your own JavaScript booth service that internally calls the central Lottery service. Compose remote services like local code."
 ---
 
 ## Goal
 
-Expose your own **lottery service** built in JavaScript — any public method becomes instantly callable from any language, no controllers, no REST routes, no OpenAPI specs.
+Build your own JavaScript backend service that **internally calls the central Lottery service** (built and hosted by us) to add tickets, then expose your service through Graftcode Gateway. Same `gg` workflow on both sides — you're a Graft consumer **and** a Graftcode producer at once.
 
 ### Prerequisites
 
@@ -15,34 +15,44 @@ Expose your own **lottery service** built in JavaScript — any public method be
 ## Step 1. Create a project folder
 
 ```bash
-mkdir js-lottery-service
-cd js-lottery-service
+mkdir js-booth-service
+cd js-booth-service
 npm init -y
 ```
 
-## Step 2. Write the lottery module
+## Step 2. Install the Lottery Graft
+
+The central Lottery service is implemented and hosted by us. Install its Graft so your booth code can call `Lottery.AddTicket(email)` directly:
+
+```bash
+npm install hypertube-nodejs-sdk
+npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-lottery@1.0.0
+```
+
+## Step 3. Write the booth module
 
 Create `index.js`:
 
 ```javascript
-const pool = new Map();
+const { Lottery, GraftConfig } = require("@graft/nuget-lottery");
 
-class Lottery {
-  static addTicket(email) {
-    const next = (pool.get(email) ?? 0) + 1;
-    pool.set(email, next);
-    return next;
+GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+
+class Booth {
+  static async checkIn(email) {
+    const tickets = await Lottery.AddTicket(email);
+    return `Welcome ${email}! Total tickets in pool: ${tickets}`;
   }
 }
 
-module.exports = { Lottery };
+module.exports = { Booth };
 ```
 
-A plain JS class. Any public method becomes remotely callable once hosted.
+`Booth.checkIn(email)` is your method. Inside, it calls the remote `Lottery.AddTicket(email)` like a normal JS call — no REST client, no DTOs.
 
-## Step 3. Host it with Graftcode Gateway
+## Step 4. Host with Graftcode Gateway
 
-Create a `Dockerfile`:
+Create `Dockerfile`:
 
 ```dockerfile
 FROM node:24
@@ -63,17 +73,17 @@ CMD ["gg", "./package.json"]
 Build and run:
 
 ```bash
-docker build --no-cache --pull -t lottery-service-js:test .
-docker run -d -p 80:80 -p 81:81 --name lottery_demo_js lottery-service-js:test
+docker build --no-cache --pull -t booth-service-js:test .
+docker run -d -p 80:80 -p 81:81 --name booth_demo_js booth-service-js:test
 ```
 
-`gg` reads `package.json`, discovers `Lottery.addTicket(email)`, and exposes it. Port `80` handles service calls, port `81` serves Graftcode Vision.
+Inside the container, `gg` exposes `Booth.checkIn`. Your code reaches across the network to the central Lottery for every call.
 
-## Step 4. Try it in Graftcode Vision
+## Step 5. Try it in Graftcode Vision
 
-Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Lottery.addTicket` listed — hit **Try it out**, pass your email, and watch the ticket count grow.
+Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Booth.checkIn` — hit **Try it out**, pass your email, and the response shows your total ticket count from the central Lottery.
 
-## Step 5. Project Key for production
+## Step 6. Project Key for production
 
 Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass it to the gateway:
 
@@ -81,6 +91,6 @@ Create a free project at [portal.graftcode.com](https://portal.graftcode.com) an
 CMD ["gg", "./package.json", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
-You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), access control, and an [MCP endpoint](https://modelcontextprotocol.io/) for free.
+You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), access control, and a free [MCP endpoint](https://modelcontextprotocol.io/).
 
-> One Dockerfile, no API design. Your `Lottery.addTicket(email)` is now callable from any app, in any language.
+> Your booth is both a producer (its `Booth.checkIn` is callable) and a consumer (it calls remote `Lottery.AddTicket`). Same `gg` workflow on both sides — no REST, no DTOs, no client code.

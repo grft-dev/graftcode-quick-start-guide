@@ -1,11 +1,11 @@
 ---
 title: ".NET"
-description: "Challenge 6 — run two .NET classes as a monolith, then split one off as a microservice. Switch back and forth with one environment variable."
+description: "Challenge 6 — run two .NET classes as a monolith, then split one off as a microservice. Both topologies still call the central Lottery service."
 ---
 
 ## Goal
 
-Start with two .NET classes — `LotteryService` and `TicketCounter` — running as a monolith. Extract `TicketCounter` into a standalone microservice. Then flip between monolith and microservice with **one environment variable** — zero code changes from then on.
+Build two .NET classes — `Booth` (orchestrator) and `LotterySubmitter` (which calls the central **Lottery** service hosted by us). Run them as a monolith first. Then extract `LotterySubmitter` into a standalone microservice and switch between monolith and microservice with **one environment variable** — zero code changes from then on.
 
 ### Prerequisites
 
@@ -21,40 +21,53 @@ cd LotteryPlatform
 
 Delete `Class1.cs`.
 
-## Step 2. Write the two classes
+## Step 2. Install the Lottery Graft
 
-Create `TicketCounter.cs`:
+```bash
+dotnet add package -s https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft.nuget.lottery --version 1.0.0
+```
+
+## Step 3. Write the two classes
+
+Create `LotterySubmitter.cs`:
 
 ```csharp
-using System.Collections.Concurrent;
+using graft.nuget.lottery;
 
 namespace LotteryPlatform;
 
-public class TicketCounter
+public class LotterySubmitter
 {
-    private static readonly ConcurrentDictionary<string, int> Pool = new();
+    static LotterySubmitter()
+    {
+        GraftConfig.Host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+    }
 
-    public static int AddTicket(string email) =>
-        Pool.AddOrUpdate(email, 1, (_, count) => count + 1);
+    public static async Task<int> Submit(string email) =>
+        await Lottery.AddTicket(email);
 }
 ```
 
-Create `LotteryService.cs`:
+Create `Booth.cs`:
 
 ```csharp
 namespace LotteryPlatform;
 
-public class LotteryService
+public class Booth
 {
-    public static int Enter(string email) => TicketCounter.AddTicket(email);
+    public static async Task<string> CheckIn(string email)
+    {
+        var tickets = await LotterySubmitter.Submit(email);
+        return $"Welcome {email}! Total tickets in pool: {tickets}";
+    }
 }
 ```
 
-A plain method call — `LotteryService` references `TicketCounter` directly. No Graftcode involved yet.
+`Booth.CheckIn` calls `LotterySubmitter.Submit` directly. `LotterySubmitter` calls the central `Lottery.AddTicket` over WebSocket.
 
-## Step 3. Host as a monolith
+## Step 4. Host as a monolith
 
-Create a `Dockerfile`:
+Create `Dockerfile`:
 
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/sdk:9.0
@@ -81,39 +94,18 @@ docker build --no-cache --pull -t lottery-platform-dotnet:test .
 docker run -d -p 80:80 -p 81:81 --name lottery_platform lottery-platform-dotnet:test
 ```
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and call `LotteryService.Enter("you@example.com")`. Both classes run inside one container.
+Open [http://localhost:81/GV](http://localhost:81/GV) and call `Booth.CheckIn("you@example.com")`. Both classes run inside one container; the central Lottery is reached over the network.
 
-## Step 4. Extract TicketCounter into its own project
+## Step 5. Run LotterySubmitter as a standalone service
 
-```bash
-dotnet new sln -n LotteryPlatform
-dotnet new classlib -n TicketCounter && mv TicketCounter.cs TicketCounter/ && rm TicketCounter/Class1.cs
-dotnet new classlib -n LotteryService && mv LotteryService.cs LotteryService/ && rm LotteryService/Class1.cs
-dotnet sln add TicketCounter/TicketCounter.csproj LotteryService/LotteryService.csproj
-dotnet add LotteryService/LotteryService.csproj reference TicketCounter/TicketCounter.csproj
-rm LotteryPlatform.csproj
-```
-
-Update the monolith `Dockerfile` to publish the solution and load both DLLs:
-
-```dockerfile
-RUN dotnet publish LotteryPlatform.sln -c Release -o /usr/app/publish
-...
-CMD ["gg", "--modules", "/usr/app/publish/LotteryService.dll,/usr/app/publish/TicketCounter.dll"]
-```
-
-The code is unchanged — it's now a **modular monolith**, ready to be split.
-
-## Step 5. Run TicketCounter as a standalone service
-
-Create `Dockerfile.ticketCounter`:
+Create `Dockerfile.submitter`:
 
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/sdk:9.0
 WORKDIR /usr/app
 COPY . /usr/app/
 
-RUN dotnet publish TicketCounter/TicketCounter.csproj -c Release -o /usr/app/publish
+RUN dotnet publish -c Release -o /usr/app/publish
 
 RUN apt-get update && apt-get install -y wget \
  && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
@@ -123,41 +115,44 @@ RUN apt-get update && apt-get install -y wget \
 EXPOSE 90
 EXPOSE 91
 
-CMD ["gg", "--modules", "/usr/app/publish/TicketCounter.dll", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
+CMD ["gg", "--modules", "/usr/app/publish/LotteryPlatform.dll", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
 ```
 
 ```bash
-docker build --no-cache --pull -f Dockerfile.ticketCounter -t ticket-counter-dotnet:test .
+docker build --no-cache --pull -f Dockerfile.submitter -t lottery-submitter-dotnet:test .
 docker network create graftcode_demo
-docker run -d --network graftcode_demo -p 90:90 -p 91:91 --name ticket_counter ticket-counter-dotnet:test
+docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name lottery_submitter lottery-submitter-dotnet:test
 ```
 
-Open [http://localhost:91/GV](http://localhost:91/GV) — `TicketCounter` is now its own service.
+Open [http://localhost:91/GV](http://localhost:91/GV) — `LotterySubmitter` is now its own service that still talks to the central Lottery internally.
 
-## Step 6. Connect through a Graft
+## Step 6. Connect Booth through a Graft
 
-From [http://localhost:91/GV](http://localhost:91/GV), copy the NuGet install command:
+From [http://localhost:91/GV](http://localhost:91/GV), copy the NuGet install command for the new submitter service:
 
 ```bash
-dotnet add LotteryService/LotteryService.csproj package -s https://grft.dev/YOUR_KEY__free graft.nuget.ticketcounter --version 1.0.0
+dotnet add package -s https://grft.dev/YOUR_KEY__free graft.nuget.lotterysubmitter --version 1.0.0
 ```
 
-Update `LotteryService/LotteryService.cs` — the **only code change** in the entire tutorial:
+Update `Booth.cs` — the **only code change** in the entire tutorial:
 
 ```csharp
-using Counter = graft.nuget.ticketcounter;
+using Submitter = graft.nuget.lotterysubmitter;
 
 namespace LotteryPlatform;
 
-public class LotteryService
+public class Booth
 {
-    static LotteryService()
+    static Booth()
     {
-        Counter.GraftConfig.SetConfig(Environment.GetEnvironmentVariable("GRAFT_CONFIG"));
+        Submitter.GraftConfig.SetConfig(Environment.GetEnvironmentVariable("GRAFT_CONFIG"));
     }
 
-    public static async Task<int> Enter(string email) =>
-        await Counter.TicketCounter.AddTicket(email);
+    public static async Task<string> CheckIn(string email)
+    {
+        var tickets = await Submitter.LotterySubmitter.Submit(email);
+        return $"Welcome {email}! Total tickets in pool: {tickets}";
+    }
 }
 ```
 
@@ -169,30 +164,30 @@ From now on, topology is controlled by `GRAFT_CONFIG`.
 docker stop lottery_platform && docker rm lottery_platform
 docker build --no-cache --pull -t lottery-platform-dotnet:test .
 docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=graft.nuget.ticketcounter;host=ticket_counter:9092;runtime=dotnet;modules=/usr/app/publish" \
+  -e GRAFT_CONFIG="name=graft.nuget.lotterysubmitter;host=lottery_submitter:9092;runtime=dotnet;modules=/usr/app/publish" \
   -p 80:80 -p 81:81 --name lottery_platform lottery-platform-dotnet:test
 ```
 
-Call `LotteryService.Enter` in Vision — same result, but the call now hits a remote container.
+Call `Booth.CheckIn` in Vision — same result. The chain is now Booth (container A) → LotterySubmitter (container B) → central Lottery.
 
 ## Step 8. Switch back to monolith
 
 ```bash
 docker stop lottery_platform && docker rm lottery_platform
 docker run -d \
-  -e GRAFT_CONFIG="name=graft.nuget.ticketcounter;host=inMemory;runtime=dotnet;modules=/usr/app/publish" \
+  -e GRAFT_CONFIG="name=graft.nuget.lotterysubmitter;host=inMemory;runtime=dotnet;modules=/usr/app/publish" \
   -p 80:80 -p 81:81 --name lottery_platform lottery-platform-dotnet:test
 ```
 
 ```text
-# Monolith:    host=inMemory
-# Microservice: host=ticket_counter:9092
+# Monolith:    host=inMemory             (LotterySubmitter runs in Booth's process)
+# Microservice: host=lottery_submitter:9092  (LotterySubmitter is remote)
 ```
 
-Same image, same code — just one env var.
+Same image, same code — just one env var. The central Lottery is always remote either way.
 
 ## Step 9. Project Key for production
 
 Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass `--projectKey YOUR_PROJECT_KEY` to each gateway. You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
 
-> Extracting a class from a monolith is no longer a rewrite — it's one import change followed by a configuration switch.
+> Splitting `LotterySubmitter` out of the monolith is no longer a rewrite — it's one import change followed by a configuration switch.

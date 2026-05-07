@@ -1,11 +1,11 @@
 ---
 title: "Java"
-description: "Challenge 3 — call the lottery service from another Java service with Graftcode. Install a typed Graft and call remote methods like local code."
+description: "Challenge 3 — call the central Lottery service from another Java service with Graftcode. Install a typed Graft and call remote methods like local code."
 ---
 
 ## Goal
 
-Call the **Challenge 3 lottery service** from your own Java backend using Graftcode — strongly typed, no REST client, no DTOs.
+Call the central **Lottery service** (built and hosted by us) from your own Java backend using Graftcode — strongly typed, no REST client, no DTOs.
 
 ### Prerequisites
 
@@ -18,9 +18,9 @@ mkdir java-lottery-consumer
 cd java-lottery-consumer
 ```
 
-## Step 2. Install the Graft
+## Step 2. Install the Lottery Graft
 
-Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `Maven`, and copy the dependency. Each challenge has its own service — Challenge 3 ships as `graft.nuget.lotterychallenge3`.
+Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `Maven`, and copy the dependency. The Lottery service is published by us as a strongly-typed Graft you can install like any other Maven dependency.
 
 Create `pom.xml`:
 
@@ -44,7 +44,7 @@ Create `pom.xml`:
     <dependencies>
         <dependency>
             <groupId>graft.nuget</groupId>
-            <artifactId>lotterychallenge3</artifactId>
+            <artifactId>lottery</artifactId>
             <version>1.0.0</version>
         </dependency>
     </dependencies>
@@ -58,14 +58,14 @@ Create `src/main/java/lottery/Main.java`:
 ```java
 package lottery;
 
-import graft.nuget.LotteryChallenge3.GraftConfig;
-import graft.nuget.LotteryChallenge3.Challenge3;
+import graft.nuget.Lottery.GraftConfig;
+import graft.nuget.Lottery.Lottery;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 
-        int tickets = Challenge3.addTickets("you@example.com");
+        int tickets = Lottery.addTicket("you@example.com");
         System.out.println("Challenge 3 complete — tickets in pool: " + tickets);
     }
 }
@@ -77,7 +77,7 @@ Run it:
 mvn compile exec:java "-Dexec.mainClass=lottery.Main"
 ```
 
-`Challenge3.addTickets(...)` is a remote call but reads like a normal method invocation. Your IDE autocompletes it because the Graft is a real Maven dependency.
+`Lottery.addTicket(...)` is a remote call but reads like a normal method invocation. Your IDE autocompletes it because the Graft is a real Maven dependency.
 
 ## Step 4. Use a Project Key for production
 

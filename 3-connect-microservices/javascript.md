@@ -1,11 +1,11 @@
 ---
 title: "JavaScript"
-description: "Challenge 3 — call the lottery service from another JavaScript service with Graftcode. Install a typed Graft and call remote methods like local code."
+description: "Challenge 3 — call the central Lottery service from another JavaScript service with Graftcode. Install a typed Graft and call remote methods like local code."
 ---
 
 ## Goal
 
-Call the **Challenge 3 lottery service** from your own JavaScript backend using Graftcode — strongly typed, no REST client, no DTOs.
+Call the central **Lottery service** (built and hosted by us) from your own JavaScript backend using Graftcode — strongly typed, no REST client, no DTOs.
 
 ### Prerequisites
 
@@ -19,13 +19,13 @@ cd js-lottery-consumer
 npm init -y
 ```
 
-## Step 2. Install the Graft
+## Step 2. Install the Lottery Graft
 
-Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `npm`, and copy the install command. Each challenge has its own service — Challenge 3 ships as `@graft/npm-lotterychallenge3`.
+Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `npm`, and copy the install command. The Lottery service is published by us as a strongly-typed Graft you can install like any other npm package.
 
 ```bash
 npm install hypertube-nodejs-sdk
-npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/npm-lotterychallenge3@1.0.0
+npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-lottery@1.0.0
 ```
 
 ## Step 3. Call the lottery method
@@ -33,12 +33,12 @@ npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__fr
 Create `index.js`:
 
 ```javascript
-const { GraftConfig, Challenge3 } = require("@graft/npm-lotterychallenge3");
+const { GraftConfig, Lottery } = require("@graft/nuget-lottery");
 
 GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 
 (async () => {
-  const tickets = await Challenge3.AddTickets("you@example.com");
+  const tickets = await Lottery.AddTicket("you@example.com");
   console.log(`Challenge 3 complete — tickets in pool: ${tickets}`);
 })();
 ```
@@ -49,7 +49,7 @@ Run it:
 node index.js
 ```
 
-`Challenge3.AddTickets(...)` is a remote call but reads like a normal function call. Your IDE autocompletes it because the Graft is a real npm package.
+`Lottery.AddTicket(...)` is a remote call but reads like a normal function call. Your IDE autocompletes it because the Graft is a real npm package.
 
 ## Step 4. Use a Project Key for production
 

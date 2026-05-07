@@ -1,11 +1,11 @@
 ---
 title: "Python"
-description: "Challenge 6 — run two Python modules as a monolith, then split one off as a microservice. Switch back and forth with one environment variable."
+description: "Challenge 6 — run two Python modules as a monolith, then split one off as a microservice. Both topologies still call the central Lottery service."
 ---
 
 ## Goal
 
-Start with two Python modules — `LotteryService` and `TicketCounter` — running as a monolith. Extract `TicketCounter` into a standalone microservice. Then flip between monolith and microservice with **one environment variable** — zero code changes from then on.
+Build two Python modules — `Booth` (orchestrator) and `LotterySubmitter` (which calls the central **Lottery** service hosted by us). Run them as a monolith first. Then extract `LotterySubmitter` into a standalone microservice and switch between monolith and microservice with **one environment variable** — zero code changes from then on.
 
 ### Prerequisites
 
@@ -29,36 +29,50 @@ requires-python = ">=3.8"
 description = "Conference lottery platform"
 ```
 
-## Step 2. Write the two modules
+## Step 2. Install the Lottery Graft
 
-Create `src/ticket_counter.py`:
-
-```python
-_pool: dict[str, int] = {}
-
-class TicketCounter:
-    @staticmethod
-    def add_ticket(email: str) -> int:
-        _pool[email] = _pool.get(email, 0) + 1
-        return _pool[email]
+```bash
+pip install hypertube-python-sdk
+pip install --target=./lib --extra-index-url https://grft.dev/simple/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft-nuget-lottery==1.0.0
 ```
 
-Create `src/lottery_service.py`:
+## Step 3. Write the two modules
+
+Create `src/lottery_submitter.py`:
 
 ```python
-from ticket_counter import TicketCounter
+import sys
+sys.path.insert(0, "./lib")
 
-class LotteryService:
+from graft_nuget_lottery import GraftConfig, Lottery
+
+GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws"
+
+
+class LotterySubmitter:
     @staticmethod
-    def enter(email: str) -> int:
-        return TicketCounter.add_ticket(email)
+    async def submit(email: str) -> int:
+        return await Lottery.addTicket(email)
 ```
 
-A regular import — direct in-process call. No Graftcode involved yet.
+Create `src/booth.py`:
 
-## Step 3. Host as a monolith
+```python
+from lottery_submitter import LotterySubmitter
 
-Create a `Dockerfile`:
+
+class Booth:
+    @staticmethod
+    async def check_in(email: str) -> str:
+        tickets = await LotterySubmitter.submit(email)
+        return f"Welcome {email}! Total tickets in pool: {tickets}"
+```
+
+`Booth.check_in` calls `LotterySubmitter.submit` directly. `LotterySubmitter` calls the central `Lottery.addTicket` over WebSocket.
+
+## Step 4. Host as a monolith
+
+Create `Dockerfile`:
 
 ```dockerfile
 FROM python:3.13-bookworm
@@ -69,6 +83,8 @@ RUN apt-get update && apt-get install -y wget \
  && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
  && dpkg -i /usr/app/gg.deb && rm /usr/app/gg.deb \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+ENV PYTHONPATH=/usr/app/lib
 
 EXPOSE 80
 EXPOSE 81
@@ -83,11 +99,11 @@ docker build --no-cache --pull -t lottery-platform-py:test .
 docker run -d -p 80:80 -p 81:81 --name lottery_platform lottery-platform-py:test
 ```
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and call `LotteryService.enter("you@example.com")`. Both modules run inside one container.
+Open [http://localhost:81/GV](http://localhost:81/GV) and call `Booth.check_in("you@example.com")`. Both modules run inside one container; the central Lottery is reached over the network.
 
-## Step 4. Run TicketCounter as a standalone service
+## Step 5. Run LotterySubmitter as a standalone service
 
-Create `Dockerfile.ticketCounter`:
+Create `Dockerfile.submitter`:
 
 ```dockerfile
 FROM python:3.13-bookworm
@@ -99,77 +115,80 @@ RUN apt-get update && apt-get install -y wget \
  && dpkg -i /usr/app/gg.deb && rm /usr/app/gg.deb \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+ENV PYTHONPATH=/usr/app/lib
+
 EXPOSE 90
 EXPOSE 91
 
-CMD ["gg", "--modules", "/usr/app/src/ticket_counter.py", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
+CMD ["gg", "--modules", "/usr/app/src/lottery_submitter.py", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
 ```
 
 ```bash
-docker build --no-cache --pull -f Dockerfile.ticketCounter -t ticket-counter-py:test .
+docker build --no-cache --pull -f Dockerfile.submitter -t lottery-submitter-py:test .
 docker network create graftcode_demo
-docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name ticket_counter ticket-counter-py:test
+docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name lottery_submitter lottery-submitter-py:test
 ```
 
-Open [http://localhost:91/GV](http://localhost:91/GV) — `TicketCounter` is now its own service.
+Open [http://localhost:91/GV](http://localhost:91/GV) — `LotterySubmitter` is now its own service that still talks to the central Lottery internally.
 
-## Step 5. Connect through a Graft
+## Step 6. Connect Booth through a Graft
 
-From [http://localhost:91/GV](http://localhost:91/GV), copy the PyPI install command:
+From [http://localhost:91/GV](http://localhost:91/GV), copy the PyPI install command for the new submitter service:
 
 ```bash
-pip install hypertube-python-sdk
-pip install --target=./lib --extra-index-url http://localhost:91/simple/ graft-pypi-ticketcounter
+pip install --target=./lib --extra-index-url http://localhost:91/simple/ graft-pypi-lotterysubmitter
 ```
 
-Update `src/lottery_service.py` — the **only code change** in the entire tutorial:
+Update `src/booth.py` — the **only code change** in the entire tutorial:
 
 ```python
 import os
-from graft_pypi_ticketcounter import GraftConfig, TicketCounter
+from graft_pypi_lotterysubmitter import GraftConfig, LotterySubmitter
 
 GraftConfig.set_config(os.environ.get("GRAFT_CONFIG"))
 
-class LotteryService:
+
+class Booth:
     @staticmethod
-    async def enter(email: str) -> int:
-        return await TicketCounter.add_ticket(email)
+    async def check_in(email: str) -> str:
+        tickets = await LotterySubmitter.submit(email)
+        return f"Welcome {email}! Total tickets in pool: {tickets}"
 ```
 
 From now on, topology is controlled by `GRAFT_CONFIG`.
 
-## Step 6. Run as a microservice
+## Step 7. Run as a microservice
 
 ```bash
 docker stop lottery_platform && docker rm lottery_platform
 docker build --no-cache --pull -t lottery-platform-py:test .
 docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=graft-pypi-ticketcounter;host=ticket_counter:9092;runtime=python;modules=/usr/app/src" \
+  -e GRAFT_CONFIG="name=graft-pypi-lotterysubmitter;host=lottery_submitter:9092;runtime=python;modules=/usr/app/src" \
   -e PYTHONPATH=/usr/app/lib \
   -p 80:80 -p 81:81 --name lottery_platform lottery-platform-py:test
 ```
 
-Call `LotteryService.enter` in Vision — same result, but the call now hits a remote container.
+Call `Booth.check_in` in Vision — same result. The chain is now Booth (container A) → LotterySubmitter (container B) → central Lottery.
 
-## Step 7. Switch back to monolith
+## Step 8. Switch back to monolith
 
 ```bash
 docker stop lottery_platform && docker rm lottery_platform
 docker run -d \
-  -e GRAFT_CONFIG="name=graft-pypi-ticketcounter;host=inMemory;runtime=python;modules=/usr/app/src" \
+  -e GRAFT_CONFIG="name=graft-pypi-lotterysubmitter;host=inMemory;runtime=python;modules=/usr/app/src" \
   -e PYTHONPATH=/usr/app/lib \
   -p 80:80 -p 81:81 --name lottery_platform lottery-platform-py:test
 ```
 
 ```text
-# Monolith:    host=inMemory
-# Microservice: host=ticket_counter:9092
+# Monolith:    host=inMemory                  (LotterySubmitter in Booth's process)
+# Microservice: host=lottery_submitter:9092   (LotterySubmitter is remote)
 ```
 
-Same image, same code — just one env var.
+Same image, same code — just one env var. The central Lottery is always remote either way.
 
-## Step 8. Project Key for production
+## Step 9. Project Key for production
 
 Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass `--projectKey YOUR_PROJECT_KEY` to each gateway. You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
 
-> Extracting a module from a monolith is no longer a rewrite — it's one import change followed by a configuration switch.
+> Splitting `LotterySubmitter` out of the monolith is no longer a rewrite — it's one import change followed by a configuration switch.

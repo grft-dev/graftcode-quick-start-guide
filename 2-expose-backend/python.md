@@ -1,11 +1,11 @@
 ---
 title: "Python"
-description: "Challenge 2 — turn a Python module into a remotely callable lottery service with Graftcode Gateway. No frameworks, no REST, no specs."
+description: "Challenge 2 — expose your own Python booth service that internally calls the central Lottery service. Compose remote services like local code."
 ---
 
 ## Goal
 
-Expose your own **lottery service** built in Python — any public method becomes instantly callable from any language, no frameworks, no REST routes, no OpenAPI specs.
+Build your own Python backend service that **internally calls the central Lottery service** (built and hosted by us) to add tickets, then expose your service through Graftcode Gateway. Same `gg` workflow on both sides — you're a Graft consumer **and** a Graftcode producer at once.
 
 ### Prerequisites
 
@@ -15,79 +15,94 @@ Expose your own **lottery service** built in Python — any public method become
 ## Step 1. Create a project folder
 
 ```bash
-mkdir py-lottery-service
-cd py-lottery-service
+mkdir py-booth-service
+cd py-booth-service
 ```
 
 Create `pyproject.toml`:
 
 ```toml
 [project]
-name = "lottery-service"
+name = "booth-service"
 version = "1.0.0"
 requires-python = ">=3.8"
-description = "Conference lottery service"
+description = "Conference booth service"
 ```
 
-## Step 2. Write the lottery module
+## Step 2. Install the Lottery Graft
 
-Create `lottery.py`:
+The central Lottery service is implemented and hosted by us. Install its Graft so your booth code can call `Lottery.addTicket(email)` directly:
+
+```bash
+pip install hypertube-python-sdk
+pip install --target=./lib --extra-index-url https://grft.dev/simple/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft-nuget-lottery==1.0.0
+```
+
+## Step 3. Write the booth module
+
+Create `booth.py`:
 
 ```python
-_pool: dict[str, int] = {}
+import sys
+sys.path.insert(0, "./lib")
 
-class Lottery:
+from graft_nuget_lottery import GraftConfig, Lottery
+
+GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws"
+
+class Booth:
     @staticmethod
-    def add_ticket(email: str) -> int:
-        _pool[email] = _pool.get(email, 0) + 1
-        return _pool[email]
+    async def check_in(email: str) -> str:
+        tickets = await Lottery.addTicket(email)
+        return f"Welcome {email}! Total tickets in pool: {tickets}"
 ```
 
-A plain Python class. Any public method becomes remotely callable once hosted.
+`Booth.check_in(email)` is your method. Inside, it calls the remote `Lottery.addTicket(email)` like a normal Python call — no REST client, no DTOs.
 
-## Step 3. Host it with Graftcode Gateway
+## Step 4. Host with Graftcode Gateway
 
-Create a `Dockerfile`:
+Create `Dockerfile`:
 
 ```dockerfile
 FROM python:3.13-bookworm
 WORKDIR /usr/app
 
-COPY ./lottery.py /usr/app/lottery-service/
-COPY ./pyproject.toml /usr/app/lottery-service/
+COPY . /usr/app/booth-service/
 
 RUN apt-get update && apt-get install -y wget \
  && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
  && dpkg -i /usr/app/gg.deb && rm /usr/app/gg.deb \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+ENV PYTHONPATH=/usr/app/booth-service/lib
+
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "--modules", "./lottery-service/"]
+CMD ["gg", "--modules", "/usr/app/booth-service/booth.py"]
 ```
 
 Build and run:
 
 ```bash
-docker build --no-cache --pull -t lottery-service-py:test .
-docker run -d -p 80:80 -p 81:81 --name lottery_demo_py lottery-service-py:test
+docker build --no-cache --pull -t booth-service-py:test .
+docker run -d -p 80:80 -p 81:81 --name booth_demo_py booth-service-py:test
 ```
 
-`gg` discovers `Lottery.add_ticket(email)` and exposes it. Port `80` handles service calls, port `81` serves Graftcode Vision.
+Inside the container, `gg` exposes `Booth.check_in`. Your code reaches across the network to the central Lottery for every call.
 
-## Step 4. Try it in Graftcode Vision
+## Step 5. Try it in Graftcode Vision
 
-Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Lottery.add_ticket` listed — hit **Try it out**, pass your email, and watch the ticket count grow.
+Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Booth.check_in` — hit **Try it out**, pass your email, and the response shows your total ticket count from the central Lottery.
 
-## Step 5. Project Key for production
+## Step 6. Project Key for production
 
 Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass it to the gateway:
 
 ```dockerfile
-CMD ["gg", "--modules", "./lottery-service/", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "--modules", "/usr/app/booth-service/booth.py", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
-You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), access control, and an [MCP endpoint](https://modelcontextprotocol.io/) for free.
+You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), access control, and a free [MCP endpoint](https://modelcontextprotocol.io/).
 
-> One Dockerfile, no API design. Your `Lottery.add_ticket(email)` is now callable from any app, in any language.
+> Your booth is both a producer (its `Booth.check_in` is callable) and a consumer (it calls remote `Lottery.addTicket`). Same `gg` workflow on both sides — no REST, no DTOs, no client code.

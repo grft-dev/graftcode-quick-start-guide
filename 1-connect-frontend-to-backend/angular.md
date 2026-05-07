@@ -1,11 +1,11 @@
 ---
 title: "Angular"
-description: "Challenge 1 — call the lottery service from an Angular app with Graftcode. Submit your email, win tickets, no REST client."
+description: "Challenge 1 — call the central Lottery service from an Angular app with Graftcode. Submit your email, win tickets, no REST client."
 ---
 
 ## Goal
 
-Call the **Challenge 1 lottery service** directly from an Angular component using Graftcode — no REST client, no DTOs. You submit your email and the remote method adds tickets to your pool.
+Call the central **Lottery service** (built and hosted by us) directly from an Angular component using Graftcode — no REST client, no DTOs. Each call adds a ticket to the conference pool for your email.
 
 ### Prerequisites
 
@@ -20,13 +20,13 @@ cd angular-hello-world
 npm install
 ```
 
-## Step 2. Install the Graft
+## Step 2. Install the Lottery Graft
 
-Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `npm`, and copy the install command. Each challenge ships its own service — for Challenge 1 that's `@graft/npm-lotterychallenge1`.
+Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `npm`, and copy the install command. The Lottery service is published by us as a strongly-typed Graft you can install like any other npm package.
 
 ```bash
 npm install hypertube-nodejs-sdk
-npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/npm-lotterychallenge1@1.0.0
+npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-lottery@1.0.0
 ```
 
 ## Step 3. Call the lottery method
@@ -35,7 +35,7 @@ Replace `src/app/app.component.ts`. Use a `signal` so the WebSocket-driven updat
 
 ```typescript
 import { Component, OnInit, signal } from "@angular/core";
-import { Challenge1, GraftConfig } from "@graft/npm-lotterychallenge1";
+import { Lottery, GraftConfig } from "@graft/nuget-lottery";
 
 GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 
@@ -50,7 +50,7 @@ export class AppComponent implements OnInit {
   readonly tickets = signal("...");
 
   async ngOnInit() {
-    const total = await Challenge1.AddTickets(MY_EMAIL);
+    const total = await Lottery.AddTicket(MY_EMAIL);
     this.tickets.set(String(total));
   }
 }
@@ -62,7 +62,7 @@ export class AppComponent implements OnInit {
 npm run dev
 ```
 
-Open [http://localhost:4200](http://localhost:4200). The remote `Challenge1.AddTickets(email)` call runs like a local function — your IDE autocompletes it because the Graft is a real npm package.
+Open [http://localhost:4200](http://localhost:4200). The remote `Lottery.AddTicket(email)` call runs like a local function — your IDE autocompletes it because the Graft is a real npm package.
 
 ## Step 5. Use a Project Key for production
 

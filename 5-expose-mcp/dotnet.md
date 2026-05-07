@@ -1,11 +1,11 @@
 ---
 title: ".NET"
-description: "Challenge 5 — make your .NET lottery service callable by AI agents through MCP with Graftcode Gateway. Zero MCP server code, zero tool definitions."
+description: "Challenge 5 — expose your own .NET booth service to AI agents through MCP. Internally it calls the central Lottery service."
 ---
 
 ## Goal
 
-Expose your **lottery service** as MCP tools so an AI agent (Cursor, Claude Desktop) can enter you in the draw on its own. Zero MCP server code, zero tool definitions.
+Build your own .NET booth service that **internally calls the central Lottery service** (built and hosted by us), then expose it through Graftcode Gateway's MCP endpoint so an AI agent (Cursor, Claude Desktop) can enter you in the draw on its own.
 
 ### Prerequisites
 
@@ -16,36 +16,48 @@ Expose your **lottery service** as MCP tools so an AI agent (Cursor, Claude Desk
 ## Step 1. Create a class library
 
 ```bash
-dotnet new classlib -n LotteryService
-cd LotteryService
+dotnet new classlib -n BoothService
+cd BoothService
 ```
 
-## Step 2. Write the lottery class
+## Step 2. Install the Lottery Graft
 
-Delete `Class1.cs` and create `Lottery.cs`:
+```bash
+dotnet add package -s https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft.nuget.lottery --version 1.0.0
+```
+
+## Step 3. Write the booth class
+
+Delete `Class1.cs` and create `Booth.cs`:
 
 ```csharp
-using System.Collections.Concurrent;
+using graft.nuget.lottery;
 
-namespace LotteryService;
+namespace BoothService;
 
-public class Lottery
+public class Booth
 {
-    private static readonly ConcurrentDictionary<string, int> Pool = new();
+    static Booth()
+    {
+        GraftConfig.Host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+    }
 
-    public static int AddTicket(string email) =>
-        Pool.AddOrUpdate(email, 1, (_, count) => count + 1);
+    public static async Task<string> CheckIn(string email)
+    {
+        var tickets = await Lottery.AddTicket(email);
+        return $"Welcome {email}! Total tickets in pool: {tickets}";
+    }
 
-    public static int GetTickets(string email) =>
-        Pool.GetValueOrDefault(email, 0);
+    public static async Task<int> HowManyTickets(string email) =>
+        await Lottery.GetTickets(email);
 }
 ```
 
-A plain C# class — no MCP-specific annotations. Every public method becomes a callable MCP tool once hosted.
+Both methods will be exposed as MCP tools automatically — no MCP server code, no tool definitions.
 
-## Step 3. Host it with Graftcode Gateway
+## Step 4. Host with Graftcode Gateway
 
-Create a `Dockerfile`:
+Create `Dockerfile`:
 
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/sdk:9.0
@@ -62,26 +74,24 @@ RUN apt-get update && apt-get install -y wget \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "LotteryService.dll"]
+CMD ["gg", "BoothService.dll"]
 ```
 
 Build and run:
 
 ```bash
-docker build --no-cache --pull -t lottery-mcp-dotnet:test .
-docker run -d -p 80:80 -p 81:81 --name lottery_mcp_dotnet lottery-mcp-dotnet:test
+docker build --no-cache --pull -t booth-mcp-dotnet:test .
+docker run -d -p 80:80 -p 81:81 --name booth_mcp_dotnet booth-mcp-dotnet:test
 ```
 
-Static methods are exposed as MCP tools automatically. Port `80` handles service calls + MCP, port `81` serves Graftcode Vision.
-
-## Step 4. Connect your AI tool
+## Step 5. Connect your AI tool
 
 For Cursor, edit `.cursor/mcp.json`:
 
 ```json
 {
   "mcpServers": {
-    "lottery-service": {
+    "booth-service": {
       "url": "http://localhost:81/mcp"
     }
   }
@@ -90,26 +100,24 @@ For Cursor, edit `.cursor/mcp.json`:
 
 (Same idea for Claude Desktop in `claude_desktop_config.json`.)
 
-## Step 5. Let the AI enter you in the lottery
+## Step 6. Let the AI enter you in the lottery
 
 Ask in Cursor:
 
-> "Add a lottery ticket for my email: you@example.com"
+> "Check me in to the lottery, my email is you@example.com"
 
-The agent discovers `Lottery.AddTicket` through MCP and calls it. Try also:
+The agent discovers `Booth.CheckIn` through MCP and calls it. Inside, your code reaches the central Lottery. Try also:
 
-> "How many tickets does you@example.com have?"
+> "How many lottery tickets does you@example.com have?"
 
-The agent calls `Lottery.GetTickets("you@example.com")` and replies with the count. No prompt engineering, no tool definitions in your code.
+The agent calls `Booth.HowManyTickets`, which forwards to the central `Lottery.GetTickets`. No prompt engineering, no tool definitions in your code.
 
-## Step 6. Project Key for production
-
-Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass it to the gateway:
+## Step 7. Project Key for production
 
 ```dockerfile
-CMD ["gg", "LotteryService.dll", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "BoothService.dll", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 You get a stable MCP URL, stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
 
-> Any public method is instantly an MCP tool. No tool definitions, no schemas, no API design.
+> Any public method on your booth becomes an MCP tool. Same `gg` workflow as Tutorial 2 — plus AI agents on top.

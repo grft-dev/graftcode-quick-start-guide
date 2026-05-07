@@ -1,11 +1,11 @@
 ---
 title: "Vue"
-description: "Challenge 1 — call the lottery service from a Vue app with Graftcode. Submit your email, win tickets, no REST client."
+description: "Challenge 1 — call the central Lottery service from a Vue app with Graftcode. Submit your email, win tickets, no REST client."
 ---
 
 ## Goal
 
-Call the **Challenge 1 lottery service** directly from a Vue component using Graftcode — no REST client, no DTOs. You submit your email and the remote method adds tickets to your pool.
+Call the central **Lottery service** (built and hosted by us) directly from a Vue component using Graftcode — no REST client, no DTOs. Each call adds a ticket to the conference pool for your email.
 
 ### Prerequisites
 
@@ -19,13 +19,13 @@ cd vue-hello-world
 npm install
 ```
 
-## Step 2. Install the Graft
+## Step 2. Install the Lottery Graft
 
-Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `npm`, and copy the install command. Each challenge ships its own service — for Challenge 1 that's `@graft/npm-lotterychallenge1`.
+Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `npm`, and copy the install command. The Lottery service is published by us as a strongly-typed Graft you can install like any other npm package.
 
 ```bash
 npm install hypertube-nodejs-sdk
-npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/npm-lotterychallenge1@1.0.0
+npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-lottery@1.0.0
 ```
 
 ## Step 3. Call the lottery method
@@ -35,7 +35,7 @@ Replace `src/App.vue`:
 ```vue
 <script setup>
 import { ref, onMounted } from "vue";
-import { Challenge1, GraftConfig } from "@graft/npm-lotterychallenge1";
+import { Lottery, GraftConfig } from "@graft/nuget-lottery";
 
 GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 
@@ -43,7 +43,7 @@ const MY_EMAIL = "you@example.com";
 const tickets = ref(null);
 
 onMounted(async () => {
-  tickets.value = await Challenge1.AddTickets(MY_EMAIL);
+  tickets.value = await Lottery.AddTicket(MY_EMAIL);
 });
 </script>
 
@@ -58,7 +58,7 @@ onMounted(async () => {
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). The remote `Challenge1.AddTickets(email)` call runs like a local function — your IDE autocompletes it because the Graft is a real npm package.
+Open [http://localhost:5173](http://localhost:5173). The remote `Lottery.AddTicket(email)` call runs like a local function — your IDE autocompletes it because the Graft is a real npm package.
 
 ## Step 5. Use a Project Key for production
 

@@ -1,11 +1,11 @@
 ---
 title: ".NET"
-description: "Challenge 4 — use a Python lottery module directly from .NET with Graftcode. No REST wrapper, no rewrite. The module runs in-process."
+description: "Challenge 4 — embed the Python edition of the Lottery module directly in your .NET app. No REST wrapper, no rewrite — runs in-process."
 ---
 
 ## Goal
 
-Use the **Challenge 4 lottery module** — published as a Python package — directly from .NET as if it were a native NuGet library. The module runs in-process; no REST wrapper, no rewrite.
+We publish the **Lottery** logic in multiple languages so you can either call it remotely (Tutorials 1–3) or embed it directly in your process. Here you'll use the Python edition of Lottery from a .NET app — same `Lottery.AddTicket(email)` API, but executed in-memory inside your .NET process.
 
 ### Prerequisites
 
@@ -20,10 +20,10 @@ cd LotteryDemo
 
 ## Step 2. Install the cross-language Graft
 
-Challenge 4 is shipped as a Python package, but you can consume it as a NuGet package thanks to Graftcode:
+The Lottery module ships as a Python package. Graftcode lets you consume it as a NuGet package:
 
 ```bash
-dotnet add package -s https://grft.dev/ graft.pypi.lotterychallenge4
+dotnet add package -s https://grft.dev/ graft.pypi.lottery
 ```
 
 The same approach works with any module from `npm`, `PyPI`, `Maven`, or `NuGet`.
@@ -38,17 +38,17 @@ $env:HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
 export HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
 ```
 
-## Step 4. Call the lottery module in-process
+## Step 4. Run Lottery in-process
 
 Replace `Program.cs`:
 
 ```csharp
-using graft.pypi.lotterychallenge4;
+using graft.pypi.lottery;
 
 GraftConfig.Host = "inMemory";
 
-var tickets = Challenge4.AddTickets("you@example.com");
-Console.WriteLine($"Challenge 4 complete — tickets in pool: {tickets}");
+var tickets = Lottery.AddTicket("you@example.com");
+Console.WriteLine($"Challenge 4 complete — local tickets: {tickets}");
 ```
 
 Run it:
@@ -57,10 +57,10 @@ Run it:
 dotnet run
 ```
 
-`Challenge4.AddTickets(...)` comes from a Python package, but reads like a normal C# method call. `GraftConfig.Host = "inMemory"` tells Graftcode to load and execute the Python module inside the same process.
+`Lottery.AddTicket(...)` comes from a Python package, but reads like a normal C# call. `GraftConfig.Host = "inMemory"` tells Graftcode to load and execute the Python Lottery module inside your .NET process — your tickets are tracked locally, not in the central pool.
 
 ## Step 5. Project Key for production
 
 Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and point `GraftConfig.Host` at your project's stable registry URL. You get a permanent address, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
 
-> Technology choice stops being an integration constraint — keep writing C# and use any module from any ecosystem.
+> Technology choice stops being an integration constraint — same Lottery API, embedded in your process from a Python package.

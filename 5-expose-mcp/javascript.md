@@ -1,11 +1,11 @@
 ---
 title: "JavaScript"
-description: "Challenge 5 — make your JavaScript lottery module callable by AI agents through MCP with Graftcode Gateway. Zero MCP server code, zero tool definitions."
+description: "Challenge 5 — expose your own JavaScript booth service to AI agents through MCP. Internally it calls the central Lottery service."
 ---
 
 ## Goal
 
-Expose your **lottery service** as MCP tools so an AI agent (Cursor, Claude Desktop) can enter you in the draw on its own. Zero MCP server code, zero tool definitions.
+Build your own JavaScript booth service that **internally calls the central Lottery service** (built and hosted by us), then expose it through Graftcode Gateway's MCP endpoint so an AI agent (Cursor, Claude Desktop) can enter you in the draw on its own.
 
 ### Prerequisites
 
@@ -16,38 +16,46 @@ Expose your **lottery service** as MCP tools so an AI agent (Cursor, Claude Desk
 ## Step 1. Create a project folder
 
 ```bash
-mkdir js-lottery-mcp
-cd js-lottery-mcp
+mkdir js-booth-mcp
+cd js-booth-mcp
 npm init -y
 ```
 
-## Step 2. Write the lottery module
+## Step 2. Install the Lottery Graft
+
+```bash
+npm install hypertube-nodejs-sdk
+npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-lottery@1.0.0
+```
+
+## Step 3. Write the booth module
 
 Create `index.js`:
 
 ```javascript
-const pool = new Map();
+const { Lottery, GraftConfig } = require("@graft/nuget-lottery");
 
-class Lottery {
-  static addTicket(email) {
-    const next = (pool.get(email) ?? 0) + 1;
-    pool.set(email, next);
-    return next;
+GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+
+class Booth {
+  static async checkIn(email) {
+    const tickets = await Lottery.AddTicket(email);
+    return `Welcome ${email}! Total tickets in pool: ${tickets}`;
   }
 
-  static getTickets(email) {
-    return pool.get(email) ?? 0;
+  static async howManyTickets(email) {
+    return await Lottery.GetTickets(email);
   }
 }
 
-module.exports = { Lottery };
+module.exports = { Booth };
 ```
 
-A plain JS class — no MCP-specific annotations. Every public method becomes a callable MCP tool once hosted.
+Both methods will be exposed as MCP tools automatically — no MCP server code, no tool definitions.
 
-## Step 3. Host it with Graftcode Gateway
+## Step 4. Host with Graftcode Gateway
 
-Create a `Dockerfile`:
+Create `Dockerfile`:
 
 ```dockerfile
 FROM node:24
@@ -68,20 +76,18 @@ CMD ["gg", "./package.json"]
 Build and run:
 
 ```bash
-docker build --no-cache --pull -t lottery-mcp-js:test .
-docker run -d -p 80:80 -p 81:81 --name lottery_mcp_js lottery-mcp-js:test
+docker build --no-cache --pull -t booth-mcp-js:test .
+docker run -d -p 80:80 -p 81:81 --name booth_mcp_js booth-mcp-js:test
 ```
 
-Public methods are exposed as MCP tools automatically. Port `80` handles service calls + MCP, port `81` serves Graftcode Vision.
-
-## Step 4. Connect your AI tool
+## Step 5. Connect your AI tool
 
 For Cursor, edit `.cursor/mcp.json`:
 
 ```json
 {
   "mcpServers": {
-    "lottery-service": {
+    "booth-service": {
       "url": "http://localhost:81/mcp"
     }
   }
@@ -90,21 +96,19 @@ For Cursor, edit `.cursor/mcp.json`:
 
 (Same idea for Claude Desktop in `claude_desktop_config.json`.)
 
-## Step 5. Let the AI enter you in the lottery
+## Step 6. Let the AI enter you in the lottery
 
 Ask in Cursor:
 
-> "Add a lottery ticket for my email: you@example.com"
+> "Check me in to the lottery, my email is you@example.com"
 
-The agent discovers `Lottery.addTicket` through MCP and calls it. Try also:
+The agent discovers `Booth.checkIn` through MCP and calls it. Inside, your code reaches the central Lottery. Try also:
 
-> "How many tickets does you@example.com have?"
+> "How many lottery tickets does you@example.com have?"
 
-The agent calls `Lottery.getTickets("you@example.com")` and replies with the count. No prompt engineering, no tool definitions in your code.
+The agent calls `Booth.howManyTickets`, which forwards to the central `Lottery.GetTickets`. No prompt engineering, no tool definitions in your code.
 
-## Step 6. Project Key for production
-
-Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass it to the gateway:
+## Step 7. Project Key for production
 
 ```dockerfile
 CMD ["gg", "./package.json", "--projectKey", "YOUR_PROJECT_KEY"]
@@ -112,4 +116,4 @@ CMD ["gg", "./package.json", "--projectKey", "YOUR_PROJECT_KEY"]
 
 You get a stable MCP URL, stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
 
-> Any public method is instantly an MCP tool. No tool definitions, no schemas, no API design.
+> Any public method on your booth becomes an MCP tool. Same `gg` workflow as Tutorial 2 — plus AI agents on top.

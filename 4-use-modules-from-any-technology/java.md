@@ -1,11 +1,11 @@
 ---
 title: "Java"
-description: "Challenge 4 — use a Python lottery module directly from Java with Graftcode. No REST wrapper, no rewrite. The module runs in-process."
+description: "Challenge 4 — embed the Python edition of the Lottery module directly in your Java app. No REST wrapper, no rewrite — runs in-process."
 ---
 
 ## Goal
 
-Use the **Challenge 4 lottery module** — published as a Python package — directly from Java as if it were a native Maven dependency. The module runs in-process; no REST wrapper, no rewrite.
+We publish the **Lottery** logic in multiple languages so you can either call it remotely (Tutorials 1–3) or embed it directly in your process. Here you'll use the Python edition of Lottery from a Java app — same `Lottery.addTicket(email)` API, but executed in-memory inside your JVM.
 
 ### Prerequisites
 
@@ -41,7 +41,7 @@ Create `pom.xml`:
     <dependencies>
         <dependency>
             <groupId>graft.pypi</groupId>
-            <artifactId>lotterychallenge4</artifactId>
+            <artifactId>lottery</artifactId>
             <version>1.0.0</version>
         </dependency>
     </dependencies>
@@ -53,7 +53,7 @@ Create `pom.xml`:
 Drop the actual Python module locally so Graftcode can run it in-process:
 
 ```bash
-python -m pip install lotterychallenge4 --target ./
+python -m pip install lottery --target ./
 mvn dependency:resolve -q
 ```
 
@@ -67,22 +67,22 @@ $env:HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
 export HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
 ```
 
-## Step 4. Call the lottery module in-process
+## Step 4. Run Lottery in-process
 
 Create `src/main/java/lottery/Main.java`:
 
 ```java
 package lottery;
 
-import graft.pypi.lotterychallenge4.GraftConfig;
-import graft.pypi.lotterychallenge4.Challenge4;
+import graft.pypi.lottery.GraftConfig;
+import graft.pypi.lottery.Lottery;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         GraftConfig.host = "inMemory";
 
-        int tickets = Challenge4.addTickets("you@example.com");
-        System.out.println("Challenge 4 complete — tickets in pool: " + tickets);
+        int tickets = Lottery.addTicket("you@example.com");
+        System.out.println("Challenge 4 complete — local tickets: " + tickets);
     }
 }
 ```
@@ -93,10 +93,10 @@ Run it:
 mvn compile exec:java "-Dexec.mainClass=lottery.Main"
 ```
 
-`Challenge4.addTickets(...)` comes from a Python package, but reads like a normal Java method call. `GraftConfig.host = "inMemory"` tells Graftcode to load and execute the Python module inside the same process.
+`Lottery.addTicket(...)` comes from a Python package, but reads like a normal Java call. `GraftConfig.host = "inMemory"` tells Graftcode to load and execute the Python Lottery module inside your JVM — your tickets are tracked locally, not in the central pool.
 
 ## Step 5. Project Key for production
 
 Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and point `GraftConfig.host` at your project's stable registry URL. You get a permanent address, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), and access control.
 
-> Technology choice stops being an integration constraint — keep writing Java and use any module from any ecosystem.
+> Technology choice stops being an integration constraint — same Lottery API, embedded in your process from a Python package.

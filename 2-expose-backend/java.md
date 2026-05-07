@@ -1,11 +1,11 @@
 ---
 title: "Java"
-description: "Challenge 2 — turn a Java class into a remotely callable lottery service with Graftcode Gateway. No Spring, no REST, no specs."
+description: "Challenge 2 — expose your own Java booth service that internally calls the central Lottery service. Compose remote services like local code."
 ---
 
 ## Goal
 
-Expose your own **lottery service** built in Java — any public method becomes instantly callable from any language, no Spring, no REST routes, no OpenAPI specs.
+Build your own Java backend service that **internally calls the central Lottery service** (built and hosted by us) to add tickets, then expose your service through Graftcode Gateway. Same `gg` workflow on both sides — you're a Graft consumer **and** a Graftcode producer at once.
 
 ### Prerequisites
 
@@ -15,49 +15,68 @@ Expose your own **lottery service** built in Java — any public method becomes 
 ## Step 1. Create a project folder
 
 ```bash
-mkdir java-lottery-service
-cd java-lottery-service
+mkdir java-booth-service
+cd java-booth-service
 ```
 
-Create `pom.xml`:
+## Step 2. Add the Lottery Graft dependency
+
+The central Lottery service is implemented and hosted by us. Add its Graft to your `pom.xml`:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.example</groupId>
-    <artifactId>lottery-service</artifactId>
+    <artifactId>booth-service</artifactId>
     <version>1.0.0</version>
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
     </properties>
+    <repositories>
+        <repository>
+            <id>graft-repository</id>
+            <url>https://grft.dev/maven2/4b4e411f-60a0-4868-b8a6-46f5dee07448__free</url>
+        </repository>
+    </repositories>
+    <dependencies>
+        <dependency>
+            <groupId>graft.nuget</groupId>
+            <artifactId>lottery</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
 </project>
 ```
 
-## Step 2. Write the lottery class
+## Step 3. Write the booth class
 
-Create `src/main/java/lottery/Lottery.java`:
+Create `src/main/java/booth/Booth.java`:
 
 ```java
-package lottery;
+package booth;
 
-import java.util.concurrent.ConcurrentHashMap;
+import graft.nuget.Lottery.GraftConfig;
+import graft.nuget.Lottery.Lottery;
 
-public class Lottery {
-    private static final ConcurrentHashMap<String, Integer> POOL = new ConcurrentHashMap<>();
+public class Booth {
+    static {
+        GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+    }
 
-    public static int addTicket(String email) {
-        return POOL.merge(email, 1, Integer::sum);
+    public static String checkIn(String email) throws Exception {
+        int tickets = Lottery.addTicket(email);
+        return "Welcome " + email + "! Total tickets in pool: " + tickets;
     }
 }
 ```
 
-A plain Java class. Any public method becomes remotely callable once hosted.
+`Booth.checkIn(email)` is your method. Inside, it calls the remote `Lottery.addTicket(email)` like a normal Java call — no REST client, no DTOs.
 
-## Step 3. Host it with Graftcode Gateway
+## Step 4. Host with Graftcode Gateway
 
-Create a `Dockerfile`:
+Create `Dockerfile`:
 
 ```dockerfile
 FROM maven:3.9-eclipse-temurin-21
@@ -74,30 +93,30 @@ RUN apt-get update && apt-get install -y wget \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "--modules", "/usr/app/target/lottery-service-1.0.0.jar"]
+CMD ["gg", "--modules", "/usr/app/target/booth-service-1.0.0.jar"]
 ```
 
 Build and run:
 
 ```bash
-docker build --no-cache --pull -t lottery-service-java:test .
-docker run -d -p 80:80 -p 81:81 --name lottery_demo_java lottery-service-java:test
+docker build --no-cache --pull -t booth-service-java:test .
+docker run -d -p 80:80 -p 81:81 --name booth_demo_java booth-service-java:test
 ```
 
-`gg` discovers `Lottery.addTicket(String)` and exposes it. Port `80` handles service calls, port `81` serves Graftcode Vision.
+Inside the container, `gg` exposes `Booth.checkIn`. Your code reaches across the network to the central Lottery for every call.
 
-## Step 4. Try it in Graftcode Vision
+## Step 5. Try it in Graftcode Vision
 
-Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Lottery.addTicket` listed — hit **Try it out**, pass your email, and watch the ticket count grow.
+Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Booth.checkIn` — hit **Try it out**, pass your email, and the response shows your total ticket count from the central Lottery.
 
-## Step 5. Project Key for production
+## Step 6. Project Key for production
 
 Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass it to the gateway:
 
 ```dockerfile
-CMD ["gg", "--modules", "/usr/app/target/lottery-service-1.0.0.jar", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "--modules", "/usr/app/target/booth-service-1.0.0.jar", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
-You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), access control, and an [MCP endpoint](https://modelcontextprotocol.io/) for free.
+You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), access control, and a free [MCP endpoint](https://modelcontextprotocol.io/).
 
-> One Dockerfile, no API design. Your `Lottery.addTicket(email)` is now callable from any app, in any language.
+> Your booth is both a producer (its `Booth.checkIn` is callable) and a consumer (it calls remote `Lottery.addTicket`). Same `gg` workflow on both sides — no REST, no DTOs, no client code.

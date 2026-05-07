@@ -1,11 +1,11 @@
 ---
 title: ".NET"
-description: "Challenge 2 — turn a .NET class into a remotely callable lottery service with Graftcode Gateway. No controllers, no REST, no specs."
+description: "Challenge 2 — expose your own .NET booth service that internally calls the central Lottery service. Compose remote services like local code."
 ---
 
 ## Goal
 
-Expose your own **lottery service** built in .NET — any public method becomes instantly callable from any language, no controllers, no REST routes, no OpenAPI specs.
+Build your own .NET backend service that **internally calls the central Lottery service** (built and hosted by us) to add tickets, then expose your service through Graftcode Gateway. Same `gg` workflow on both sides — you're a Graft consumer **and** a Graftcode producer at once.
 
 ### Prerequisites
 
@@ -15,35 +15,47 @@ Expose your own **lottery service** built in .NET — any public method becomes 
 ## Step 1. Create a class library
 
 ```bash
-dotnet new classlib -n LotteryService
-cd LotteryService
+dotnet new classlib -n BoothService
+cd BoothService
 ```
 
-## Step 2. Write the lottery class
+## Step 2. Install the Lottery Graft
 
-Delete `Class1.cs` and create `LotteryService.cs`:
+The central Lottery service is implemented and hosted by us. Install its Graft so your booth code can call `Lottery.AddTicket(email)` directly:
+
+```bash
+dotnet add package -s https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft.nuget.lottery --version 1.0.0
+```
+
+## Step 3. Write the booth class
+
+Delete `Class1.cs` and create `Booth.cs`:
 
 ```csharp
-using System.Collections.Concurrent;
+using graft.nuget.lottery;
 
-namespace LotteryService;
+namespace BoothService;
 
-public class Lottery
+public class Booth
 {
-    private static readonly ConcurrentDictionary<string, int> Pool = new();
-
-    public static int AddTicket(string email)
+    static Booth()
     {
-        return Pool.AddOrUpdate(email, 1, (_, count) => count + 1);
+        GraftConfig.Host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+    }
+
+    public static async Task<string> CheckIn(string email)
+    {
+        var tickets = await Lottery.AddTicket(email);
+        return $"Welcome {email}! Total tickets in pool: {tickets}";
     }
 }
 ```
 
-A plain C# class. Any public method becomes remotely callable once hosted.
+`Booth.CheckIn(email)` is your method. Inside, it calls the remote `Lottery.AddTicket(email)` like a normal C# call — no REST client, no DTOs.
 
-## Step 3. Host it with Graftcode Gateway
+## Step 4. Host with Graftcode Gateway
 
-Create a `Dockerfile`:
+Create `Dockerfile`:
 
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/sdk:9.0
@@ -60,30 +72,30 @@ RUN apt-get update && apt-get install -y wget \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "--modules", "LotteryService.dll"]
+CMD ["gg", "--modules", "BoothService.dll"]
 ```
 
 Build and run:
 
 ```bash
-docker build --no-cache --pull -t lottery-service-dotnet:test .
-docker run -d -p 80:80 -p 81:81 --name lottery_demo_dotnet lottery-service-dotnet:test
+docker build --no-cache --pull -t booth-service-dotnet:test .
+docker run -d -p 80:80 -p 81:81 --name booth_demo_dotnet booth-service-dotnet:test
 ```
 
-`gg` discovers `Lottery.AddTicket(string)` automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
+Inside the container, `gg` exposes `Booth.CheckIn`. Your code reaches across the network to the central Lottery for every call.
 
-## Step 4. Try it in Graftcode Vision
+## Step 5. Try it in Graftcode Vision
 
-Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Lottery.AddTicket` listed — hit **Try it out**, pass your email, and watch the ticket count grow.
+Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Booth.CheckIn` — hit **Try it out**, pass your email, and the response shows your total ticket count from the central Lottery.
 
-## Step 5. Project Key for production
+## Step 6. Project Key for production
 
 Create a free project at [portal.graftcode.com](https://portal.graftcode.com) and pass it to the gateway:
 
 ```dockerfile
-CMD ["gg", "--modules", "LotteryService.dll", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "--modules", "BoothService.dll", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
-You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), access control, and an [MCP endpoint](https://modelcontextprotocol.io/) for free.
+You get a stable registry URL, portal visibility at [gateways.graftcode.com](https://gateways.graftcode.com/), access control, and a free [MCP endpoint](https://modelcontextprotocol.io/).
 
-> One Dockerfile, no API design. Your `Lottery.AddTicket(email)` is now callable from any app, in any language.
+> Your booth is both a producer (its `Booth.CheckIn` is callable) and a consumer (it calls remote `Lottery.AddTicket`). Same `gg` workflow on both sides — no REST, no DTOs, no client code.
