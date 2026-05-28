@@ -13,20 +13,38 @@ Build your own .NET booth service that **internally calls the central Lottery se
 - [.NET SDK](https://dotnet.microsoft.com/download) installed locally
 - An AI tool with MCP support — e.g. [Cursor](https://cursor.com/) or [Claude Desktop](https://claude.ai/download)
 
-## Step 1. Create a class library
+## Step 1. How Graftcode works
+
+Call remote methods like local functions. Install a package, import a method, call it directly.
+
+With one command, Graftcode generates a strongly-typed client for your service.
+
+![How Graftcode works](../assets/how-graftcode-works.png)
+
+*- No REST clients. No DTOs. No glue code. Just logic. -*
+
+## Step 2. What you will build
+
+In this challenge, you'll expose your booth service through MCP so an AI agent can enter you in the lottery.
+
+![What you will build](../assets/what-you-will-build-placeholder.png)
+
+*- Import methods and call them directly. No REST, no DTOs, no boilerplate. -*
+
+## Step 3. Create a class library
 
 ```bash
 dotnet new classlib -n BoothService
 cd BoothService
 ```
 
-## Step 2. Install the Lottery Graft
+## Step 4. Install the Lottery Graft
 
 ```bash
 dotnet add package -s https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft.nuget.lottery --version 1.0.0
 ```
 
-## Step 3. Write the booth class
+## Step 5. Write the booth class
 
 Delete `Class1.cs` and create `Booth.cs`:
 
@@ -55,7 +73,7 @@ public class Booth
 
 Both methods will be exposed as MCP tools automatically — no MCP server code, no tool definitions.
 
-## Step 4. Host with Graftcode Gateway
+## Step 6. Host with Graftcode Gateway
 
 Create `Dockerfile`:
 
@@ -84,7 +102,7 @@ docker build --no-cache --pull -t booth-mcp-dotnet:test .
 docker run -d -p 80:80 -p 81:81 --name booth_mcp_dotnet booth-mcp-dotnet:test
 ```
 
-## Step 5. Connect your AI tool
+## Step 7. Connect your AI tool
 
 For Cursor, edit `.cursor/mcp.json`:
 
@@ -100,7 +118,7 @@ For Cursor, edit `.cursor/mcp.json`:
 
 (Same idea for Claude Desktop in `claude_desktop_config.json`.)
 
-## Step 6. Let the AI enter you in the lottery
+## Step 8. Let the AI enter you in the lottery
 
 Ask in Cursor:
 

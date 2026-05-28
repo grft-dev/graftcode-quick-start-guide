@@ -11,14 +11,32 @@ Call the central **Lottery service** (built and hosted by us) from your own PHP 
 
 - [PHP 8.2+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) installed locally
 
-## Step 1. Create a project folder
+## Step 1. How Graftcode works
+
+Call remote methods like local functions. Install a package, import a method, call it directly.
+
+With one command, Graftcode generates a strongly-typed client for your service.
+
+![How Graftcode works](../assets/how-graftcode-works.png)
+
+*- No REST clients. No DTOs. No glue code. Just logic. -*
+
+## Step 2. What you will build
+
+In this challenge, you'll call the central Lottery service from your backend by installing a typed Graft package.
+
+![What you will build](../assets/what-you-will-build-placeholder.png)
+
+*- Import methods and call them directly. No REST, no DTOs, no boilerplate. -*
+
+## Step 3. Create a project folder
 
 ```bash
 mkdir php-lottery-consumer
 cd php-lottery-consumer
 ```
 
-## Step 2. Install the Lottery Graft
+## Step 4. Install the Lottery Graft
 
 Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `Composer`, and copy the install command. The Lottery service is published by us as a strongly-typed Graft you can install like any other Composer package.
 
@@ -45,7 +63,7 @@ Create `composer.json`:
 composer install
 ```
 
-## Step 3. Call the lottery method
+## Step 5. Call the lottery method
 
 Create `index.php`:
 

@@ -12,7 +12,25 @@ Build your own PHP backend service that **internally calls the central Lottery s
 - [Docker](https://docs.docker.com/get-docker/) installed and running
 - [PHP 8.2+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) installed locally
 
-## Step 1. Create a project folder
+## Step 1. How Graftcode works
+
+Call remote methods like local functions. Install a package, import a method, call it directly.
+
+With one command, Graftcode generates a strongly-typed client for your service.
+
+![How Graftcode works](../assets/how-graftcode-works.png)
+
+*- No REST clients. No DTOs. No glue code. Just logic. -*
+
+## Step 2. What you will build
+
+In this challenge, you'll build a booth service that calls the central Lottery service and expose it through Graftcode Gateway.
+
+![What you will build](../assets/what-you-will-build-placeholder.png)
+
+*- Import methods and call them directly. No REST, no DTOs, no boilerplate. -*
+
+## Step 3. Create a project folder
 
 ```bash
 mkdir php-booth-service
@@ -41,7 +59,7 @@ Create `composer.json`:
 }
 ```
 
-## Step 2. Install the Lottery Graft
+## Step 4. Install the Lottery Graft
 
 The central Lottery service is implemented and hosted by us. Composer pulls it in like any other PHP package:
 
@@ -50,7 +68,7 @@ composer require hypertube/php-sdk
 composer install
 ```
 
-## Step 3. Write the booth class
+## Step 5. Write the booth class
 
 Create `src/Booth.php`:
 
@@ -79,7 +97,7 @@ class Booth
 
 `Booth::checkIn($email)` is your method. Inside, it calls the remote `Lottery::addTicket($email)` like a normal PHP call — no REST client, no DTOs.
 
-## Step 4. Host with Graftcode Gateway
+## Step 6. Host with Graftcode Gateway
 
 Create `Dockerfile`:
 
@@ -110,7 +128,7 @@ docker run -d -p 80:80 -p 81:81 --name booth_demo_php booth-service-php:test
 
 Inside the container, `gg` exposes `Booth::checkIn`. Your code reaches across the network to the central Lottery for every call.
 
-## Step 5. Try it in Graftcode Vision
+## Step 7. Try it in Graftcode Vision
 
 Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Booth.checkIn` — hit **Try it out**, pass your email, and the response shows your total ticket count from the central Lottery.
 

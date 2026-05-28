@@ -12,7 +12,25 @@ Build two Java classes — `Booth` (orchestrator) and `LotterySubmitter` (which 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
 - [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
 
-## Step 1. Create the project
+## Step 1. How Graftcode works
+
+Call remote methods like local functions. Install a package, import a method, call it directly.
+
+With one command, Graftcode generates a strongly-typed client for your service.
+
+![How Graftcode works](../assets/how-graftcode-works.png)
+
+*- No REST clients. No DTOs. No glue code. Just logic. -*
+
+## Step 2. What you will build
+
+In this challenge, you'll run Booth and LotterySubmitter as a monolith, then split one into a microservice with one config change.
+
+![What you will build](../assets/what-you-will-build-placeholder.png)
+
+*- Import methods and call them directly. No REST, no DTOs, no boilerplate. -*
+
+## Step 3. Create the project
 
 ```bash
 mkdir java-lottery-platform
@@ -48,7 +66,7 @@ Create `pom.xml`:
 </project>
 ```
 
-## Step 2. Write the two classes
+## Step 4. Write the two classes
 
 Create `src/main/java/lottery/LotterySubmitter.java`:
 
@@ -84,7 +102,7 @@ public class Booth {
 
 `Booth.checkIn` calls `LotterySubmitter.submit` directly. `LotterySubmitter` calls the central `Lottery.addTicket` over WebSocket.
 
-## Step 3. Host as a monolith
+## Step 5. Host as a monolith
 
 Create `Dockerfile`:
 
@@ -115,7 +133,7 @@ docker run -d -p 80:80 -p 81:81 --name lottery_platform lottery-platform-java:te
 
 Open [http://localhost:81/GV](http://localhost:81/GV) and call `Booth.checkIn("you@example.com")`. Both classes run inside one container; the central Lottery is reached over the network.
 
-## Step 4. Run LotterySubmitter as a standalone service
+## Step 6. Run LotterySubmitter as a standalone service
 
 Move `LotterySubmitter.java` into a sub-project so it can ship as its own JAR:
 
@@ -171,7 +189,7 @@ docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name lot
 
 Open [http://localhost:91/GV](http://localhost:91/GV) — `LotterySubmitter` is now its own service that still talks to the central Lottery internally.
 
-## Step 5. Connect Booth through a Graft
+## Step 7. Connect Booth through a Graft
 
 From [http://localhost:91/GV](http://localhost:91/GV), copy the Maven coordinates and add the new repository + dependency to the root `pom.xml`:
 
@@ -214,7 +232,7 @@ public class Booth {
 
 From now on, topology is controlled by `GRAFT_CONFIG`.
 
-## Step 6. Run as a microservice
+## Step 8. Run as a microservice
 
 ```bash
 docker stop lottery_platform && docker rm lottery_platform
@@ -226,7 +244,7 @@ docker run -d --network graftcode_demo \
 
 Call `Booth.checkIn` in Vision — same result. The chain is now Booth (container A) → LotterySubmitter (container B) → central Lottery.
 
-## Step 7. Switch back to monolith
+## Step 9. Switch back to monolith
 
 ```bash
 docker stop lottery_platform && docker rm lottery_platform

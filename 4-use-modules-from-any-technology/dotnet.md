@@ -11,14 +11,32 @@ We publish the **Lottery** logic in multiple languages so you can either call it
 
 - [.NET SDK](https://dotnet.microsoft.com/download) installed locally
 
-## Step 1. Create a console app
+## Step 1. How Graftcode works
+
+Call remote methods like local functions. Install a package, import a method, call it directly.
+
+With one command, Graftcode generates a strongly-typed client for your service.
+
+![How Graftcode works](../assets/how-graftcode-works.png)
+
+*- No REST clients. No DTOs. No glue code. Just logic. -*
+
+## Step 2. What you will build
+
+In this challenge, you'll embed the Lottery module from another language directly in your process — same API, runs in-memory.
+
+![What you will build](../assets/what-you-will-build-placeholder.png)
+
+*- Import methods and call them directly. No REST, no DTOs, no boilerplate. -*
+
+## Step 3. Create a console app
 
 ```bash
 dotnet new console -n LotteryDemo
 cd LotteryDemo
 ```
 
-## Step 2. Install the cross-language Graft
+## Step 4. Install the cross-language Graft
 
 The Lottery module ships as a Python package. Graftcode lets you consume it as a NuGet package:
 
@@ -28,7 +46,7 @@ dotnet add package -s https://grft.dev/ graft.pypi.lottery
 
 The same approach works with any module from `npm`, `PyPI`, `Maven`, or `NuGet`.
 
-## Step 3. Set the SDK key
+## Step 5. Set the SDK key
 
 ```powershell
 $env:HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
@@ -38,7 +56,7 @@ $env:HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
 export HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
 ```
 
-## Step 4. Run Lottery in-process
+## Step 6. Run Lottery in-process
 
 Replace `Program.cs`:
 

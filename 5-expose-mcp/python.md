@@ -13,7 +13,25 @@ Build your own Python booth service that **internally calls the central Lottery 
 - [Python](https://www.python.org/downloads/) installed locally
 - An AI tool with MCP support — e.g. [Cursor](https://cursor.com/) or [Claude Desktop](https://claude.ai/download)
 
-## Step 1. Create a project folder
+## Step 1. How Graftcode works
+
+Call remote methods like local functions. Install a package, import a method, call it directly.
+
+With one command, Graftcode generates a strongly-typed client for your service.
+
+![How Graftcode works](../assets/how-graftcode-works.png)
+
+*- No REST clients. No DTOs. No glue code. Just logic. -*
+
+## Step 2. What you will build
+
+In this challenge, you'll expose your booth service through MCP so an AI agent can enter you in the lottery.
+
+![What you will build](../assets/what-you-will-build-placeholder.png)
+
+*- Import methods and call them directly. No REST, no DTOs, no boilerplate. -*
+
+## Step 3. Create a project folder
 
 ```bash
 mkdir py-booth-mcp
@@ -30,14 +48,14 @@ requires-python = ">=3.8"
 description = "Conference booth service"
 ```
 
-## Step 2. Install the Lottery Graft
+## Step 4. Install the Lottery Graft
 
 ```bash
 pip install hypertube-python-sdk
 pip install --target=./lib --extra-index-url https://grft.dev/simple/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft-nuget-lottery==1.0.0
 ```
 
-## Step 3. Write the booth module
+## Step 5. Write the booth module
 
 Create `booth.py`:
 
@@ -62,7 +80,7 @@ class Booth:
 
 Both methods will be exposed as MCP tools automatically — no MCP server code, no tool definitions.
 
-## Step 4. Host with Graftcode Gateway
+## Step 6. Host with Graftcode Gateway
 
 Create `Dockerfile`:
 
@@ -91,7 +109,7 @@ docker build --no-cache --pull -t booth-mcp-py:test .
 docker run -d -p 80:80 -p 81:81 --name booth_mcp_py booth-mcp-py:test
 ```
 
-## Step 5. Connect your AI tool
+## Step 7. Connect your AI tool
 
 For Cursor, edit `.cursor/mcp.json`:
 
@@ -107,7 +125,7 @@ For Cursor, edit `.cursor/mcp.json`:
 
 (Same idea for Claude Desktop in `claude_desktop_config.json`.)
 
-## Step 6. Let the AI enter you in the lottery
+## Step 8. Let the AI enter you in the lottery
 
 Ask in Cursor:
 

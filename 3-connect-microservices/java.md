@@ -11,14 +11,32 @@ Call the central **Lottery service** (built and hosted by us) from your own Java
 
 - [JDK 17+](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
 
-## Step 1. Create a project folder
+## Step 1. How Graftcode works
+
+Call remote methods like local functions. Install a package, import a method, call it directly.
+
+With one command, Graftcode generates a strongly-typed client for your service.
+
+![How Graftcode works](../assets/how-graftcode-works.png)
+
+*- No REST clients. No DTOs. No glue code. Just logic. -*
+
+## Step 2. What you will build
+
+In this challenge, you'll call the central Lottery service from your backend by installing a typed Graft package.
+
+![What you will build](../assets/what-you-will-build-placeholder.png)
+
+*- Import methods and call them directly. No REST, no DTOs, no boilerplate. -*
+
+## Step 3. Create a project folder
 
 ```bash
 mkdir java-lottery-consumer
 cd java-lottery-consumer
 ```
 
-## Step 2. Install the Lottery Graft
+## Step 4. Install the Lottery Graft
 
 Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `Maven`, and copy the dependency. The Lottery service is published by us as a strongly-typed Graft you can install like any other Maven dependency.
 
@@ -51,7 +69,7 @@ Create `pom.xml`:
 </project>
 ```
 
-## Step 3. Call the lottery method
+## Step 5. Call the lottery method
 
 Create `src/main/java/lottery/Main.java`:
 

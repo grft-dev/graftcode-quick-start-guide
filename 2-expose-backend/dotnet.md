@@ -12,14 +12,32 @@ Build your own .NET backend service that **internally calls the central Lottery 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
 - [.NET SDK](https://dotnet.microsoft.com/download) installed locally
 
-## Step 1. Create a class library
+## Step 1. How Graftcode works
+
+Call remote methods like local functions. Install a package, import a method, call it directly.
+
+With one command, Graftcode generates a strongly-typed client for your service.
+
+![How Graftcode works](../assets/how-graftcode-works.png)
+
+*- No REST clients. No DTOs. No glue code. Just logic. -*
+
+## Step 2. What you will build
+
+In this challenge, you'll build a booth service that calls the central Lottery service and expose it through Graftcode Gateway.
+
+![What you will build](../assets/what-you-will-build-placeholder.png)
+
+*- Import methods and call them directly. No REST, no DTOs, no boilerplate. -*
+
+## Step 3. Create a class library
 
 ```bash
 dotnet new classlib -n BoothService
 cd BoothService
 ```
 
-## Step 2. Install the Lottery Graft
+## Step 4. Install the Lottery Graft
 
 The central Lottery service is implemented and hosted by us. Install its Graft so your booth code can call `Lottery.AddTicket(email)` directly:
 
@@ -27,7 +45,7 @@ The central Lottery service is implemented and hosted by us. Install its Graft s
 dotnet add package -s https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft.nuget.lottery --version 1.0.0
 ```
 
-## Step 3. Write the booth class
+## Step 5. Write the booth class
 
 Delete `Class1.cs` and create `Booth.cs`:
 
@@ -53,7 +71,7 @@ public class Booth
 
 `Booth.CheckIn(email)` is your method. Inside, it calls the remote `Lottery.AddTicket(email)` like a normal C# call — no REST client, no DTOs.
 
-## Step 4. Host with Graftcode Gateway
+## Step 6. Host with Graftcode Gateway
 
 Create `Dockerfile`:
 
@@ -84,7 +102,7 @@ docker run -d -p 80:80 -p 81:81 --name booth_demo_dotnet booth-service-dotnet:te
 
 Inside the container, `gg` exposes `Booth.CheckIn`. Your code reaches across the network to the central Lottery for every call.
 
-## Step 5. Try it in Graftcode Vision
+## Step 7. Try it in Graftcode Vision
 
 Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Booth.CheckIn` — hit **Try it out**, pass your email, and the response shows your total ticket count from the central Lottery.
 

@@ -13,7 +13,25 @@ Build your own Ruby booth service that **internally calls the central Lottery se
 - [Ruby 3.2+](https://www.ruby-lang.org/) and [Bundler](https://bundler.io/) installed locally
 - An AI tool with MCP support — e.g. [Cursor](https://cursor.com/) or [Claude Desktop](https://claude.ai/download)
 
-## Step 1. Create a project folder
+## Step 1. How Graftcode works
+
+Call remote methods like local functions. Install a package, import a method, call it directly.
+
+With one command, Graftcode generates a strongly-typed client for your service.
+
+![How Graftcode works](../assets/how-graftcode-works.png)
+
+*- No REST clients. No DTOs. No glue code. Just logic. -*
+
+## Step 2. What you will build
+
+In this challenge, you'll expose your booth service through MCP so an AI agent can enter you in the lottery.
+
+![What you will build](../assets/what-you-will-build-placeholder.png)
+
+*- Import methods and call them directly. No REST, no DTOs, no boilerplate. -*
+
+## Step 3. Create a project folder
 
 ```bash
 mkdir ruby-booth-mcp
@@ -36,7 +54,7 @@ gem "hypertube-ruby-sdk"
 bundle install
 ```
 
-## Step 2. Write the booth class
+## Step 4. Write the booth class
 
 Create `booth.rb`:
 
@@ -62,7 +80,7 @@ end
 
 Both methods will be exposed as MCP tools automatically — no MCP server code, no tool definitions.
 
-## Step 3. Host with Graftcode Gateway
+## Step 5. Host with Graftcode Gateway
 
 Create `Dockerfile`:
 
@@ -91,7 +109,7 @@ docker build --no-cache --pull -t booth-mcp-ruby:test .
 docker run -d -p 80:80 -p 81:81 --name booth_mcp_ruby booth-mcp-ruby:test
 ```
 
-## Step 4. Connect your AI tool
+## Step 6. Connect your AI tool
 
 For Cursor, edit `.cursor/mcp.json`:
 
@@ -107,7 +125,7 @@ For Cursor, edit `.cursor/mcp.json`:
 
 (Same idea for Claude Desktop in `claude_desktop_config.json`.)
 
-## Step 5. Let the AI enter you in the lottery
+## Step 7. Let the AI enter you in the lottery
 
 Ask in Cursor:
 

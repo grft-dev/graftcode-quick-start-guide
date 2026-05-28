@@ -12,7 +12,25 @@ Call the central **Lottery service** (built and hosted by us) directly from an A
 - [Node.js](https://nodejs.org/) installed locally
 - [Angular CLI](https://angular.dev/tools/cli) installed (`npm install -g @angular/cli`)
 
-## Step 1. Start with an Angular app
+## Step 1. How Graftcode works
+
+Call remote methods like local functions. Install a package, import a method, call it directly.
+
+With one command, Graftcode generates a strongly-typed client for your service.
+
+![How Graftcode works](../assets/how-graftcode-works.png)
+
+*- No REST clients. No DTOs. No glue code. Just logic. -*
+
+## Step 2. What you will build
+
+In this challenge, you'll connect an Angular app to a hosted Lottery service using a generated Graft package.
+
+![What you will build](../assets/what-you-will-build-placeholder.png)
+
+*- Import methods and call them directly. No REST, no DTOs, no boilerplate. -*
+
+## Step 3. Start with an Angular app
 
 ```bash
 git clone https://github.com/grft-dev/angular-hello-world
@@ -20,7 +38,7 @@ cd angular-hello-world
 npm install
 ```
 
-## Step 2. Install the Lottery Graft
+## Step 4. Install the Lottery Graft
 
 Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `npm`, and copy the install command. The Lottery service is published by us as a strongly-typed Graft you can install like any other npm package.
 
@@ -29,7 +47,7 @@ npm install hypertube-nodejs-sdk
 npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-lottery@1.0.0
 ```
 
-## Step 3. Call the lottery method
+## Step 5. Call the lottery method
 
 Replace `src/app/app.component.ts`. Use a `signal` so the WebSocket-driven update reaches the template reliably:
 
@@ -56,7 +74,7 @@ export class AppComponent implements OnInit {
 }
 ```
 
-## Step 4. Run the app
+## Step 6. Run the app
 
 ```bash
 npm run dev

@@ -12,14 +12,32 @@ Build your own Java backend service that **internally calls the central Lottery 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
 - [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
 
-## Step 1. Create a project folder
+## Step 1. How Graftcode works
+
+Call remote methods like local functions. Install a package, import a method, call it directly.
+
+With one command, Graftcode generates a strongly-typed client for your service.
+
+![How Graftcode works](../assets/how-graftcode-works.png)
+
+*- No REST clients. No DTOs. No glue code. Just logic. -*
+
+## Step 2. What you will build
+
+In this challenge, you'll build a booth service that calls the central Lottery service and expose it through Graftcode Gateway.
+
+![What you will build](../assets/what-you-will-build-placeholder.png)
+
+*- Import methods and call them directly. No REST, no DTOs, no boilerplate. -*
+
+## Step 3. Create a project folder
 
 ```bash
 mkdir java-booth-service
 cd java-booth-service
 ```
 
-## Step 2. Add the Lottery Graft dependency
+## Step 4. Add the Lottery Graft dependency
 
 The central Lottery service is implemented and hosted by us. Add its Graft to your `pom.xml`:
 
@@ -50,7 +68,7 @@ The central Lottery service is implemented and hosted by us. Add its Graft to yo
 </project>
 ```
 
-## Step 3. Write the booth class
+## Step 5. Write the booth class
 
 Create `src/main/java/booth/Booth.java`:
 
@@ -74,7 +92,7 @@ public class Booth {
 
 `Booth.checkIn(email)` is your method. Inside, it calls the remote `Lottery.addTicket(email)` like a normal Java call — no REST client, no DTOs.
 
-## Step 4. Host with Graftcode Gateway
+## Step 6. Host with Graftcode Gateway
 
 Create `Dockerfile`:
 
@@ -105,7 +123,7 @@ docker run -d -p 80:80 -p 81:81 --name booth_demo_java booth-service-java:test
 
 Inside the container, `gg` exposes `Booth.checkIn`. Your code reaches across the network to the central Lottery for every call.
 
-## Step 5. Try it in Graftcode Vision
+## Step 7. Try it in Graftcode Vision
 
 Open [http://localhost:81/GV](http://localhost:81/GV). You'll see `Booth.checkIn` — hit **Try it out**, pass your email, and the response shows your total ticket count from the central Lottery.
 

@@ -12,7 +12,25 @@ We publish the **Lottery** logic in multiple languages so you can either call it
 - [JDK 17+](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
 - [Python](https://www.python.org/downloads/) installed locally
 
-## Step 1. Create a project folder
+## Step 1. How Graftcode works
+
+Call remote methods like local functions. Install a package, import a method, call it directly.
+
+With one command, Graftcode generates a strongly-typed client for your service.
+
+![How Graftcode works](../assets/how-graftcode-works.png)
+
+*- No REST clients. No DTOs. No glue code. Just logic. -*
+
+## Step 2. What you will build
+
+In this challenge, you'll embed the Lottery module from another language directly in your process — same API, runs in-memory.
+
+![What you will build](../assets/what-you-will-build-placeholder.png)
+
+*- Import methods and call them directly. No REST, no DTOs, no boilerplate. -*
+
+## Step 3. Create a project folder
 
 ```bash
 mkdir java-lottery-demo
@@ -48,7 +66,7 @@ Create `pom.xml`:
 </project>
 ```
 
-## Step 2. Pull in the Python module
+## Step 4. Pull in the Python module
 
 Drop the actual Python module locally so Graftcode can run it in-process:
 
@@ -57,7 +75,7 @@ python -m pip install lottery --target ./
 mvn dependency:resolve -q
 ```
 
-## Step 3. Set the SDK key
+## Step 5. Set the SDK key
 
 ```powershell
 $env:HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
@@ -67,7 +85,7 @@ $env:HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
 export HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
 ```
 
-## Step 4. Run Lottery in-process
+## Step 6. Run Lottery in-process
 
 Create `src/main/java/lottery/Main.java`:
 
