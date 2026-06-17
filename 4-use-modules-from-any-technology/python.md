@@ -30,10 +30,8 @@ cd py-js-module-demo
 
 For this example we'll use a JavaScript currency converter from npm, but the same approach works with any module from a supported repository - `npm`, `PyPI`, `Maven` or `NuGet`.
 
-`hypertube-python-sdk` is still required for this example today, but that extra step is temporary.
 
 ```bash
-pip install hypertube-python-sdk
 python -m pip install --extra-index-url https://grft.dev/simple graft-nuget-sdnTestSimpleCar==0.1.0
 ```
 
