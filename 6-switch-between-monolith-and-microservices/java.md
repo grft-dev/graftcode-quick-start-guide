@@ -295,7 +295,7 @@ Now that the price calculator runs on its own gateway, install its **Graft** - t
 
 From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **Maven** and copy the generated dependency coordinates. Note that the repository URL shown in your Graftcode Vision interface may be different than the example provided below.
 
-> The exact group ID, artifact ID, and repository URL are shown in Graftcode Vision - copy them from there. `hypertube-java-sdk` is still required for this example today, but that extra step is temporary.
+> The exact group ID, artifact ID, and repository URL are shown in Graftcode Vision - copy them from there.
 
 Add the Graftcode repository and Graft dependency to your root `pom.xml`:
 
