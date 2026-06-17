@@ -37,10 +37,7 @@ Graftcode Vision shows all public classes and methods exposed by the remote serv
 
 Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `PyPI`, and copy the generated install command.
 
-`hypertube-python-sdk` is still required for this example today, but that extra step is temporary.
-
 ```bash
-pip install hypertube-python-sdk
 python -m pip install --extra-index-url https://grft.dev/simple/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft-nuget-energypriceservice==1.2.0
 ```
 
