@@ -157,11 +157,10 @@ Now that the price calculator runs on its own gateway, install its **Graft** - t
 From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **npm** and copy the generated install command. Note that the `--registry` address shown in your Graftcode Vision interface may be different than the example provided below.
 
 ```bash
-npm install hypertube-nodejs-sdk
 npm install --registry https://grft.dev/54ee6507-ca20-48c0-8c31-7248fac7faf6__free @graft/npm-price-calculator@1.0.0
 ```
 
-> The exact package name and registry URL are shown in Graftcode Vision - copy them from there. `hypertube-nodejs-sdk` is still required for this example today, but that extra step is temporary.
+> The exact package name and registry URL are shown in Graftcode Vision - copy them from there.
 
 Update `index.js` to use the Graft instead of the direct import:
 
