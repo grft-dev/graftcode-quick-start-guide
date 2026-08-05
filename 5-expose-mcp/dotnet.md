@@ -17,15 +17,15 @@ Turn a .NET class into an MCP-compatible service that AI agents can discover and
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [.NET SDK](https://dotnet.microsoft.com/download) installed locally
+- [.NET SDK 9](https://dotnet.microsoft.com/download/dotnet/9.0) installed locally (matches the `sdk:9.0` Docker image)
 - An AI tool with MCP support - for example [Cursor](https://cursor.com/) or [Claude Desktop](https://claude.ai/download)
 
 ## Step 1. Create a project folder
 
-Create a new .NET class library project:
+Create a new .NET class library targeting `net9.0`:
 
 ```bash
-dotnet new classlib -n EnergyService
+dotnet new classlib -n EnergyService -f net9.0
 cd EnergyService
 ```
 
@@ -89,12 +89,12 @@ CMD ["gg", "EnergyService.dll"]
 
 - **FROM mcr.microsoft.com/dotnet/sdk:9.0** - Uses the official .NET 9 SDK image as the base, which includes everything needed to build and run .NET applications.
 - **COPY . /usr/app/** - Copies your project files (including `EnergyPriceCalculator.cs` and the `.csproj`) into the container.
-- **RUN dotnet publish -c Release -o /usr/app/publish** - Builds and publishes the project in Release mode, outputting the compiled assembly to `/usr/app/publish`.
+- **RUN dotnet publish -c Release -o /usr/app/** - Builds and publishes the project in Release mode, placing the compiled assembly in `/usr/app/`.
 - **RUN apt-get update && apt-get install -y wget** - Installs tools needed to download Graftcode Gateway.
 - **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
-- **EXPOSE 80** - Declares the port used for service communication, including the MCP endpoint.
-- **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
-- **CMD ["gg"]** - Runs Graftcode Gateway. It reads the `.csproj` to find your assembly, discovers public methods, and exposes them as both Grafts and MCP tools.
+- **EXPOSE 80** - Declares the port for Graft service calls (app-to-app).
+- **EXPOSE 81** - Declares the port for Graftcode Vision and the MCP endpoint.
+- **CMD ["gg", "EnergyService.dll"]** - Starts Graftcode Gateway against your compiled assembly. Gateway analyzes `EnergyService.dll`, discovers public methods, and exposes them as Grafts and MCP tools.
 
 </collapsible>
 
@@ -110,6 +110,8 @@ Your .NET service is now running with an MCP endpoint exposed automatically by G
 ## Step 4. Explore the service in Graftcode Vision
 
 Open [http://localhost:81/GV](http://localhost:81/GV) in your browser.
+
+With the port mapping from this tutorial (`-p 80:80 -p 81:81`), Graftcode Vision is at **`http://localhost:81/GV`** - even if container logs also mention port 80.
 
 You will see all public methods from your .NET class - their names, parameter types, and return types. Every method listed here is also available as an MCP tool that AI agents can discover and call. Graftcode Vision also provides:
 

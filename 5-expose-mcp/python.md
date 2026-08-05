@@ -17,7 +17,7 @@ Turn a Python module into an MCP-compatible service that AI agents can discover 
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [Python](https://www.python.org/downloads/) installed locally
+- [Python](https://www.python.org/downloads/) *(optional)* - only if you edit files outside Docker; build and Gateway run entirely in the container
 - An AI tool with MCP support - for example [Cursor](https://cursor.com/) or [Claude Desktop](https://claude.ai/download)
 
 ## Step 1. Create a project folder
@@ -31,7 +31,7 @@ cd py-ai-backend
 
 Create module meta data file `pyproject.toml`:
 
-```python
+```toml
 [project]
 name = "energy-service"
 version = "1.0.0"
@@ -89,17 +89,17 @@ EXPOSE 81
 CMD ["gg","--modules","./energy-service/"]
 ```
 
-`gg` (Graftcode Gateway) reads your `python module`, discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and for static methods also as MCP tools for AI agents. Port `80` handles service calls, port `81` serves Graftcode Vision and the MCP endpoint.
+`gg` (Graftcode Gateway) analyzes the module directory passed via `--modules` (`./energy-service/`, including your `pyproject.toml`), discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and for static methods also as MCP tools for AI agents. Port `80` handles service calls, port `81` serves Graftcode Vision and the MCP endpoint.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
-- **FROM python:3.13** - Uses the official Python 3.13 image as the base runtime environment.
-- **COPY . /usr/app/** - Copies your project files (including `energy_price_calculator.py` and `setup.py`) into the container.
+- **FROM python:3.13-bookworm** - Uses the official Python 3.13 image on Debian Bookworm as the base runtime environment.
+- **COPY ./energy_price_calculator.py /usr/app/energy-service/** and **COPY ./pyproject.toml /usr/app/energy-service/** - Copies your module and project metadata into a dedicated `energy-service` folder for Gateway to analyze.
 - **RUN apt-get update && apt-get install -y wget** - Installs tools needed to download Graftcode Gateway.
 - **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
-- **EXPOSE 80** - Declares the port used for service communication, including the MCP endpoint.
-- **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
-- **CMD ["gg"]** - Runs Graftcode Gateway. It reads `setup.py` to find your module, discovers public methods, and exposes them as both Grafts and MCP tools.
+- **EXPOSE 80** - Declares the port for Graft service calls (app-to-app).
+- **EXPOSE 81** - Declares the port for Graftcode Vision and the MCP endpoint.
+- **CMD ["gg", "--modules", "./energy-service/"]** - Starts Graftcode Gateway against the `energy-service` module folder. It discovers public methods and exposes them as Grafts and MCP tools.
 
 </collapsible>
 
