@@ -16,7 +16,7 @@ Turn a Python module into a remotely callable backend service using Graftcode Ga
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [Python](https://www.python.org/downloads/) installed locally
+- [Python](https://www.python.org/downloads/) only if you run the PyPI consumer locally - Docker alone is enough to build and host the service
 
 ## Step 1. Create a project folder
 
@@ -42,7 +42,7 @@ class EnergyPriceCalculator:
 
 Create module meta data file `pyproject.toml`:
 
-```python
+```toml
 [project]
 name = "energy-service"
 version = "1.0.0"
@@ -64,7 +64,7 @@ WORKDIR /usr/app
 COPY ./energy_price_calculator.py /usr/app/energy-service/
 COPY ./pyproject.toml /usr/app/energy-service/
 
-RUN apt-get update \ 
+RUN apt-get update \
  && apt-get install -y wget \
  && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
  && dpkg -i /usr/app/gg.deb \
@@ -78,17 +78,17 @@ EXPOSE 81
 CMD ["gg","--modules","./energy-service/"]
 ```
 
-The key line is the last one - `gg` (Graftcode Gateway) reads your `setup.py`, discovers all public methods in your module, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
+The key line is the last one - `gg` (Graftcode Gateway) reads the module directory passed via `--modules` (`./energy-service/`, which includes your `pyproject.toml`), discovers all public methods in your module, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
-- **FROM python:3.13** - Uses the official Python 3.13 image as the base runtime environment.
-- **COPY . /usr/app/** - Copies your project files (including `energy_price_calculator.py` and `setup.py`) into the container.
+- **FROM python:3.13-bookworm** - Uses the official Python 3.13 image as the base runtime environment.
+- **COPY ./energy_price_calculator.py /usr/app/energy-service/** and **COPY ./pyproject.toml /usr/app/energy-service/** - Copies the module source and `pyproject.toml` into `/usr/app/energy-service/` inside the container.
 - **RUN apt-get update && apt-get install -y wget** - Installs tools needed to download Graftcode Gateway.
 - **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
 - **EXPOSE 80** - Declares the port used for service communication (Grafts connect here).
 - **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
-- **CMD ["gg"]** - Runs Graftcode Gateway. It reads `setup.py` to find your module, discovers public methods, and makes them callable.
+- **CMD ["gg", "--modules", "./energy-service/"]** - Runs Graftcode Gateway. `--modules` points Gateway at the module directory to analyze; it discovers public methods and makes them callable. `--modules` is optional when the same directory as `gg` contains only one target module.
 
 </collapsible>
 
@@ -131,10 +131,12 @@ A Project Key gives you:
 
 Your service is now accessible from any application. From Graftcode Vision, select your target package type - for example `PyPI` - and copy the generated install command. That installs a **Graft**: a strongly-typed client that lets any app call your service methods directly.
 
-```python
-from graft_pypi_energypricecalculator import EnergyPriceCalculator
+Use the package and import paths from Vision or Gateway logs (for this sample the package is typically `graft-pypi-energy-service==1.0.0`). `get_price()` is synchronous and returns an `int`:
 
-price = await EnergyPriceCalculator.get_price()
+```python
+from graft_pypi_energy_service.energypricecalculator import EnergyPriceCalculator
+
+price = EnergyPriceCalculator.get_price()
 print(price)
 ```
 
