@@ -16,6 +16,7 @@ Use a module from any supported technology directly in a .NET service with Graft
 ### Prerequisites
 
 - [.NET SDK](https://dotnet.microsoft.com/download) installed locally
+- [Python](https://www.python.org/downloads/) installed locally with `python3.dll` on `PATH` — the classic installer or embeddable distribution is preferred. The Microsoft Store / `WindowsApps` Python build may not be detected by the Hypertube launcher.
 
 ## Step 1. Create a project folder
 
@@ -32,6 +33,7 @@ For this example we'll use a Python currency converter from PyPI ([sdncenter-cur
 
 ```bash
 dotnet add package -s https://grft.dev/ graft.pypi.sdncenter-currency-converter
+python -m pip install sdncenter-currency-converter --target ./
 ```
 
 This installs a **Graft** - a strongly-typed C# client generated from the module. You import and call it like any other NuGet package, regardless of which technology the module was originally written in.
@@ -58,6 +60,8 @@ export HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
 set HYPERTUBE_KEY=Fe2w-p2GK-Mn26-j8ZY-Xe25
 ```
 
+The first successful activation creates a `hypertube.lic` file. Later runs (and other local projects) can reuse that license. Activating the same key again in a clean environment may return `ERROR:Key already used`.
+
 ## Step 4. Call the cross-language module and run it
 
 Replace the contents of `Program.cs`:
@@ -68,7 +72,7 @@ using graft.pypi.currency_converter.converter;
 
 GraftConfig.Host = "inMemory";
 
-var result = SimpleCurrencyConverter.convert(100, "USD", "EUR");
+var result = SimpleCurrencyConverter.Convert(100, "USD", "EUR");
 Console.WriteLine($"Converted amount: {result}");
 ```
 

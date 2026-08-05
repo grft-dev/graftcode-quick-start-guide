@@ -16,6 +16,7 @@ Use a module from any supported technology directly in a Java service with Graft
 ### Prerequisites
 
 - [JDK 17+](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
+- [Python](https://www.python.org/downloads/) installed locally with `python3.dll` on `PATH` — the classic installer or embeddable distribution is preferred. The Microsoft Store / `WindowsApps` Python build may not be detected by the Hypertube launcher.
 
 ## Step 1. Create a project folder
 
@@ -103,6 +104,10 @@ export HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
 set HYPERTUBE_KEY=Fe2w-p2GK-Mn26-j8ZY-Xe25
 ```
 
+The first successful activation creates a `hypertube.lic` file. Later runs (and other local projects) can reuse that license. Activating the same key again in a clean environment may return `ERROR:Key already used`. Prefer a local run with an existing `hypertube.lic` over reactivating the sample key inside a fresh Docker container.
+
+A plain `maven:` Docker image is not enough for `inMemory` - the container also needs `python3` plus `libxml2` / `libxmlsec1` (otherwise Hypertube fails loading native libraries).
+
 ## Step 4. Call the cross-language module and run it
 
 Create `src/main/java/energy/Main.java`:
@@ -119,6 +124,7 @@ public class Main {
 
         double result = SimpleCurrencyConverter.convert(100, "USD", "EUR");
         System.out.println("Converted amount: " + result);
+        System.exit(0);
     }
 }
 ```
@@ -128,6 +134,8 @@ Run it:
 ```bash
 mvn compile exec:java "-Dexec.mainClass=energy.Main"
 ```
+
+`System.exit(0)` ends the process after the call - otherwise the Graft client keeps the runtime alive and the command does not return to the terminal.
 
 You should see the converted amount printed in your terminal. `SimpleCurrencyConverter.convert(...)` comes from a Python package, but your code reads like a regular method call - no HTTP request, no response parsing, no serialization. `GraftConfig.host = "inMemory"` tells Graftcode to load and execute the Python module inside the same process.
 

@@ -16,7 +16,7 @@ Use a module from any supported technology directly in a JavaScript service with
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) installed locally
-- [Python](https://www.python.org/) installed locally
+- [Python](https://www.python.org/downloads/) installed locally with `python3.dll` on `PATH` — the classic installer or embeddable distribution is preferred. The Microsoft Store / `WindowsApps` Python build may not be detected by the Hypertube launcher.
 
 ## Step 1. Create a project folder
 
@@ -35,12 +35,13 @@ For this example we'll use a Python currency converter from PyPI ([sdncenter-cur
 
 ```bash
 npm install --registry https://grft.dev/ @graft/pypi-sdncenter-currency-converter
+npm install hypertube-binaries@3.1.3
 python -m pip install sdncenter-currency-converter --target ./
 ```
 
 `npm install --registry https://grft.dev/ @graft/pypi-sdncenter-currency-converter` installs a **Graft** - a strongly-typed JavaScript client generated from the module. You import and call it like any other npm package, regardless of which technology the module was originally written in.
 
-The `pip install` command installs the Python package to your Python environment, which Graftcode uses to execute the module in-process.
+The `pip install` command installs the Python package next to your project, which Graftcode uses to execute the module in-process.
 
 ## Step 3. Set the SDK key
 
@@ -64,6 +65,8 @@ export HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
 set HYPERTUBE_KEY=Fe2w-p2GK-Mn26-j8ZY-Xe25
 ```
 
+The first successful activation creates a `hypertube.lic` file. Later runs (and other local projects) can reuse that license. Activating the same key again in a clean environment may return `ERROR:Key already used`.
+
 ## Step 4. Call the cross-language module and run it
 
 Create `index.js`:
@@ -76,6 +79,7 @@ GraftConfig.host = "inMemory";
 (async () => {
   const result = await SimpleCurrencyConverter.convert(100, "USD", "EUR");
   console.log("Converted amount:", result);
+  process.exit(0);
 })();
 ```
 
@@ -84,6 +88,8 @@ Run it:
 ```bash
 node index.js
 ```
+
+`process.exit(0)` ends the process after the call - otherwise the client keeps the connection open and the command does not return to the terminal.
 
 You should see the converted amount printed in your terminal. `SimpleCurrencyConverter.convert(...)` comes from a Python package, but your code reads like a regular method call - no HTTP request, no response parsing, no serialization. `GraftConfig.host = "inMemory"` tells Graftcode to load and execute the Python module inside the same process.
 
