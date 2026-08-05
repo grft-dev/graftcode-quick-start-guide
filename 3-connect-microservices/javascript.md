@@ -54,8 +54,9 @@ const { GraftConfig, MeterLogic } = require("@graft/nuget-energypriceservice");
 GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 
 (async () => {
-  const consumption = await MeterLogic.NetConsumptionKWh(1000, 1150);
+  const consumption = await MeterLogic.netConsumptionKWh(1000, 1150);
   console.log("Net consumption:", consumption);
+  process.exit(0);
 })();
 ```
 
@@ -65,7 +66,9 @@ Run it:
 node index.js
 ```
 
-You should see the net consumption value printed in your terminal. `MeterLogic.NetConsumptionKWh(...)` is a remote call, but your code reads like a normal method invocation - no HTTP request, no response parsing, no serialization. 
+The npm Graft uses **camelCase** method names (`netConsumptionKWh`), even when Vision shows PascalCase from the .NET backend. `process.exit(0)` ends the process after the call - otherwise the client keeps the connection open and the command does not return to the terminal.
+
+You should see the net consumption value printed in your terminal. `MeterLogic.netConsumptionKWh(...)` is a remote call, but your code reads like a normal method invocation - no HTTP request, no response parsing, no serialization. 
 
 Your IDE can autocomplete available methods on `MeterLogic`, `BillingLogic`, and any other class from that service because the Graft is a real installed package.
 

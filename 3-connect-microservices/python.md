@@ -47,15 +47,24 @@ This adds the generated strongly-typed client for the remote service to your pro
 
 The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Create `main.py`:
 
+The generated Graft currently imports a module path that does not match the on-disk package layout. Register the real module under the name `MeterLogic` expects before importing it - this is a workaround for a packaging defect, not a normal configuration step:
+
 ```python
 import os
-from graft_nuget_energypriceservice.graft.nuget.EnergyPriceService import GraftConfig
+import sys
+from graft_nuget_energypriceservice.graft.nuget import energyPriceService
+
+sys.modules[
+    "graft_nuget_energypriceservice.graft.nuget.EnergyPriceService"
+] = energyPriceService
+
+from graft_nuget_energypriceservice.graft.nuget.energyPriceService import GraftConfig
 from graft_nuget_energypriceservice.meterlogic import MeterLogic
 
 GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws"
 
-consumption = MeterLogic.netConsumptionKWh(1000, 1150)
-print(f"Net consumption: {consumption}")
+consumption = MeterLogic.net_consumption_k_wh(1000, 1150)
+print(f"Net consumption: {consumption}", flush=True)
 os._exit(0)
 ```
 
@@ -65,7 +74,9 @@ Run it:
 python main.py
 ```
 
-You should see the net consumption value printed in your terminal. `MeterLogic.NetConsumptionKWh(...)` is a remote call, but your code reads like a normal method invocation - no HTTP request, no response parsing, no serialization.
+The Python Graft exposes `net_consumption_k_wh` (snake_case; the generator also splits `KWh` as `k_wh`). Use `flush=True` before `os._exit(0)` so the printed result is not lost when the process exits immediately.
+
+You should see the net consumption value printed in your terminal. `MeterLogic.net_consumption_k_wh(...)` is a remote call, but your code reads like a normal method invocation - no HTTP request, no response parsing, no serialization.
 
 Your IDE can autocomplete available methods on `MeterLogic`, `BillingLogic`, and any other class from that service because the Graft is a real installed package.
 

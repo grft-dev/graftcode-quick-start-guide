@@ -37,9 +37,7 @@ Graftcode Vision shows all public classes and methods exposed by the remote serv
 
 Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `Maven`, and copy the generated dependency coordinates.
 
-`hypertube-java-sdk` is still required for this example today, but that extra step is temporary.
-
-Create a `pom.xml` with the Graft dependency and the Graftcode repository:
+Create a `pom.xml` with the Graft dependency and the Graftcode repository. Runtime pieces such as `hypertube-java-sdk` arrive transitively with the Graft - you do not need to declare them separately:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -56,6 +54,7 @@ Create a `pom.xml` with the Graft dependency and the Graftcode repository:
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <repositories>
@@ -72,6 +71,16 @@ Create a `pom.xml` with the Graft dependency and the Graftcode repository:
             <version>1.2.0</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.3</version>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 ```
 
@@ -93,6 +102,7 @@ public class Main {
 
         int consumption = MeterLogic.netConsumptionKWh(1000, 1150);
         System.out.println("Net consumption: " + consumption);
+        System.exit(0);
     }
 }
 ```
@@ -103,7 +113,9 @@ Run it:
 mvn compile exec:java "-Dexec.mainClass=energy.Main"
 ```
 
-You should see the net consumption value printed in your terminal. `MeterLogic.NetConsumptionKWh(...)` is a remote call, but your code reads like a normal method invocation - no HTTP request, no response parsing, no serialization.
+`System.exit(0)` is required so the process ends after the call - otherwise the Graft client keeps background threads alive and the command does not return to the terminal.
+
+You should see the net consumption value printed in your terminal. `MeterLogic.netConsumptionKWh(...)` is a remote call, but your code reads like a normal method invocation - no HTTP request, no response parsing, no serialization.
 
 Your IDE can autocomplete available methods on `MeterLogic`, `BillingLogic`, and any other class from that service because the Graft is a real Maven dependency.
 
