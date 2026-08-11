@@ -29,13 +29,13 @@ cd java-energy-consumer
 
 ## Step 2. Find the remote method in Graftcode Vision
 
-We're hosting this sample service for you so you can see exactly what connecting to another team's service looks like in practice - open it in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) to explore.
+We're hosting this sample service for you so you can see exactly what connecting to another team's service looks like in practice - open it in [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io) to explore.
 
 Graftcode Vision shows all public classes and methods exposed by the remote service - their names, parameter types, and return types. It also gives you the exact package manager command needed to install that service as a Graft.
 
 ## Step 3. Install the Graft
 
-Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `Maven`, and copy the generated dependency coordinates.
+Open [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io), pick `Maven`, and copy the generated dependency coordinates.
 
 Create a `pom.xml` with the Graft dependency and the Graftcode repository. Runtime pieces such as `hypertube-java-sdk` arrive transitively with the Graft - you do not need to declare them separately:
 
@@ -88,7 +88,7 @@ This adds the generated strongly-typed client for the remote service to your pro
 
 ## Step 4. Call the remote method and run it
 
-The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Create `src/main/java/energy/Main.java`:
+The exact configuration snippet for your language is available in [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Create `src/main/java/energy/Main.java`:
 
 ```java
 package energy;
@@ -98,7 +98,7 @@ import graft.nuget.EnergyPriceService.EnergyPriceService.MeterLogic;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+        GraftConfig.host = "wss://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io/ws";
 
         int consumption = MeterLogic.netConsumptionKWh(1000, 1150);
         System.out.println("Net consumption: " + consumption);
