@@ -134,11 +134,17 @@ Your service is now accessible from any application. From Graftcode Vision, sele
 Use the package and import paths from Vision or Gateway logs (for this sample the package is typically `graft-pypi-energy-service==1.0.0`). `get_price()` is synchronous and returns an `int`:
 
 ```python
-from graft_pypi_energy_service.energypricecalculator import EnergyPriceCalculator
+from graft_pypi_energy_service.energy_price_calculator import EnergyPriceCalculator
+from graft_pypi_energy_service.graft_config import GraftConfig
+
+GraftConfig.host = "ws://localhost:80/ws"
 
 price = EnergyPriceCalculator.get_price()
 print(price)
 ```
+
+The generated PyPI Graft uses a flat module layout: import `energy_price_calculator` and `graft_config` (snake_case file names), not a nested `energypricecalculator` path.
+
 
 No REST clients, no request/response models, no endpoint URLs in your code. When you add or update a public method, consumers update their Graft with a single package manager command.
 

@@ -32,14 +32,14 @@ npm install
 
 Before you install anything, compare the two views of the same backend:
 
-- [Swagger](https://g-d-ca-polc-demo-ecws-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io/swagger/index.html) shows routes, verbs, and payloads.
-- [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io) shows public classes and methods and gives you the package manager command to install them.
+- [Swagger](https://gc-d-ca-polc-demo-ecws-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/swagger/index.html) shows routes, verbs, and payloads.
+- [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) shows public classes and methods and gives you the package manager command to install them.
 
 This is the key Graftcode shift: instead of reading an API spec and building a client, you install the service as a dependency and call methods directly.
 
 ## Step 3. Install the Graft
 
-Open [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io), pick `npm`, and copy the generated install command.
+Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `npm`, and copy the generated install command.
 
 ```bash
 npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-energypriceservice@1.2.0
@@ -49,13 +49,13 @@ The command above is a snapshot for this guide. The registry UUID and package ve
 
 ## Step 4. Configure the generated client
 
-Open `src/App.jsx` and connect the generated client to the service host. The exact configuration snippet for your language is available in [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab:
+Open `src/App.jsx` and connect the generated client to the service host. The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab:
 
 ```javascript
 import { useEffect, useState } from "react";
 import { BillingLogic, GraftConfig } from "@graft/nuget-energypriceservice";
 
-GraftConfig.host = "wss://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io/ws";
+GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 ```
 
 `@graft/nuget-energypriceservice` is the Graft you installed - it exposes the backend's public classes and methods as normal JavaScript imports. Setting `GraftConfig.host` tells the client where the backend is running.
@@ -96,7 +96,7 @@ If something is not working, expand below to see the full `src/App.jsx` source:
 import { useEffect, useState } from "react";
 import { BillingLogic, GraftConfig } from "@graft/nuget-energypriceservice";
 
-GraftConfig.host = "wss://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io/ws";
+GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 
 function App() {
   const [data, setData] = useState(null);
@@ -115,7 +115,7 @@ export default App;
 
 ## Step 7. Explore more methods and keep up with backend changes
 
-Go back to [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io) to inspect more methods on `BillingLogic`. 
+Go back to [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) to inspect more methods on `BillingLogic`. 
 
 Your IDE can autocomplete available methods and arguments because the service is installed as a typed package, not consumed through handwritten API code. Your AI can now generate frontend code using backend methods as easily as using other npm modules you imported.
 

@@ -30,13 +30,13 @@ npm init -y
 
 ## Step 2. Find the remote method in Graftcode Vision
 
-We're hosting this sample service for you so you can see exactly what connecting to another team's service looks like in practice - open it in [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io) to explore.
+We're hosting this sample service for you so you can see exactly what connecting to another team's service looks like in practice - open it in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) to explore.
 
 Graftcode Vision shows all public classes and methods exposed by the remote service - their names, parameter types, and return types. It also gives you the exact package manager command needed to install that service as a Graft.
 
 ## Step 3. Install the Graft
 
-Open [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io), pick `npm`, and copy the generated install command.
+Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `npm`, and copy the generated install command.
 
 ```bash
 npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-energypriceservice@1.2.0
@@ -46,12 +46,12 @@ This adds the generated strongly-typed client for the remote service to your pro
 
 ## Step 4. Call the remote method and run it
 
-The exact configuration snippet for your language is available in [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Now, let's create `index.js`, paste the code below and save the file:
+The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Now, let's create `index.js`, paste the code below and save the file:
 
 ```javascript
 const { GraftConfig, MeterLogic } = require("@graft/nuget-energypriceservice");
 
-GraftConfig.host = "wss://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io/ws";
+GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
 
 (async () => {
   const consumption = await MeterLogic.netConsumptionKWh(1000, 1150);

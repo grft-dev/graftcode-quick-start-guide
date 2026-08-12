@@ -29,13 +29,13 @@ cd py-energy-consumer
 
 ## Step 2. Find the remote method in Graftcode Vision
 
-We're hosting this sample service for you so you can see exactly what connecting to another team's service looks like in practice - open it in [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io) to explore.
+We're hosting this sample service for you so you can see exactly what connecting to another team's service looks like in practice - open it in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) to explore.
 
 Graftcode Vision shows all public classes and methods exposed by the remote service - their names, parameter types, and return types. It also gives you the exact package manager command needed to install that service as a Graft.
 
 ## Step 3. Install the Graft
 
-Open [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io), pick `PyPI`, and copy the generated install command.
+Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io), pick `PyPI`, and copy the generated install command.
 
 ```bash
 python -m pip install --extra-index-url https://grft.dev/simple/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft-nuget-energypriceservice==1.2.0
@@ -45,23 +45,16 @@ This adds the generated strongly-typed client for the remote service to your pro
 
 ## Step 4. Call the remote method and run it
 
-The exact configuration snippet for your language is available in [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Create `main.py`:
+The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Create `main.py`:
 
-The generated Graft currently imports a module path that does not match the on-disk package layout. Register the real module under the name `MeterLogic` expects before importing it - this is a workaround for a packaging defect, not a normal configuration step:
+The generated PyPI Graft uses a flat package layout (`graft_config.py`, `meter_logic.py`). Import those modules directly:
 
 ```python
 import os
-import sys
-from graft_nuget_energypriceservice.graft.nuget import energyPriceService
+from graft_nuget_energypriceservice.graft_config import GraftConfig
+from graft_nuget_energypriceservice.meter_logic import MeterLogic
 
-sys.modules[
-    "graft_nuget_energypriceservice.graft.nuget.EnergyPriceService"
-] = energyPriceService
-
-from graft_nuget_energypriceservice.graft.nuget.energyPriceService import GraftConfig
-from graft_nuget_energypriceservice.meterlogic import MeterLogic
-
-GraftConfig.host = "wss://g-d-ca-polc-demo-ecbe-01.blueriver-ab3772ba.polandcentral.azurecontainerapps.io/ws"
+GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws"
 
 consumption = MeterLogic.net_consumption_k_wh(1000, 1150)
 print(f"Net consumption: {consumption}", flush=True)

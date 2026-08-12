@@ -183,7 +183,9 @@ The AI agent discovers `EnergyPriceCalculator.getPrice()` through MCP and calls 
 
 > "Calculate the energy bill for 250 kWh"
 
-The agent calls `EnergyPriceCalculator.calculateBill(250)` and returns the result. No prompt engineering, no tool definitions in your code - MCP handles discovery and invocation automatically.
+The agent calls `EnergyPriceCalculator.calculateBill(...)` and returns the result. No prompt engineering, no tool definitions in your code - MCP handles discovery and invocation automatically.
+
+For **manual MCP JSON-RPC** (`tools/call`), use the parameter names from `tools/list` / `inputSchema` - do not assume they match the Java source parameter names. On current Gateway builds the Java `calculateBill(int kwhUsed)` tool exposes a single integer argument named **`arg0`** (calling with `kwhUsed` yields `NoSuchMethodException`). AI clients that read the schema (for example Cursor) pick this up automatically.
 
 ## Step 7. Run with a Project Key (recommended for real-world usage)
 

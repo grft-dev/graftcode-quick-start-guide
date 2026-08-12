@@ -155,6 +155,8 @@ You will see all public methods from your Kotlin class - their names, parameter 
 - A **"Try it out"** button to call methods live, directly from the browser.
 - A **package manager command** (npm, NuGet, PyPI, Maven, etc.) to install this service as a strongly-typed client in any other application.
 
+When calling the service through **MCP** (`http://localhost:81/mcp`), run `tools/list` first. Kotlin `companion object` + `@JvmStatic` can expose **hashed / duplicate** tool names (for example `getPrice_b5df91ae` for the static method and another hash for the Companion instance). A plain `getPrice` name may return MCP error `-32602 Invalid fully qualified member name`. Prefer the hashed name from `tools/list`, or call via the Graft npm client below.
+
 ## Step 5. Run with a Project Key (recommended for real-world usage)
 
 Everything above works without any account - perfect for learning and local development. When you're ready for real-world usage, create a free account at [portal.graftcode.com](https://portal.graftcode.com), set up a project, and copy its **Project Key**.

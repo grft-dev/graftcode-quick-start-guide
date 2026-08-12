@@ -68,7 +68,7 @@ Create `main.py`:
 
 ```python
 import os
-from graft_nuget_sdntestsimplecar.simplecar import SimpleCar, GraftConfig
+from graft_nuget_sdntestsimplecar.simple_car import SimpleCar, GraftConfig
 
 GraftConfig.host = "inMemory"
 
