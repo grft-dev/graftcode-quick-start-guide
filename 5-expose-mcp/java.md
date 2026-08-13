@@ -16,8 +16,8 @@ Turn a Java class into an MCP-compatible service that AI agents can discover and
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) installed and running
-- [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
+- [Docker](https://docs.docker.com/get-docker/) installed and running - enough to build and host this tutorial
+- [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) *(optional)* - only if you prefer compiling outside the `maven:3.9-eclipse-temurin-21` image
 - An AI tool with MCP support - for example [Cursor](https://cursor.com/) or [Claude Desktop](https://claude.ai/download)
 
 ## Step 1. Create a project folder
@@ -103,7 +103,7 @@ EXPOSE 81
 CMD ["gg","--modules", "/usr/app/target/energy-service-1.0.0.jar"]
 ```
 
-`gg` (Graftcode Gateway) reads your `jar`, discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and for static methods also as MCP tools for AI agents. Port 81 handles service calls and the MCP endpoint, port 81 serves Graftcode Vision.
+`gg` (Graftcode Gateway) analyzes your compiled JAR, discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and for static methods also as MCP tools for AI agents. Port `80` handles service calls, port `81` serves Graftcode Vision and the MCP endpoint.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
@@ -112,9 +112,9 @@ CMD ["gg","--modules", "/usr/app/target/energy-service-1.0.0.jar"]
 - **RUN mvn package -q** - Compiles the project and packages it into a JAR in `target/`.
 - **RUN apt-get update && apt-get install -y wget** - Installs tools needed to download Graftcode Gateway.
 - **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
-- **EXPOSE 80** - Declares the port used for service communication, including the MCP endpoint.
-- **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
-- **CMD ["gg"]** - Runs Graftcode Gateway. It reads `pom.xml` to find your compiled classes, discovers public methods, and exposes them as both Grafts and MCP tools.
+- **EXPOSE 80** - Declares the port for Graft service calls (app-to-app).
+- **EXPOSE 81** - Declares the port for Graftcode Vision and the MCP endpoint.
+- **CMD ["gg", "--modules", "/usr/app/target/energy-service-1.0.0.jar"]** - Starts Graftcode Gateway against the compiled JAR. Gateway analyzes the JAR, discovers public methods, and exposes them as Grafts and MCP tools.
 
 </collapsible>
 
@@ -183,7 +183,9 @@ The AI agent discovers `EnergyPriceCalculator.getPrice()` through MCP and calls 
 
 > "Calculate the energy bill for 250 kWh"
 
-The agent calls `EnergyPriceCalculator.calculateBill(250)` and returns the result. No prompt engineering, no tool definitions in your code - MCP handles discovery and invocation automatically.
+The agent calls `EnergyPriceCalculator.calculateBill(...)` and returns the result. No prompt engineering, no tool definitions in your code - MCP handles discovery and invocation automatically.
+
+For **manual MCP JSON-RPC** (`tools/call`), use the parameter names from `tools/list` / `inputSchema` - do not assume they match the Java source parameter names. On current Gateway builds the Java `calculateBill(int kwhUsed)` tool exposes a single integer argument named **`arg0`** (calling with `kwhUsed` yields `NoSuchMethodException`). AI clients that read the schema (for example Cursor) pick this up automatically.
 
 ## Step 7. Run with a Project Key (recommended for real-world usage)
 

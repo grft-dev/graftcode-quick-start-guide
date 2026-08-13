@@ -45,6 +45,8 @@ Open [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.po
 npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-energypriceservice@1.2.0
 ```
 
+The command above is a snapshot for this guide. The registry UUID and package version can change - always prefer the install command currently shown in Graftcode Vision.
+
 ## Step 4. Configure the generated client
 
 Open `src/App.vue` and connect the generated client to the service host. The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab:
@@ -62,7 +64,7 @@ GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandce
 
 ## Step 5. Call a backend method
 
-`BillingLogic` is a class from the backend, and `CalculateMonthlyBill(...)` is one of its public methods - the same ones you browsed in Graftcode Vision. You call it like any other imported function.
+`BillingLogic` is a class from the backend, and `calculateMonthlyBill(...)` is one of its public methods - the same ones you browsed in Graftcode Vision. The npm Graft uses **camelCase** method names even when the backend or Vision shows PascalCase from C#. You call it like any other imported function.
 
 ```vue
 <script setup>
@@ -74,7 +76,7 @@ GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandce
 const bill = ref(null);
 
 onMounted(async () => {
-  const result = await BillingLogic.CalculateMonthlyBill(88.4, 1.4, 23);
+  const result = await BillingLogic.calculateMonthlyBill(88.4, 1.4, 23);
   bill.value = result.toFixed(2);
 });
 </script>
@@ -92,7 +94,7 @@ Start the development server:
 npm run dev
 ```
 
-Open the URL shown in the terminal (typically [http://localhost:5173](http://localhost:5173)). You should see the calculated energy bill rendered on the page.
+In this starter, `npm run dev` runs Vite. Open the URL shown in the terminal (typically [http://localhost:5173](http://localhost:5173)). If that port is already in use (for example another Vite app), Vite picks the next free port - use the URL printed in the terminal. You should see the calculated energy bill rendered on the page.
 
 If something is not working, expand below to see the full `src/App.vue` source:
 
@@ -108,7 +110,7 @@ GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandce
 const bill = ref(null);
 
 onMounted(async () => {
-  const result = await BillingLogic.CalculateMonthlyBill(88.4, 1.4, 23);
+  const result = await BillingLogic.calculateMonthlyBill(88.4, 1.4, 23);
   bill.value = result.toFixed(2);
 });
 </script>

@@ -16,7 +16,7 @@ Turn a Groovy class into a remotely callable backend service using Graftcode Gat
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
+- [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) only if you build outside Docker - the Maven base image below already provides both for `docker build`
 
 ## Step 1. Create a project folder
 
@@ -90,7 +90,7 @@ class EnergyPriceCalculator {
 }
 ```
 
-This is a plain Groovy class - no annotations, no frameworks, no special interfaces. Groovy methods are public by default, so every method you write here will automatically become available for remote consumption once hosted through Graftcode Gateway.
+This is a plain Groovy class - no annotations, no frameworks, no special interfaces. Groovy methods are public by default, so methods you define here become available for remote consumption once hosted through Graftcode Gateway. Vision and MCP may also list inherited Groovy runtime methods such as `getMetaClass` and `setMetaClass`.
 
 ## Step 3. Host it with Graftcode Gateway
 
@@ -105,7 +105,7 @@ COPY . /usr/app/
 
 RUN mvn package -q
 
-RUN apt-get update \ 
+RUN apt-get update \
  && apt-get install -y wget \
  && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
  && dpkg -i /usr/app/gg.deb \
@@ -131,7 +131,7 @@ The key line is the last one - `gg` (Graftcode Gateway) reads your compiled JAR,
 - **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
 - **EXPOSE 80** - Declares the port used for service communication (Grafts connect here).
 - **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
-- **CMD ["gg"]** - Runs Graftcode Gateway. It reads the compiled JAR, discovers public methods, and makes them callable.
+- **CMD ["gg", "--modules", "/usr/app/target/energy-service-1.0.0.jar"]** - Runs Graftcode Gateway. `--modules` points Gateway at the compiled JAR to analyze; it discovers public methods and makes them callable. `--modules` is optional when the same directory as `gg` contains only one target JAR.
 
 </collapsible>
 
@@ -172,7 +172,11 @@ A Project Key gives you:
 
 ## Step 6. Call it from another app
 
-Your service is now accessible from any application. From Graftcode Vision, select your target package type - for example `Maven` - and copy the generated install command. That installs a **Graft**: a strongly-typed client that lets any app call your service methods directly.
+Your service is now accessible from any application. From Graftcode Vision, select your target package type - for example `npm` - and copy the generated install command. That installs a **Graft**: a strongly-typed client that lets any app call your service methods directly.
+
+The generated npm package name is derived from Maven coordinates (for this sample it looks like `@graft/maven-groupid_com-example_artifactid_energy-service@1.0.0`). Always copy the exact command from Vision or Gateway logs.
+
+If Gateway logs "Uploading UGM successful" but `npm install` or Maven restore returns **404**, the package may not be available yet. Recheck the registry URL from Vision/logs, retry the install, or call methods through the MCP endpoint at `http://localhost:81/mcp` while troubleshooting.
 
 ```groovy
 import com.graft.maven.energypricecalculator.EnergyPriceCalculator

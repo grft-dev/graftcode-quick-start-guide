@@ -17,7 +17,7 @@ Turn a JavaScript module into an MCP-compatible service that AI agents can disco
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [Node.js](https://nodejs.org/) installed locally
+- [Node.js](https://nodejs.org/) *(optional)* - only if you edit and run files outside Docker; build and Gateway run entirely in the container
 - An AI tool with MCP support - for example [Cursor](https://cursor.com/) or [Claude Desktop](https://claude.ai/download)
 
 ## Step 1. Create a project folder
@@ -82,12 +82,12 @@ CMD ["gg", "./package.json"]
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
-- **FROM node:24** - Uses the official Node.js 24 image as the base runtime environment.
+- **FROM node:24** - Uses the official Node.js 24 image as the build environment. Graftcode Gateway runs your module with its embedded Node runtime - separate from the base image - so your code stays portable without extra configuration.
 - **COPY . /usr/app/** - Copies your project files (including `index.js`) into the container.
 - **RUN apt-get update && apt-get install -y wget** - Installs tools needed to download Graftcode Gateway.
 - **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
-- **EXPOSE 80** - Declares the port used for service communication, including the MCP endpoint.
-- **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
+- **EXPOSE 80** - Declares the port for Graft service calls (app-to-app).
+- **EXPOSE 81** - Declares the port for Graftcode Vision and the MCP endpoint.
 - **CMD ["gg", "./package.json"]** - Runs Graftcode Gateway, pointing it at your `package.json` to find your module, discover public methods, and expose them as both Grafts and MCP tools.
 
 </collapsible>

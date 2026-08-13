@@ -1,19 +1,19 @@
 ---
 title: "Python"
-description: "Build two Python modules in one project as a monolith, then extract one into a separate microservice with Graftcode - and switch freely between the two topologies with a single configuration change."
+description: "Build two Python modules in one project as a monolith, then extract one into a separate microservice with Graftcode — and switch freely between the two topologies with a single configuration change."
 ---
 
 ## Goal
 
-Start with two Python modules in a single project running as a monolith, then extract one into a separate microservice using Graftcode. After that one-time setup, switch freely between monolith and microservice by changing a single configuration value - zero code changes.
+Start with two Python modules in a single project running as a monolith, then extract one into a separate microservice using Graftcode. After that one-time setup, switch freely between monolith and microservice by changing a single configuration value — zero code changes.
 
 ### What You'll See
 
-- Create two Python modules in the same project - a price calculator and a billing service that calls it directly.
+- Create two Python modules in the same project — a price calculator and a billing service that calls it directly.
 - Host both in a single container as a monolith.
 - Extract the price calculator into its own container as a standalone microservice.
 - Connect the billing service to it through a Graft.
-- Switch between monolith and microservice by changing one environment variable - no code changes from that point on.
+- Switch between monolith and microservice by changing one environment variable — no code changes from that point on.
 
 ### Prerequisites
 
@@ -68,7 +68,7 @@ class BillingService:
         return kwh_used * price
 ```
 
-A regular import - the billing service imports the price calculator directly as a local module. No Graftcode involved yet.
+A regular import — the billing service imports the price calculator directly as a local module. No Graftcode involved yet.
 
 ## Step 4. Host as a monolith
 
@@ -106,7 +106,7 @@ docker run -d -p 80:80 -p 81:81 --name energy_platform py-energy-platform:test
 
 Open [http://localhost:81/GV](http://localhost:81/GV) and try calling `BillingService.calculate_bill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
 
-At this point, everything runs inside **one container** - both modules share a single process. This is your monolith.
+At this point, everything runs inside **one container** — both modules share a single process. This is your monolith.
 
 ## Step 5. Extract the price calculator as a separate microservice
 
@@ -143,33 +143,34 @@ docker network create graftcode_demo
 docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name price_calculator price-calculator-py:test
 ```
 
-Open [http://localhost:91/GV](http://localhost:91/GV) - the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.get_price` listed with its return type.
+Open [http://localhost:91/GV](http://localhost:91/GV) — the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.get_price` listed with its return type.
 
 ## Step 6. Connect the billing service through a Graft
 
-Now that the price calculator runs on its own gateway, install its **Graft** - the strongly-typed client that Graftcode generates automatically.
+Now that the price calculator runs on its own gateway, install its **Graft** — the strongly-typed client that Graftcode generates automatically.
 
-From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **PyPI** and copy the generated install command. Note that the `--extra-index-url` address shown in your Graftcode Vision interface may be different than the example provided below.
+From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **PyPI** and copy the generated install command. The package name follows your hosted module coordinates (for this sample, typically `graft-pypi-energy-platform` from `pyproject.toml` `name = "energy-platform"`). The `--extra-index-url` shown in Vision may differ from the example below.
 
 ```bash
-pip install --target=./lib --extra-index-url http://localhost:91/simple/ graft-pypi-energypricecalculator
+pip install --target=./lib --extra-index-url https://grft.dev/simple/<uuid>__free graft-pypi-energy-platform==1.0.0
 ```
 
-> The exact package name and registry URL are shown in Graftcode Vision - copy them from there. The `--target=./lib` flag installs packages into a local `lib/` directory so they get copied into the container alongside your project - similar to how `npm install` stores packages in `node_modules/`.
+> The exact package name and registry URL are shown in Graftcode Vision — copy them from there. The `--target=./lib` flag installs packages into a local `lib/` directory so they get copied into the container alongside your project — similar to how `npm install` stores packages in `node_modules/`.
 
-Update `src/billing_service.py` to use the Graft instead of the direct import:
+Update `src/billing_service.py` to use the Graft instead of the direct import. Import paths follow the generated package layout; `get_price()` is synchronous:
 
 ```python
 import os
-from graft_pypi_energypricecalculator import GraftConfig, EnergyPriceCalculator
+from graft_pypi_energy_platform.energypricecalculator import EnergyPriceCalculator
+from graft_pypi_energy_platform.graft.pypi.energy_platform import GraftConfig
 
 GraftConfig.set_config(os.environ.get("GRAFT_CONFIG"))
 
 
 class BillingService:
     @staticmethod
-    async def calculate_bill(kwh_used: int) -> int:
-        price = await EnergyPriceCalculator.get_price()
+    def calculate_bill(kwh_used: int) -> int:
+        price = EnergyPriceCalculator.get_price()
         return kwh_used * price
 ```
 
@@ -177,20 +178,22 @@ This is the only code change in the entire tutorial. The billing service now rea
 
 ## Step 7. Run as a microservice
 
-Stop the monolith container, rebuild the image with the updated code, and run the billing service pointing at the remote price calculator:
+Stop the monolith container, rebuild the image with the updated code, and run the billing service pointing at the remote price calculator.
+
+> In `GRAFT_CONFIG`, `name=` is the Graft's internal name (for this sample: `graft.pypi.energy_platform`) — not the hyphenated PyPI package id. Copy it from Vision or the generated `GraftConfig` in the package.
 
 ```bash
 docker stop energy_platform
 docker rm energy_platform
 docker build --no-cache --pull -t py-energy-platform:test .
 docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=graft-pypi-energypricecalculator;host=price_calculator:9092;runtime=python;modules=/usr/app/src" \
+  -e GRAFT_CONFIG="name=graft.pypi.energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src" \
   -e PYTHONPATH=/usr/app/lib \
   -p 80:80 -p 81:81 \
   --name energy_platform py-energy-platform:test
 ```
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and call `BillingService.calculate_bill` with `250`. Same method, same result - but the price calculation now happens over the network in a separate container.
+Open [http://localhost:81/GV](http://localhost:81/GV) and call `BillingService.calculate_bill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
 
 ## Step 8. Switch back to monolith
 
@@ -200,7 +203,7 @@ Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
 docker stop energy_platform
 docker rm energy_platform
 docker run -d \
-  -e GRAFT_CONFIG="name=graft-pypi-energypricecalculator;host=inMemory;runtime=python;modules=/usr/app/src" \
+  -e GRAFT_CONFIG="name=graft.pypi.energy_platform;host=inMemory;runtime=python;modules=/usr/app/src" \
   -e PYTHONPATH=/usr/app/lib \
   -p 80:80 -p 81:81 \
   --name energy_platform py-energy-platform:test
@@ -210,15 +213,13 @@ Compare the two configurations side by side:
 
 ```text
 # Monolith (in-process)
-name=graft-pypi-energypricecalculator;host=inMemory;runtime=python;modules=/usr/app/src
+name=graft.pypi.energy_platform;host=inMemory;runtime=python;modules=/usr/app/src
 
 # Microservice (remote)
-name=graft-pypi-energypricecalculator;host=price_calculator:9092;runtime=python;modules=/usr/app/src
+name=graft.pypi.energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src
 ```
 
-> We're still working on the best way to pass the configuration so that it's intuitive and user friendly.
-
-Same Docker image, same code - just a different environment variable. You can switch back and forth as many times as you need.
+`GRAFT_CONFIG` owns the topology — same Docker image, same business logic, one environment variable. Switch back and forth as often as you need.
 
 ## Step 9. Prove the microservice call goes over the network
 
@@ -228,7 +229,7 @@ Switch back to microservice mode to verify the call is truly remote:
 docker stop energy_platform
 docker rm energy_platform
 docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=graft-pypi-energypricecalculator;host=price_calculator:9092;runtime=python;modules=/usr/app/src" \
+  -e GRAFT_CONFIG="name=graft.pypi.energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src" \
   -e PYTHONPATH=/usr/app/lib \
   -p 80:80 -p 81:81 \
   --name energy_platform py-energy-platform:test
@@ -240,7 +241,7 @@ Stop the price calculator:
 docker stop price_calculator
 ```
 
-Call `calculate_bill` in Graftcode Vision - you'll see a connection error because the remote service is down.
+Call `calculate_bill` in Graftcode Vision — you'll see a connection error because the remote service is down.
 
 Start it again:
 
@@ -248,11 +249,11 @@ Start it again:
 docker start price_calculator
 ```
 
-The method works again. The code never changed - only the deployment topology did.
+The method works again. The code never changed — only the deployment topology did.
 
 ## Step 10. Run with a Project Key (recommended for real-world usage)
 
-Everything above works without any account - perfect for learning and local development. When you're ready for real-world usage, create a free account at [portal.graftcode.com](https://portal.graftcode.com), set up a project, and copy its **Project Key**.
+Everything above works without any account — perfect for learning and local development. When you're ready for real-world usage, create a free account at [portal.graftcode.com](https://portal.graftcode.com), set up a project, and copy its **Project Key**.
 
 Then pass the key when starting your gateways:
 
@@ -262,9 +263,9 @@ CMD ["gg", "--modules", "./src/", "--projectKey", "YOUR_PROJECT_KEY"]
 
 A Project Key gives you:
 
-- **Stable registry URL** - consumers always find and update your Graft through a permanent address, so install commands don't change when you redeploy.
-- **Portal visibility** - see all your gateways and exposed services in one place at [gateways.graftcode.com](https://gateways.graftcode.com/).
-- **Access control** - decide who can download your Grafts using package manager authentication and permissions.
+- **Stable registry URL** — consumers always find and update your Graft through a permanent address, so install commands don't change when you redeploy.
+- **Portal visibility** — see all your gateways and exposed services in one place at [gateways.graftcode.com](https://gateways.graftcode.com/).
+- **Access control** — decide who can download your Grafts using package manager authentication and permissions.
 
 <collapsible title="Old Way vs New Way">
 
@@ -282,11 +283,11 @@ Extracting a module from a monolith into a microservice typically requires:
 
 ### With Graftcode
 
-- Start with both modules in the same project as plain Python - a normal monolith
+- Start with both modules in the same project as plain Python — a normal monolith
 - When you're ready to extract, host the module on its own Graftcode Gateway and install the Graft
-- One import change in the consuming service - then topology is controlled by configuration forever
+- One import change in the consuming service — then topology is controlled by configuration forever
 - Switch between monolith and microservice (and back) with one environment variable
 
-> With Graftcode, extracting a module from a monolith is not a rewrite - it's a one-time import change followed by a configuration switch. After that, your code stays focused on business logic while the architecture adapts to your operational needs.
+> With Graftcode, extracting a module from a monolith is not a rewrite — it's a one-time import change followed by a configuration switch. After that, your code stays focused on business logic while the architecture adapts to your operational needs.
 
 </collapsible>

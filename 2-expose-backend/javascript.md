@@ -16,7 +16,7 @@ Turn a JavaScript module into a remotely callable backend service using Graftcod
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [Node.js](https://nodejs.org/) installed locally
+- [Node.js](https://nodejs.org/) only if you run the npm consumer locally - Docker alone is enough to build and host the service
 
 ## Step 1. Create a project folder
 
@@ -71,6 +71,8 @@ CMD ["gg", "./package.json"]
 
 The key line is the last one - `gg` (Graftcode Gateway) reads your `package.json`, discovers all public methods in your module, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
 
+The Dockerfile base image is `node:24`, but Gateway analyzes and runs the module with its embedded **Node.js 22** runtime. Stick to syntax and dependencies that work on Node 22 unless you have verified otherwise. During analysis Gateway may also log a logger re-initialization warning (`last-write-wins`); it is safe to ignore if the module loads successfully.
+
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
 - **FROM node:24** - Uses the official Node.js 24 image as the base runtime environment.
@@ -122,8 +124,10 @@ A Project Key gives you:
 
 Your service is now accessible from any application. From Graftcode Vision, select your target package type - for example `npm` - and copy the generated install command. That installs a **Graft**: a strongly-typed client that lets any app call your service methods directly.
 
+Use the package name from Vision or Gateway logs (for this sample typically `@graft/npm-js-energy-service`):
+
 ```javascript
-const { EnergyPriceCalculator } = require("@graft/npm-energypricecalculator");
+const { EnergyPriceCalculator } = require("@graft/npm-js-energy-service");
 
 const price = await EnergyPriceCalculator.getPrice();
 console.log(price);

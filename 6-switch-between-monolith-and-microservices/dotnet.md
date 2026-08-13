@@ -19,14 +19,14 @@ Start with two .NET classes in a single project running as a monolith, extract o
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [.NET SDK](https://dotnet.microsoft.com/download) installed locally
+- [.NET SDK 9](https://dotnet.microsoft.com/download) installed locally (matches the `sdk:9.0` Docker image used below)
 
 ## Step 1. Create a project folder
 
-Create a new .NET class library project:
+Create a new .NET class library project targeting `net9.0` (the same TFM as the Docker image):
 
 ```bash
-dotnet new classlib -n EnergyPlatform
+dotnet new classlib -n EnergyPlatform -f net9.0
 cd EnergyPlatform
 ```
 
@@ -112,16 +112,16 @@ Before deploying the price calculator as a separate service, extract it into its
 From the `EnergyPlatform/` directory, restructure the project:
 
 ```bash
-# Create a solution to hold both projects
-dotnet new sln -n EnergyPlatform
+# Create a classic .sln (SDK 10+ defaults to .slnx — use -f sln so the Dockerfile path matches)
+dotnet new sln -n EnergyPlatform -f sln
 
 # Create the price calculator as its own class library
-dotnet new classlib -n EnergyPriceCalculator
+dotnet new classlib -n EnergyPriceCalculator -f net9.0
 mv EnergyPriceCalculator.cs EnergyPriceCalculator/
 rm EnergyPriceCalculator/Class1.cs
 
 # Create the billing service as its own class library
-dotnet new classlib -n BillingService
+dotnet new classlib -n BillingService -f net9.0
 mv BillingService.cs BillingService/
 rm BillingService/Class1.cs
 
@@ -150,7 +150,7 @@ EnergyPlatform/
     └── BillingService.cs
 ```
 
-The code in both `.cs` files is unchanged — same method calls. The only difference is they now compile into **separate DLLs**.
+The method calls stay the same. The only difference is they now compile into **separate DLLs**.
 
 Update the `Dockerfile` to build the solution and load both modules:
 
@@ -206,6 +206,21 @@ public class EnergyPriceCalculator
 }
 ```
 
+Because the namespace and class share the same name, qualify the call in `BillingService/BillingService.cs`:
+
+```csharp
+namespace EnergyPlatform;
+
+public class BillingService
+{
+    public static int CalculateBill(int kwhUsed)
+    {
+        var price = global::EnergyPriceCalculator.EnergyPriceCalculator.GetPrice();
+        return kwhUsed * price;
+    }
+}
+```
+
 ## Step 7. Deploy the price calculator as a separate microservice
 
 Now let's say the price calculator needs to scale independently, or another team wants to own it. Because it's already its own project with its own DLL, we just need to host it on its own gateway.
@@ -249,15 +264,13 @@ Open [http://localhost:91/GV](http://localhost:91/GV) — the price calculator i
 
 Now that the price calculator runs on its own gateway, install its **Graft** — the strongly-typed client that Graftcode generates automatically.
 
-From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **NuGet** and copy the generated install command. 
+From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **NuGet** and copy the generated install command.
 
-> Note that the source URL shown in your Graftcode Vision interface may be different than the example provided below.
+> The exact package name and source URL are shown in Graftcode Vision — copy them from there. The example below is a snapshot and may differ for your gateway.
 
 ```bash
 dotnet add BillingService/BillingService.csproj package -s https://grft.dev/009f24d4-64b6-49af-9834-4119d581c64d__free graft.nuget.energypricecalculator --version 1.0.0
 ```
-
-> The exact package name and source URL are shown in Graftcode Vision — copy them from there.
 
 Update `BillingService/BillingService.cs` to use the Graft instead of the direct reference:
 
@@ -281,7 +294,7 @@ public static class BillingService
 }
 ```
 
-This is the **only code change** in the entire tutorial. The `Pricing` alias distinguishes the Graft's `EnergyPriceCalculator` from the local class of the same name. The billing service now reads its configuration from the `GRAFT_CONFIG` environment variable and has no knowledge of whether the price calculator runs in-process or on a remote host. From this point on, switching between monolith and microservice is purely a configuration change.
+This is the **only code change** in the entire tutorial. The `RemotePricing` alias distinguishes the Graft's `EnergyPriceCalculator` from the local class of the same name. The billing service now reads its configuration from the `GRAFT_CONFIG` environment variable and has no knowledge of whether the price calculator runs in-process or on a remote host. From this point on, switching between monolith and microservice is purely a configuration change.
 
 ## Step 9. Add a NuGet config so Docker can find the dependency
 
@@ -309,6 +322,8 @@ docker rm energy_platform
 docker build --pull -t dotnet-energy-platform:test .
 docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.nuget.EnergyPriceCalculator;host=ws://price_calculator:90/ws;runtime=netcore" -p 80:80 -p 81:81 --name energy_platform dotnet-energy-platform:test
 ```
+
+> Use the `name=` value from your Graft / Vision. The example above matches the generated client namespace.
 
 Open [http://localhost:81/GV](http://localhost:81/GV) and call `BillingService.CalculateBill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
 
@@ -345,15 +360,13 @@ Compare the two configurations side by side:
 
 ```text
 # Monolith (in-process)
-name=graft.nuget.energypricecalculator;host=inMemory;runtime=dotnet;modules=/usr/app/publish
+name=graft.nuget.EnergyPriceCalculator;host=inMemory;runtime=netcore;modules=/usr/app/publish
 
 # Microservice (remote)
-name=graft.nuget.energypricecalculator;host=price_calculator:9092;runtime=dotnet;modules=/usr/app/publish
+name=graft.nuget.EnergyPriceCalculator;host=ws://price_calculator:90/ws;runtime=netcore
 ```
 
-> We're still working on the best way to pass the configuration so that it's intuitive and user friendly.
-
-Same Docker image, same code — just a different environment variable. You can switch back and forth as many times as you need.
+`GRAFT_CONFIG` owns the topology — same Docker image, same business logic, one environment variable. Switch back and forth as often as you need.
 
 ## Step 13. Run with a Project Key (recommended for real-world usage)
 

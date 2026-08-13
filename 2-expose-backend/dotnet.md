@@ -16,14 +16,14 @@ Turn a .NET class into a remotely callable backend service using Graftcode Gatew
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [.NET SDK](https://dotnet.microsoft.com/download) installed locally
+- [.NET SDK 9](https://dotnet.microsoft.com/download) installed locally (matches the `sdk:9.0` Docker image used below)
 
 ## Step 1. Create a project folder
 
-Create a new .NET class library project:
+Create a new .NET class library project targeting `net9.0` (required so the project matches the Docker SDK image; a newer local SDK would otherwise create `net10.0`):
 
 ```bash
-dotnet new classlib -n EnergyService
+dotnet new classlib -n EnergyService -f net9.0
 cd EnergyService
 ```
 
@@ -79,12 +79,12 @@ The key line is the last one - `gg` (Graftcode Gateway) analyzes your `EnergySer
 
 - **FROM mcr.microsoft.com/dotnet/sdk:9.0** - Uses the official .NET 9 SDK image as the base, which includes everything needed to build and run .NET applications.
 - **COPY . /usr/app/** - Copies your project files (including `EnergyPriceCalculator.cs` and the `.csproj`) into the container.
-- **RUN dotnet publish -c Release -o /usr/app/publish** - Builds and publishes the project in Release mode, outputting the compiled assembly to `/usr/app/publish`.
+- **RUN dotnet publish -c Release -o /usr/app/** - Builds and publishes the project in Release mode, outputting the compiled assembly to `/usr/app/` (the container working directory, so Gateway finds `EnergyService.dll` there).
 - **RUN apt-get update && apt-get install -y wget** - Installs tools needed to download Graftcode Gateway.
-- **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
+- **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package. Because this uses `releases/latest`, the Gateway version can change between builds - when debugging differences, note the version printed in the container logs.
 - **EXPOSE 80** - Declares the port used for service communication (Grafts connect here).
 - **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
-- **CMD ["gg"]** - Runs Graftcode Gateway. It reads indicate `.dll` file, discovers public methods, and makes them callable.
+- **CMD ["gg", "--modules", "EnergyService.dll"]** - Runs Graftcode Gateway. `--modules` points Gateway at the published assembly to analyze; it discovers public methods and makes them callable. `--modules` is optional when the same directory as `gg` contains only one target DLL.
 
 </collapsible>
 
@@ -100,6 +100,8 @@ Your .NET service is now running and exposed through Graftcode Gateway.
 ## Step 4. Explore the service in Graftcode Vision
 
 Open [http://localhost:81/GV](http://localhost:81/GV) in your browser.
+
+Gateway startup logs may also print a Vision URL on port `80`. With the port mapping from this tutorial (`-p 80:80 -p 81:81`), use **`http://localhost:81/GV`**.
 
 You will see all public methods from your .NET class - their names, parameter types, and return types. Graftcode Vision also provides:
 

@@ -16,7 +16,7 @@ Turn a Java class into a remotely callable backend service using Graftcode Gatew
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) installed locally
+- [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) only if you build outside Docker - the Maven base image below already provides both for `docker build`
 
 ## Step 1. Create a project folder
 
@@ -80,7 +80,7 @@ COPY . /usr/app/
 
 RUN mvn package -q
 
-RUN apt-get update \ 
+RUN apt-get update \
  && apt-get install -y wget \
  && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
  && dpkg -i /usr/app/gg.deb \
@@ -95,7 +95,7 @@ CMD ["gg","--modules", "/usr/app/target/energy-service-1.0.0.jar"]
  
 ```
 
-The key line is the last one - `gg` (Graftcode Gateway) reads your `pom.xml`, discovers all public methods in your compiled classes, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
+The key line is the last one - `gg` (Graftcode Gateway) reads the compiled JAR passed via `--modules`, discovers all public methods in your classes, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
@@ -106,7 +106,7 @@ The key line is the last one - `gg` (Graftcode Gateway) reads your `pom.xml`, di
 - **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
 - **EXPOSE 80** - Declares the port used for service communication (Grafts connect here).
 - **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
-- **CMD ["gg"]** - Runs Graftcode Gateway. It reads `pom.xml` to find your compiled classes, discovers public methods, and makes them callable.
+- **CMD ["gg", "--modules", "/usr/app/target/energy-service-1.0.0.jar"]** - Runs Graftcode Gateway. `--modules` points Gateway at the compiled JAR to analyze; it discovers public methods and makes them callable. `--modules` is optional when the same directory as `gg` contains only one target JAR.
 
 </collapsible>
 
@@ -147,7 +147,9 @@ A Project Key gives you:
 
 ## Step 6. Call it from another app
 
-Your service is now accessible from any application. From Graftcode Vision, select your target package type - for example `Maven` - and copy the generated install command. That installs a **Graft**: a strongly-typed client that lets any app call your service methods directly.
+Your service is now accessible from any application. From Graftcode Vision, select your target package type - for example `npm` - and copy the generated install command. That installs a **Graft**: a strongly-typed client that lets any app call your service methods directly.
+
+The generated npm package name comes from Maven `groupId` / `artifactId` and can be long - for this sample it is typically `@graft/maven-groupid_com-example_artifactid_energy-service@1.0.0`. Always prefer the exact command from Vision or Gateway logs.
 
 ```java
 import com.graft.maven.energypricecalculator.EnergyPriceCalculator;

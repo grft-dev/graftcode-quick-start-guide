@@ -47,15 +47,17 @@ This adds the generated strongly-typed client for the remote service to your pro
 
 The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Create `main.py`:
 
+The generated PyPI Graft uses a flat package layout (`graft_config.py`, `meter_logic.py`). Import those modules directly:
+
 ```python
 import os
-from graft_nuget_energypriceservice.graft.nuget.EnergyPriceService import GraftConfig
-from graft_nuget_energypriceservice.meterlogic import MeterLogic
+from graft_nuget_energypriceservice.graft_config import GraftConfig
+from graft_nuget_energypriceservice.meter_logic import MeterLogic
 
 GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws"
 
-consumption = MeterLogic.netConsumptionKWh(1000, 1150)
-print(f"Net consumption: {consumption}")
+consumption = MeterLogic.net_consumption_k_wh(1000, 1150)
+print(f"Net consumption: {consumption}", flush=True)
 os._exit(0)
 ```
 
@@ -65,7 +67,9 @@ Run it:
 python main.py
 ```
 
-You should see the net consumption value printed in your terminal. `MeterLogic.NetConsumptionKWh(...)` is a remote call, but your code reads like a normal method invocation - no HTTP request, no response parsing, no serialization.
+The Python Graft exposes `net_consumption_k_wh` (snake_case; the generator also splits `KWh` as `k_wh`). Use `flush=True` before `os._exit(0)` so the printed result is not lost when the process exits immediately.
+
+You should see the net consumption value printed in your terminal. `MeterLogic.net_consumption_k_wh(...)` is a remote call, but your code reads like a normal method invocation - no HTTP request, no response parsing, no serialization.
 
 Your IDE can autocomplete available methods on `MeterLogic`, `BillingLogic`, and any other class from that service because the Graft is a real installed package.
 

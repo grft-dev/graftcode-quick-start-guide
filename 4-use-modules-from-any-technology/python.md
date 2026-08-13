@@ -5,7 +5,7 @@ description: "Use a module from any supported technology in your Python service 
 
 ## Goal
 
-Use a module from any supported technology directly in a Python service with Graftcode - no REST wrapper, no rewrite, no custom interop. In this tutorial we use a JavaScript module as the example.
+Use a module from any supported technology directly in a Python service with Graftcode - no REST wrapper, no rewrite, no custom interop. In this tutorial we use a .NET NuGet module as the example.
 
 ### What You'll See
 
@@ -16,6 +16,7 @@ Use a module from any supported technology directly in a Python service with Gra
 ### Prerequisites
 
 - [Python](https://www.python.org/downloads/) installed locally
+- [.NET SDK](https://dotnet.microsoft.com/download) (or a `Microsoft.NETCore.App` runtime) installed locally - `inMemory` loads this Graft on Netcore, not Node
 
 ## Step 1. Create a project folder
 
@@ -28,7 +29,7 @@ cd py-js-module-demo
 
 ## Step 2. Install a module from another technology
 
-For this example we'll use a JavaScript currency converter from npm, but the same approach works with any module from a supported repository - `npm`, `PyPI`, `Maven` or `NuGet`.
+For this example we'll use a .NET sample library from NuGet (`sdnTestSimpleCar` / `SimpleCar`), but the same approach works with any module from a supported repository - `npm`, `PyPI`, `Maven` or `NuGet`.
 
 
 ```bash
@@ -59,23 +60,27 @@ export HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
 set HYPERTUBE_KEY=Fe2w-p2GK-Mn26-j8ZY-Xe25
 ```
 
+The first successful activation creates a `hypertube.lic` file. Later runs (and other local projects) can reuse that license. Activating the same key again in a clean environment may return `ERROR:Key already used`.
+
 ## Step 4. Call the cross-language module and run it
 
 Create `main.py`:
 
 ```python
-from graft_nuget_sdntestsimplecar.simplecar import SimpleCar, GraftConfig
- 
-GraftConfig.host = "inMemory"
- 
-car = SimpleCar("Toyota", "Corolla", 2022, "car-001")
- 
-print(car.toString())
-print("Running:", car.isRunning)
+import os
+from graft_nuget_sdntestsimplecar.simple_car import SimpleCar, GraftConfig
 
-//Now let's call some method!
-car.start();
-print("Running:", car.isRunning)
+GraftConfig.host = "inMemory"
+
+car = SimpleCar("Toyota", "Corolla", 2022, "car-001")
+
+print(car.to_string(), flush=True)
+print("Running:", car.is_running, flush=True)
+
+# Now let's call some method!
+car.start()
+print("Running:", car.is_running, flush=True)
+os._exit(0)
 ```
 
 Run it:
@@ -84,7 +89,9 @@ Run it:
 python main.py
 ```
 
-You should see the converted amount printed in your terminal. `SimpleCurrencyConverter.convert(...)` comes from a JavaScript package, but your code reads like a regular method call - no HTTP request, no response parsing, no serialization. `GraftConfig.host = "inMemory"` tells Graftcode to load and execute the JavaScript module inside the same process.
+The Python Graft exposes snake_case members (`to_string`, `is_running`). Use `flush=True` before `os._exit(0)` so printed output is not lost when the process exits.
+
+You should see the car description and running state printed in your terminal. `SimpleCar` comes from a .NET NuGet package, but your code reads like a regular method call - no HTTP request, no response parsing, no serialization. `GraftConfig.host = "inMemory"` tells Graftcode to load and execute the .NET assembly inside the same process.
 
 ## Step 5. Run with a Project Key (recommended for real-world usage)
 

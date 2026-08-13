@@ -16,6 +16,7 @@ Use a module from any supported technology directly in a .NET service with Graft
 ### Prerequisites
 
 - [.NET SDK](https://dotnet.microsoft.com/download) installed locally
+- [Python](https://www.python.org/downloads/) installed locally with `python3.dll` on `PATH` — the classic installer or embeddable distribution is preferred. The Microsoft Store / `WindowsApps` Python build may not be detected by the Hypertube launcher.
 
 ## Step 1. Create a project folder
 
@@ -32,6 +33,33 @@ For this example we'll use a Python currency converter from PyPI ([sdncenter-cur
 
 ```bash
 dotnet add package -s https://grft.dev/ graft.pypi.sdncenter-currency-converter
+python -m pip install sdncenter-currency-converter --target ./
+```
+
+Hypertube resolves the Python package using the dotted module path as a directory under the current working directory. After `pip install --target ./`, create a directory junction (Windows) or symlink so `currency_converter.converter` points at the installed `currency_converter` folder:
+
+**PowerShell:**
+
+```powershell
+cmd /c mklink /J currency_converter.converter currency_converter
+```
+
+**Bash (macOS / Linux):**
+
+```bash
+ln -s currency_converter currency_converter.converter
+```
+
+On **.NET SDK 10+**, the Graft NuGet package may inject literal `**/*.cs` / `**/*.resx` globs that break `dotnet build` (`CS2001` / `MSB3552`). If that happens, disable default items and compile only your entry file, for example in the `.csproj`:
+
+```xml
+<PropertyGroup>
+  <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+</PropertyGroup>
+<ItemGroup>
+  <Compile Include="Program.cs" />
+</ItemGroup>
 ```
 
 This installs a **Graft** - a strongly-typed C# client generated from the module. You import and call it like any other NuGet package, regardless of which technology the module was originally written in.
@@ -58,6 +86,8 @@ export HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
 set HYPERTUBE_KEY=Fe2w-p2GK-Mn26-j8ZY-Xe25
 ```
 
+The first successful activation creates a `hypertube.lic` file. Later runs (and other local projects) can reuse that license. Activating the same key again in a clean environment may return `ERROR:Key already used`.
+
 ## Step 4. Call the cross-language module and run it
 
 Replace the contents of `Program.cs`:
@@ -68,7 +98,7 @@ using graft.pypi.currency_converter.converter;
 
 GraftConfig.Host = "inMemory";
 
-var result = SimpleCurrencyConverter.convert(100, "USD", "EUR");
+var result = SimpleCurrencyConverter.Convert(100, "USD", "EUR");
 Console.WriteLine($"Converted amount: {result}");
 ```
 
