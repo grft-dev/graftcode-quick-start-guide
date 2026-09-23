@@ -95,9 +95,9 @@ docker build --no-cache --pull -t js-energy-platform:test .
 docker run -d -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
 ```
 
-`gg` (Graftcode Gateway) loads the `index.js` entry module and exposes `BillingService.calculateBill`. That method calls the local `EnergyPriceCalculator` internally. Port `80` handles service calls, port `81` serves Graftcode Vision.
+`gg` (Graftcode Gateway) discovers both modules automatically and exposes all their public methods. Port `80` handles service calls, port `81` serves Graftcode Vision.
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and try calling `BillingService.calculateBill` with a value like `250`. Vision lists `BillingService.calculateBill`; `EnergyPriceCalculator` is not exposed separately from the entry module.
+Open [http://localhost:81/GV](http://localhost:81/GV) and try calling `BillingService.calculateBill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
 
 At this point, everything runs inside **one container** — both modules share a single process. This is your monolith.
 
