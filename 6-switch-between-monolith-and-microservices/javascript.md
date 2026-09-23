@@ -162,13 +162,15 @@ npm install --registry https://grft.dev/54ee6507-ca20-48c0-8c31-7248fac7faf6__fr
 
 > The exact package name and registry URL are shown in Graftcode Vision — copy them from there.
 
-Update `index.js` to use the Graft instead of the direct import. Keep the gateway entry module in CommonJS and load the generated Graft with `import()`, because the Graft uses top-level await:
+Update `index.js` to use the Graft instead of the direct import (keep CommonJS `require`):
 
 ```javascript
+const { GraftConfig, EnergyPriceCalculator } = require("@graft/npm-price-calculator");
+
+GraftConfig.setConfig(process.env.GRAFT_CONFIG);
+
 class BillingService {
   static async calculateBill(kwhUsed) {
-    const { GraftConfig, EnergyPriceCalculator } = await import("@graft/npm-price-calculator");
-    GraftConfig.setConfig(process.env.GRAFT_CONFIG);
     const price = await EnergyPriceCalculator.getPrice();
     return kwhUsed * price;
   }

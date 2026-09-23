@@ -72,10 +72,11 @@ The first successful activation creates a `hypertube.lic` file. Later runs (and 
 Create `index.js`:
 
 ```javascript
-(async () => {
-  const { GraftConfig, SimpleCurrencyConverter } = await import("@graft/pypi-sdncenter-currency-converter");
-  GraftConfig.host = "inMemory";
+const { GraftConfig, SimpleCurrencyConverter } = require("@graft/pypi-sdncenter-currency-converter");
 
+GraftConfig.host = "inMemory";
+
+(async () => {
   const result = await SimpleCurrencyConverter.convert(100, "USD", "EUR");
   console.log("Converted amount:", result);
   process.exit(0);

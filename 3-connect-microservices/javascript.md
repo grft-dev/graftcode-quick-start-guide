@@ -49,10 +49,11 @@ This adds the generated strongly-typed client for the remote service to your pro
 The exact configuration snippet for your language is available in [Graftcode Vision](https://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Now, let's create `index.js`, paste the code below and save the file:
 
 ```javascript
-(async () => {
-  const { GraftConfig, MeterLogic } = await import("@graft/nuget-energypriceservice");
-  GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+const { GraftConfig, MeterLogic } = require("@graft/nuget-energypriceservice");
 
+GraftConfig.host = "wss://gc-d-ca-polc-demo-ecbe-01.blackgrass-d2c29aae.polandcentral.azurecontainerapps.io/ws";
+
+(async () => {
   const consumption = await MeterLogic.netConsumptionKWh(1000, 1150);
   console.log("Net consumption:", consumption);
   process.exit(0);
