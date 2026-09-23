@@ -116,7 +116,7 @@ Create `src/main/java/energy/Main.java`:
 package energy;
 
 import graft.pypi.sdncenter_currency_converter.GraftConfig;
-import graft.pypi.sdncenter_currency_converter.currency_converter.converter.SimpleCurrencyConverter;
+import graft.pypi.currency_converter.converter.SimpleCurrencyConverter;
 
 public class Main {
     public static void main(String[] args) throws Exception {

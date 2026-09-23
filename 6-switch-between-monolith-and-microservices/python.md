@@ -149,7 +149,7 @@ Open [http://localhost:91/GV](http://localhost:91/GV) — the price calculator i
 
 Now that the price calculator runs on its own gateway, install its **Graft** — the strongly-typed client that Graftcode generates automatically.
 
-From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **PyPI** and copy the generated install command. The package name follows your hosted module coordinates (for this sample, typically `graft-pypi-energy-platform` from `pyproject.toml` `name = "energy-platform"`). The `--extra-index-url` shown in Vision may differ from the example below.
+From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **PyPI** and copy the generated install command. Add `--target=./lib` to that command before running it from the project root. The package name follows your hosted module coordinates (for this sample, typically `graft-pypi-energy-platform` from `pyproject.toml` `name = "energy-platform"`). The `--extra-index-url` shown in Vision may differ from the example below.
 
 ```bash
 pip install --target=./lib --extra-index-url https://grft.dev/simple/<uuid>__free graft-pypi-energy-platform==1.0.0
