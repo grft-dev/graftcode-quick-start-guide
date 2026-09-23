@@ -342,7 +342,7 @@ Update `src/main/java/energy/BillingService.java` to use the Graft instead of th
 package energy;
 
 import graft.maven.price_calculator.GraftConfig;
-import graft.maven.price_calculator.energy.EnergyPriceCalculator;
+import graft.maven.energy.EnergyPriceCalculator;
 
 public class BillingService {
     static {

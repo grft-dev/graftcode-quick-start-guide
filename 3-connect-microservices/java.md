@@ -94,7 +94,7 @@ The exact configuration snippet for your language is available in [Graftcode Vis
 package energy;
 
 import graft.nuget.EnergyPriceService.GraftConfig;
-import graft.nuget.EnergyPriceService.EnergyPriceService.MeterLogic;
+import graft.nuget.EnergyPriceService.MeterLogic;
 
 public class Main {
     public static void main(String[] args) throws Exception {

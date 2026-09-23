@@ -95,9 +95,9 @@ docker build --no-cache --pull -t js-energy-platform:test .
 docker run -d -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
 ```
 
-`gg` (Graftcode Gateway) discovers both modules automatically and exposes all their public methods. Port `80` handles service calls, port `81` serves Graftcode Vision.
+`gg` (Graftcode Gateway) loads the `index.js` entry module and exposes `BillingService.calculateBill`. That method calls the local `EnergyPriceCalculator` internally. Port `80` handles service calls, port `81` serves Graftcode Vision.
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and try calling `BillingService.calculateBill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
+Open [http://localhost:81/GV](http://localhost:81/GV) and try calling `BillingService.calculateBill` with a value like `250`. Vision lists `BillingService.calculateBill`; `EnergyPriceCalculator` is not exposed separately from the entry module.
 
 At this point, everything runs inside **one container** — both modules share a single process. This is your monolith.
 
@@ -162,15 +162,13 @@ npm install --registry https://grft.dev/54ee6507-ca20-48c0-8c31-7248fac7faf6__fr
 
 > The exact package name and registry URL are shown in Graftcode Vision — copy them from there.
 
-Update `index.js` to use the Graft instead of the direct import (keep CommonJS `require`):
+Update `index.js` to use the Graft instead of the direct import. Keep the gateway entry module in CommonJS and load the generated Graft with `import()`, because the Graft uses top-level await:
 
 ```javascript
-const { GraftConfig, EnergyPriceCalculator } = require("@graft/npm-price-calculator");
-
-GraftConfig.setConfig(process.env.GRAFT_CONFIG);
-
 class BillingService {
   static async calculateBill(kwhUsed) {
+    const { GraftConfig, EnergyPriceCalculator } = await import("@graft/npm-price-calculator");
+    GraftConfig.setConfig(process.env.GRAFT_CONFIG);
     const price = await EnergyPriceCalculator.getPrice();
     return kwhUsed * price;
   }
@@ -192,25 +190,25 @@ docker build --no-cache --pull -t js-energy-platform:test .
 docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=price-calculator;runtime=nodejs;host=ws://price_calculator:90/ws" -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
 ```
 
-> Use the `name=` and `modules=` values from your Graft (Vision or the package's generated config). The example uses the defaults for `@graft/npm-price-calculator`.
+> Use the `name=` value from your Graft (Vision or the package's generated config). In remote mode, `modules=price-calculator` identifies the hosted service. In `inMemory` mode, `modules=` must point to the local JavaScript file in the billing container.
 
 Open [http://localhost:81/GV](http://localhost:81/GV) and call `BillingService.calculateBill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
 
 ## Step 8. Switch back to monolith
 
-Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
+Want to go back to a monolith? Stop and restart with `host=inMemory` and `modules=` pointing to the local price calculator file:
 
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker run -d -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=price-calculator;runtime=nodejs;host=inMemory" -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
+docker run -d -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=/usr/app/src/priceCalculator.js;runtime=nodejs;host=inMemory" -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
 ```
 
 Compare the two configurations side by side:
 
 ```text
 # Monolith (in-process)
-name=@graft/npm-price-calculator;modules=price-calculator;runtime=nodejs;host=inMemory
+name=@graft/npm-price-calculator;modules=/usr/app/src/priceCalculator.js;runtime=nodejs;host=inMemory
 
 # Microservice (remote)
 name=@graft/npm-price-calculator;modules=price-calculator;runtime=nodejs;host=ws://price_calculator:90/ws
