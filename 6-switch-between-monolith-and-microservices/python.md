@@ -161,8 +161,8 @@ Update `src/billing_service.py` to use the Graft instead of the direct import. I
 
 ```python
 import os
-from graft_pypi_energy_platform.energypricecalculator import EnergyPriceCalculator
-from graft_pypi_energy_platform.graft.pypi.energy_platform import GraftConfig
+from graft_pypi_energy_platform.energy_price_calculator import EnergyPriceCalculator
+from graft_pypi_energy_platform.graft_config import GraftConfig
 
 GraftConfig.set_config(os.environ.get("GRAFT_CONFIG"))
 
@@ -180,14 +180,14 @@ This is the only code change in the entire tutorial. The billing service now rea
 
 Stop the monolith container, rebuild the image with the updated code, and run the billing service pointing at the remote price calculator.
 
-> In `GRAFT_CONFIG`, `name=` is the Graft's internal name (for this sample: `graft.pypi.energy_platform`) — not the hyphenated PyPI package id. Copy it from Vision or the generated `GraftConfig` in the package.
+> In `GRAFT_CONFIG`, `name=` is the Graft's internal name (for this sample: `graft_pypi_energy_platform`) — not the hyphenated PyPI package id. Copy it from Vision or the generated `GraftConfig` in the package.
 
 ```bash
 docker stop energy_platform
 docker rm energy_platform
 docker build --no-cache --pull -t py-energy-platform:test .
 docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=graft.pypi.energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src" \
+  -e GRAFT_CONFIG="name=graft_pypi_energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src" \
   -e PYTHONPATH=/usr/app/lib \
   -p 80:80 -p 81:81 \
   --name energy_platform py-energy-platform:test
@@ -203,7 +203,7 @@ Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
 docker stop energy_platform
 docker rm energy_platform
 docker run -d \
-  -e GRAFT_CONFIG="name=graft.pypi.energy_platform;host=inMemory;runtime=python;modules=/usr/app/src" \
+  -e GRAFT_CONFIG="name=graft_pypi_energy_platform;host=inMemory;runtime=python;modules=/usr/app/src" \
   -e PYTHONPATH=/usr/app/lib \
   -p 80:80 -p 81:81 \
   --name energy_platform py-energy-platform:test
@@ -213,10 +213,10 @@ Compare the two configurations side by side:
 
 ```text
 # Monolith (in-process)
-name=graft.pypi.energy_platform;host=inMemory;runtime=python;modules=/usr/app/src
+name=graft_pypi_energy_platform;host=inMemory;runtime=python;modules=/usr/app/src
 
 # Microservice (remote)
-name=graft.pypi.energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src
+name=graft_pypi_energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src
 ```
 
 `GRAFT_CONFIG` owns the topology — same Docker image, same business logic, one environment variable. Switch back and forth as often as you need.
@@ -229,7 +229,7 @@ Switch back to microservice mode to verify the call is truly remote:
 docker stop energy_platform
 docker rm energy_platform
 docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=graft.pypi.energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src" \
+  -e GRAFT_CONFIG="name=graft_pypi_energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src" \
   -e PYTHONPATH=/usr/app/lib \
   -p 80:80 -p 81:81 \
   --name energy_platform py-energy-platform:test
