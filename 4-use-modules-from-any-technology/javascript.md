@@ -62,7 +62,7 @@ export HYPERTUBE_KEY="f7GZ-De6k-Mx4p-t7FN-q5DC"
 **Windows CMD:**
 
 ```cmd
-set HYPERTUBE_KEY=Fe2w-p2GK-Mn26-j8ZY-Xe25
+set HYPERTUBE_KEY=f7GZ-De6k-Mx4p-t7FN-q5DC
 ```
 
 The first successful activation creates a `hypertube.lic` file. Later runs (and other local projects) can reuse that license. Activating the same key again in a clean environment may return `ERROR:Key already used`.
