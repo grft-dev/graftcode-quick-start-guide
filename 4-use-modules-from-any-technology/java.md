@@ -89,13 +89,13 @@ Set the `HYPERTUBE_KEY` environment variable in your terminal before running the
 **PowerShell:**
 
 ```powershell
-$env:HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
+$env:HYPERTUBE_KEY="f7GZ-De6k-Mx4p-t7FN-q5DC"
 ```
 
 **Bash (macOS / Linux):**
 
 ```bash
-export HYPERTUBE_KEY="Fe2w-p2GK-Mn26-j8ZY-Xe25"
+export HYPERTUBE_KEY="f7GZ-De6k-Mx4p-t7FN-q5DC"
 ```
 
 **Windows CMD:**
