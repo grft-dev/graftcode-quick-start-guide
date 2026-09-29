@@ -29,7 +29,7 @@ Each tutorial is **self-contained** - pick the scenario that interests you and f
 
 | # | Tutorial | What you'll do | Languages |
 |---|----------|----------------|-----------|
-| 1 | [**Connect Frontend to Backend**](/quick-start/connect-frontend-to-backend) | Call a live backend service from a frontend app using a Graft - no REST client, no DTOs. | [React](1-connect-frontend-to-backend/react.md) · [Vue](1-connect-frontend-to-backend/vue.md) · [Angular](1-connect-frontend-to-backend/angular.md) · [Next.js](1-connect-frontend-to-backend/nextjs.md) · [VanillaJS](1-connect-frontend-to-backend/vanillajs.md) · [Svelte](1-connect-frontend-to-backend/svelte.md) · [SolidJS](1-connect-frontend-to-backend/solidjs.md) · [Preact](1-connect-frontend-to-backend/preact.md) · [Astro](1-connect-frontend-to-backend/astro.md) · [Qwik](1-connect-frontend-to-backend/qwik.md) |
+| 1 | [**Connect Frontend to Backend**](/quick-start/connect-frontend-to-backend) | Call a live backend service from a frontend app using a Graft - no REST client, no DTOs. | [React](1-connect-frontend-to-backend/react.md) · [Vue](1-connect-frontend-to-backend/vue.md) · [Angular](1-connect-frontend-to-backend/angular.md) · [Next.js](1-connect-frontend-to-backend/nextjs.md) · [VanillaJS](1-connect-frontend-to-backend/vanillajs.md) · [Svelte](1-connect-frontend-to-backend/svelte.md) · [SolidJS](1-connect-frontend-to-backend/solidjs.md) · [Preact](1-connect-frontend-to-backend/preact.md) · [Astro](1-connect-frontend-to-backend/astro.md) · [Qwik](1-connect-frontend-to-backend/qwik.md) · [WebAssembly](1-connect-frontend-to-backend/webassembly.md) |
 | 2 | [**Expose a Backend Service**](/quick-start/expose-backend/) | Turn a class or module into a remotely callable service with Graftcode Gateway and Docker. | [JavaScript](2-expose-backend/javascript.md) · [.NET](2-expose-backend/dotnet.md) · [Python](2-expose-backend/python.md) · [Java](2-expose-backend/java.md) |
 | 3 | [**Connect Microservices**](/quick-start/connect-microservices/) | Connect one backend service to another by installing a Graft and calling remote methods like local code. | [JavaScript](3-connect-microservices/javascript.md) · [.NET](3-connect-microservices/dotnet.md) · [Python](3-connect-microservices/python.md) · [Java](3-connect-microservices/java.md) |
 | 4 | [**Use Modules from Any Technology**](/quick-start/use-modules-from-any-technology/) | Use a module from another language directly in your service - no REST wrapper, no rewrite. | [JavaScript](4-use-modules-from-any-technology/javascript.md) · [.NET](4-use-modules-from-any-technology/dotnet.md) · [Python](4-use-modules-from-any-technology/python.md) · [Java](4-use-modules-from-any-technology/java.md) |
@@ -45,7 +45,7 @@ All tutorials require:
 
 Depending on the language you choose, you'll also need one of:
 
-- [Node.js](https://nodejs.org/) - for JavaScript, React, Vue, Angular, Next.js, VanillaJS, Svelte, SolidJS, Preact, Astro, and Qwik tutorials
+- [Node.js](https://nodejs.org/) - for JavaScript, React, Vue, Angular, Next.js, VanillaJS, Svelte, SolidJS, Preact, Astro, Qwik, and WebAssembly tutorials
 - [.NET SDK](https://dotnet.microsoft.com/download) - for .NET tutorials
 - [Python](https://www.python.org/downloads/) - for Python tutorials
 - [JDK 21](https://adoptium.net/) and [Maven](https://maven.apache.org/download.cgi) - for Java tutorials
