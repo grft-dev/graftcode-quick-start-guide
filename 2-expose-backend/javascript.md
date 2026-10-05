@@ -55,13 +55,7 @@ WORKDIR /usr/app
 
 COPY . /usr/app/
 
-RUN apt-get update \
- && apt-get install -y wget \
- && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
- && dpkg -i /usr/app/gg.deb \
- && rm /usr/app/gg.deb \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
 EXPOSE 81
@@ -77,8 +71,7 @@ The Dockerfile base image is `node:24`, but Gateway analyzes and runs the module
 
 - **FROM node:24** - Uses the official Node.js 24 image as the base runtime environment.
 - **COPY . /usr/app/** - Copies your project files (including `index.js`) into the container.
-- **RUN apt-get update && apt-get install -y wget** - Installs tools needed to download Graftcode Gateway.
-- **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
+- **RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb** - `curl` downloads the installer, `dpkg -i gg.deb` installs Graftcode Gateway, and `rm gg.deb` removes the package.
 - **EXPOSE 80** - Declares the port used for service communication (Grafts connect here).
 - **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
 - **CMD ["gg", "./package.json"]** - Runs Graftcode Gateway, pointing it at your `package.json` to find your module, discover public methods, and make them callable.

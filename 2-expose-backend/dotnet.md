@@ -59,13 +59,7 @@ COPY . /usr/app/
 RUN dotnet build
 RUN dotnet publish -c Release -o /usr/app/
 
-RUN apt-get update \
-&& apt-get install -y wget \
-&& wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
-&& dpkg -i /usr/app/gg.deb \
-&& rm /usr/app/gg.deb \
-&& apt-get clean \
-&& rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
 EXPOSE 81
@@ -80,8 +74,7 @@ The key line is the last one - `gg` (Graftcode Gateway) analyzes your `EnergySer
 - **FROM mcr.microsoft.com/dotnet/sdk:9.0** - Uses the official .NET 9 SDK image as the base, which includes everything needed to build and run .NET applications.
 - **COPY . /usr/app/** - Copies your project files (including `EnergyPriceCalculator.cs` and the `.csproj`) into the container.
 - **RUN dotnet publish -c Release -o /usr/app/** - Builds and publishes the project in Release mode, outputting the compiled assembly to `/usr/app/` (the container working directory, so Gateway finds `EnergyService.dll` there).
-- **RUN apt-get update && apt-get install -y wget** - Installs tools needed to download Graftcode Gateway.
-- **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package. Because this uses `releases/latest`, the Gateway version can change between builds - when debugging differences, note the version printed in the container logs.
+- **RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb** - `curl` downloads the installer, `dpkg -i gg.deb` installs Graftcode Gateway, and `rm gg.deb` removes the package.
 - **EXPOSE 80** - Declares the port used for service communication (Grafts connect here).
 - **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
 - **CMD ["gg", "--modules", "EnergyService.dll"]** - Runs Graftcode Gateway. `--modules` points Gateway at the published assembly to analyze; it discovers public methods and makes them callable. `--modules` is optional when the same directory as `gg` contains only one target DLL.

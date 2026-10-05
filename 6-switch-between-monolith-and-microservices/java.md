@@ -97,13 +97,7 @@ COPY . /usr/app/
 
 RUN mvn package -q
 
-RUN apt-get update \
- && apt-get install -y wget \
- && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
- && dpkg -i /usr/app/gg.deb \
- && rm /usr/app/gg.deb \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
 EXPOSE 81
@@ -234,13 +228,7 @@ COPY . /usr/app/
 RUN cd price-calculator && mvn install -q && cd ..
 RUN mvn package -q
 
-RUN apt-get update \
- && apt-get install -y wget \
- && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
- && dpkg -i /usr/app/gg.deb \
- && rm /usr/app/gg.deb \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
 EXPOSE 81
@@ -263,13 +251,7 @@ COPY price-calculator /usr/app/
 
 RUN mvn package -q
 
-RUN apt-get update \
- && apt-get install -y wget \
- && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
- && dpkg -i /usr/app/gg.deb \
- && rm /usr/app/gg.deb \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 90
 EXPOSE 91

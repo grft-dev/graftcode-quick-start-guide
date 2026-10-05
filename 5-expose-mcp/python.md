@@ -68,20 +68,12 @@ Create a `Dockerfile` in the project root:
 ```dockerfile
 FROM python:3.13-bookworm
 
-ARG TARGETARCH
-
 WORKDIR /usr/app
 
 COPY ./energy_price_calculator.py /usr/app/energy-service/
 COPY ./pyproject.toml /usr/app/energy-service/
 
-RUN apt-get update \
- && apt-get install -y wget \
- && wget -O /usr/app/gg.deb "https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_${TARGETARCH}.deb" \
- && dpkg -i /usr/app/gg.deb \
- && rm /usr/app/gg.deb \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
 EXPOSE 81
@@ -95,8 +87,7 @@ CMD ["gg","--modules","./energy-service/"]
 
 - **FROM python:3.13-bookworm** - Uses the official Python 3.13 image on Debian Bookworm as the base runtime environment.
 - **COPY ./energy_price_calculator.py /usr/app/energy-service/** and **COPY ./pyproject.toml /usr/app/energy-service/** - Copies your module and project metadata into a dedicated `energy-service` folder for Gateway to analyze.
-- **RUN apt-get update && apt-get install -y wget** - Installs tools needed to download Graftcode Gateway.
-- **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
+- **RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb** - `curl` downloads the installer, `dpkg -i gg.deb` installs Graftcode Gateway, and `rm gg.deb` removes the package.
 - **EXPOSE 80** - Declares the port for Graft service calls (app-to-app).
 - **EXPOSE 81** - Declares the port for Graftcode Vision and the MCP endpoint.
 - **CMD ["gg", "--modules", "./energy-service/"]** - Starts Graftcode Gateway against the `energy-service` module folder. It discovers public methods and exposes them as Grafts and MCP tools.
