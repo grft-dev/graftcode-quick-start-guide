@@ -105,13 +105,7 @@ COPY . /usr/app/
 
 RUN mvn package -q
 
-RUN apt-get update \
- && apt-get install -y wget \
- && wget -O /usr/app/gg.deb https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_amd64.deb \
- && dpkg -i /usr/app/gg.deb \
- && rm /usr/app/gg.deb \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
 EXPOSE 81
@@ -127,8 +121,7 @@ The key line is the last one - `gg` (Graftcode Gateway) reads your compiled JAR,
 - **FROM maven:3.9-eclipse-temurin-21** - Uses the official Maven image with JDK 21 as the base, which includes everything needed to build and run Groovy applications via Maven.
 - **COPY . /usr/app/** - Copies your project files (including `pom.xml` and source files) into the container.
 - **RUN mvn package -q** - Compiles the Groovy source and packages it into a JAR in `target/`.
-- **RUN apt-get update && apt-get install -y wget** - Installs tools needed to download Graftcode Gateway.
-- **wget -O /usr/app/gg.deb ... && dpkg -i /usr/app/gg.deb** - Downloads and installs the latest Graftcode Gateway package.
+- **RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb** - `curl` downloads the installer, `dpkg -i gg.deb` installs Graftcode Gateway, and `rm gg.deb` removes the package.
 - **EXPOSE 80** - Declares the port used for service communication (Grafts connect here).
 - **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
 - **CMD ["gg", "--modules", "/usr/app/target/energy-service-1.0.0.jar"]** - Runs Graftcode Gateway. `--modules` points Gateway at the compiled JAR to analyze; it discovers public methods and makes them callable. `--modules` is optional when the same directory as `gg` contains only one target JAR.
