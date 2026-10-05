@@ -17,7 +17,8 @@ Connect an Angular app to backend logic with Graftcode - no REST clients, no DTO
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) installed locally
-- [Angular CLI](https://angular.dev/tools/cli) installed (`npm install -g @angular/cli`)
+
+The starter includes the Angular CLI. `npm run dev` later in this guide uses that local CLI, so a global `npm install -g @angular/cli` is not required.
 
 ## Step 1. Start with an Angular app
 
@@ -91,6 +92,8 @@ export class AppComponent implements OnInit {
 ```
 
 ## Step 6. Run the app
+
+This starter is zoneless: it does not load Zone.js, because the Graft package uses top-level await and Angular rejects that while Zone.js is in the build.
 
 Start the development server:
 
