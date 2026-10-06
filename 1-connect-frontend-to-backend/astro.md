@@ -16,7 +16,7 @@ Connect an Astro app to backend logic with Graftcode - no REST clients, no DTOs,
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) installed locally
+- [Node.js](https://nodejs.org/) 22.12 or newer installed locally
 
 ## Step 1. Start with an Astro app
 
