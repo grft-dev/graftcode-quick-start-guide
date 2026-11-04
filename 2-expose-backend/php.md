@@ -35,8 +35,9 @@ Create `composer.json`:
     "description": "Energy price sample module",
     "type": "library",
     "license": "ISC",
+    "version": "1.0.0",
     "require": {
-        "php": ">=8.2"
+        "php": "^7.4 || ^8.0"
     },
     "autoload": {
         "psr-4": {
@@ -53,10 +54,17 @@ Create `src/EnergyPriceCalculator.php`:
 ```php
 <?php
 
+declare(strict_types=1);
+
 namespace Energy;
 
-class EnergyPriceCalculator
+use Random\RandomException;
+
+final class EnergyPriceCalculator
 {
+    /**
+     * @throws RandomException
+     */
     public static function getPrice(): int
     {
         return random_int(100, 104);
@@ -71,7 +79,7 @@ This is a plain PHP class - no attributes, no frameworks, no special interfaces.
 Create a `Dockerfile` in the project root:
 
 ```dockerfile
-FROM php:8.3-cli
+FROM php:8.4-cli
 
 WORKDIR /usr/app
 
@@ -86,14 +94,14 @@ RUN apt-get update && apt-get install -y git unzip \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "--modules", "/usr/app/src", "--runtime", "php"]
+CMD ["gg", "/usr/app/src"]
 ```
 
 The key line is the last one - `gg` (Graftcode Gateway) reads the module path under `--modules`, discovers all public methods in your PHP classes, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
-- **FROM php:8.3-cli** - Uses the official PHP 8.3 CLI image as the base runtime environment.
+- **FROM php:8.4-cli** - Uses the official PHP 8.4 CLI image as the base runtime environment.
 - **COPY . /usr/app/** - Copies your project files (including `composer.json` and `src/`) into the container.
 - **composer install --no-dev --optimize-autoloader** - Registers PSR-4 autoloading so Gateway can load your classes.
 - **RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb** - `curl` downloads the installer, `dpkg -i gg.deb` installs Graftcode Gateway, and `rm gg.deb` removes the package.
@@ -128,7 +136,7 @@ Everything above works without any account - perfect for learning and local deve
 Then pass the key when starting your gateway:
 
 ```dockerfile
-CMD ["gg", "--modules", "/usr/app/src", "--runtime", "php", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "/usr/app/src", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 A Project Key gives you:
