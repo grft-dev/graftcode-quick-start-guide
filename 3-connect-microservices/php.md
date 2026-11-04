@@ -16,7 +16,7 @@ Connect a PHP backend service to another remote service using Graftcode - so the
 
 ### Prerequisites
 
-- [PHP 8.2+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) installed locally
+- [PHP 7.4 or 8.0+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) installed locally
 
 ## Step 1. Create a PHP service
 
@@ -43,7 +43,7 @@ Create `composer.json`:
 {
     "name": "example/energy-consumer",
     "require": {
-        "php": ">=8.2",
+        "php": "^7.4 || ^8.0",
         "hypertube/php-sdk": "*",
         "graft/nuget-energypriceservice": "1.2.0"
     },
@@ -68,6 +68,8 @@ The exact configuration snippet for your language is available in [Graftcode Vis
 
 ```php
 <?php
+
+declare(strict_types=1);
 
 require __DIR__ . "/vendor/autoload.php";
 

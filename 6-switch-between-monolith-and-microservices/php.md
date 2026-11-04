@@ -18,7 +18,7 @@ Start with two PHP classes in a single project running as a monolith, then extra
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [PHP 8.2+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) installed locally (for `composer` commands)
+- [PHP 7.4 or 8.0+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) installed locally (for `composer` commands)
 
 ## Step 1. Create a project folder
 
@@ -37,8 +37,9 @@ Create `composer.json`:
     "description": "Energy platform - switches between monolith and microservice deployments",
     "type": "library",
     "license": "ISC",
+    "version": "1.0.0",
     "require": {
-        "php": ">=8.2"
+        "php": "^7.4 || ^8.0"
     },
     "autoload": {
         "psr-4": {
@@ -54,6 +55,8 @@ Create `src/EnergyPriceCalculator.php`:
 
 ```php
 <?php
+
+declare(strict_types=1);
 
 namespace Energy;
 
@@ -73,6 +76,8 @@ Create `src/BillingService.php`:
 ```php
 <?php
 
+declare(strict_types=1);
+
 namespace Energy;
 
 class BillingService
@@ -80,6 +85,7 @@ class BillingService
     public static function calculateBill(int $kwhUsed): int
     {
         $price = EnergyPriceCalculator::getPrice();
+
         return $kwhUsed * $price;
     }
 }
@@ -92,7 +98,7 @@ A regular class reference — the billing service calls the price calculator dir
 Create a `Dockerfile` in the project root:
 
 ```dockerfile
-FROM php:8.3-cli
+FROM php:8.4-cli
 
 WORKDIR /usr/app
 
@@ -107,7 +113,7 @@ RUN apt-get update && apt-get install -y git unzip \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "--modules", "/usr/app/src", "--runtime", "php"]
+CMD ["gg", "/usr/app/src"]
 ```
 
 Build and run:
@@ -130,7 +136,7 @@ Now let's say the price calculator needs to scale independently, or another team
 Create `Dockerfile.priceCalculator` in the project root:
 
 ```dockerfile
-FROM php:8.3-cli
+FROM php:8.4-cli
 
 WORKDIR /usr/app
 
@@ -145,7 +151,7 @@ RUN apt-get update && apt-get install -y git unzip \
 EXPOSE 90
 EXPOSE 91
 
-CMD ["gg", "--modules", "/usr/app/src/EnergyPriceCalculator.php", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092", "--runtime", "php"]
+CMD ["gg", "/usr/app/src/EnergyPriceCalculator.php", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
 ```
 
 Build and run the price calculator as a standalone service:
@@ -175,6 +181,8 @@ Update `src/BillingService.php` to use the Graft instead of the direct class ref
 ```php
 <?php
 
+declare(strict_types=1);
+
 namespace Energy;
 
 use Graft\Composer\EnergyPlatform\EnergyPriceCalculator;
@@ -186,6 +194,7 @@ class BillingService
     {
         GraftConfig::setConfig(getenv("GRAFT_CONFIG"));
         $price = EnergyPriceCalculator::getPrice();
+
         return $kwhUsed * $price;
     }
 }
@@ -272,7 +281,7 @@ Everything above works without any account — perfect for learning and local de
 Then pass the key when starting your gateways:
 
 ```dockerfile
-CMD ["gg", "--modules", "/usr/app/src", "--runtime", "php", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "/usr/app/src", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 A Project Key gives you:

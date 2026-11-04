@@ -16,7 +16,7 @@ Turn a PHP class into a remotely callable backend service using Graftcode Gatewa
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [PHP 8.2+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) only if you run the Composer consumer locally - Docker alone is enough to build and host the service
+- [PHP 7.4 or 8.0+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) only if you run the Composer consumer locally - Docker alone is enough to build and host the service
 
 ## Step 1. Create a project folder
 
@@ -60,7 +60,7 @@ namespace Energy;
 
 use Random\RandomException;
 
-final class EnergyPriceCalculator
+class EnergyPriceCalculator
 {
     /**
      * @throws RandomException
@@ -154,6 +154,8 @@ Use the package name and import paths from Vision or Gateway logs (for this samp
 
 ```php
 <?php
+
+declare(strict_types=1);
 
 require __DIR__ . "/vendor/autoload.php";
 

@@ -15,7 +15,7 @@ Use a module from any supported technology directly in a PHP service with Graftc
 
 ### Prerequisites
 
-- [PHP 8.2+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) installed locally
+- [PHP 7.4 or 8.0+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) installed locally
 - [.NET SDK](https://dotnet.microsoft.com/download) (or a `Microsoft.NETCore.App` runtime) installed locally - `inMemory` loads this Graft on Netcore, not on the PHP runtime alone
 
 ## Step 1. Create a project folder
@@ -37,7 +37,7 @@ Create `composer.json`:
 {
     "name": "example/dotnet-module-demo",
     "require": {
-        "php": ">=8.2",
+        "php": "^7.4 || ^8.0",
         "hypertube/php-sdk": "*",
         "graft/nuget-sdntestsimplecar": "0.1.0"
     },
@@ -86,6 +86,8 @@ Create `main.php`:
 
 ```php
 <?php
+
+declare(strict_types=1);
 
 require __DIR__ . "/vendor/autoload.php";
 
