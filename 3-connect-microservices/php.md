@@ -52,13 +52,24 @@ Create `composer.json`:
             "type": "composer",
             "url": "https://grft.dev/composer/4b4e411f-60a0-4868-b8a6-46f5dee07448__free"
         }
-    ]
+    ],
+    "scripts": {
+        "post-install-cmd": [
+            "@post-update-cmd"
+        ],
+        "post-update-cmd": [
+            "@php vendor/graftcode/hypertube-php-sdk/scripts/download-lfs-files.php",
+            "@php vendor/graftcode/hypertube-php-sdk/scripts/extract-zip-packages.php"
+        ]
+    }
 }
 ```
 
 ```bash
 composer install
 ```
+
+Composer runs the Hypertube post-install scripts above to download Git LFS binaries and extract SDK packages into `vendor/graftcode/hypertube-php-sdk/hypertube/` (requires `ext-zip`, `ext-ffi`, and network access).
 
 This adds the generated strongly-typed client for the remote service to your project.
 

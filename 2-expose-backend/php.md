@@ -150,6 +150,9 @@ A Project Key gives you:
 
 Your service is now accessible from any application. From Graftcode Vision, select your target package type - for example `Composer` - and copy the generated install command. That installs a **Graft**: a strongly-typed client that lets any app call your service methods directly.
 
+> **Test the Graft locally with a Composer consumer**  
+> This step shows a call snippet only. To create a separate consumer project (`composer.json`, Graft `repositories`, `composer install`, Hypertube post-install scripts, and `vendor/autoload.php`), follow **[Connect Microservices — PHP, Step 3: Install the Graft](../3-connect-microservices/php.md#step-3-install-the-graft)**. Use the **Composer install command, registry URL, and package name from Vision at [http://localhost:81/GV](http://localhost:81/GV)** after Step 4 above—not the hosted demo URLs in that tutorial. Set `GraftConfig::$host` to your gateway WebSocket endpoint (for this tutorial, typically `ws://localhost:80/ws`). Prefer `use` namespaces from the installed Graft package or Vision, not only from the example below.
+
 Use the package name and import paths from Vision or Gateway logs (for this sample the package is typically `graft/composer-energy-service:1.0.0`). `getPrice()` is synchronous and returns an `int`:
 
 ```php

@@ -46,13 +46,24 @@ Create `composer.json`:
             "type": "composer",
             "url": "https://grft.dev/composer"
         }
-    ]
+    ],
+    "scripts": {
+        "post-install-cmd": [
+            "@post-update-cmd"
+        ],
+        "post-update-cmd": [
+            "@php vendor/graftcode/hypertube-php-sdk/scripts/download-lfs-files.php",
+            "@php vendor/graftcode/hypertube-php-sdk/scripts/extract-zip-packages.php"
+        ]
+    }
 }
 ```
 
 ```bash
 composer install
 ```
+
+Composer runs the Hypertube post-install scripts above to download Git LFS binaries and extract SDK packages into `vendor/graftcode/hypertube-php-sdk/hypertube/` (requires `ext-zip`, `ext-ffi`, and network access).
 
 This installs a **Graft** - a strongly-typed PHP client generated from the module. You import and call it like any other Composer package, regardless of which technology the module was originally written in.
 

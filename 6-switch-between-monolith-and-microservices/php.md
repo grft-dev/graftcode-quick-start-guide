@@ -176,6 +176,22 @@ composer require graft/composer-energy-platform:1.0.0 --repository '{"type":"com
 
 > The exact package name and registry URL are shown in Graftcode Vision — copy them from there.
 
+Add Hypertube post-install scripts to `composer.json` in the project root (required for the PHP Graft runtime after `graftcode/hypertube-php-sdk` is installed):
+
+```json
+"scripts": {
+    "post-install-cmd": [
+        "@post-update-cmd"
+    ],
+    "post-update-cmd": [
+        "@php vendor/graftcode/hypertube-php-sdk/scripts/download-lfs-files.php",
+        "@php vendor/graftcode/hypertube-php-sdk/scripts/extract-zip-packages.php"
+    ]
+}
+```
+
+Then run `composer update` so Composer executes those scripts (requires `ext-zip`, `ext-ffi`, and network access for Git LFS binaries).
+
 Update `src/BillingService.php` to use the Graft instead of the direct class reference:
 
 ```php
