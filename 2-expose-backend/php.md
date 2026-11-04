@@ -157,15 +157,15 @@ Use the package name and import paths from Vision or Gateway logs (for this samp
 
 declare(strict_types=1);
 
-require __DIR__ . "/vendor/autoload.php";
+require __DIR__ . '/vendor/autoload.php';
 
 use Graft\Composer\EnergyService\EnergyPriceCalculator;
 use Graft\Composer\EnergyService\GraftConfig;
 
-GraftConfig::$host = "ws://localhost:80/ws";
+GraftConfig::$host = 'ws://localhost:80/ws';
 
 $price = EnergyPriceCalculator::getPrice();
-echo $price, PHP_EOL;
+echo sprintf('Energy price is: %d $', $price), PHP_EOL;
 ```
 
 Always prefer the exact namespace, package id, and install command from Graftcode Vision - generated Composer Grafts mirror your hosted class names (often camelCase method names such as `getPrice`).

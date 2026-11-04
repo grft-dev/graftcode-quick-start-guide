@@ -94,15 +94,15 @@ require __DIR__ . "/vendor/autoload.php";
 use Graft\Nuget\SdnTestSimpleCar\GraftConfig;
 use Graft\Nuget\SdnTestSimpleCar\SimpleCar;
 
-GraftConfig::$host = "inMemory";
+GraftConfig::$host = 'inMemory';
 
-$car = new SimpleCar("Toyota", "Corolla", 2022, "car-001");
+$car = new SimpleCar('Toyota', 'Corolla', 2022, 'car-001');
 
 echo $car->toString(), PHP_EOL;
-echo "Running: ", $car->isRunning() ? "true" : "false", PHP_EOL;
+echo 'Running: ', $car->isRunning() ? 'true' : 'false', PHP_EOL;
 
 $car->start();
-echo "Running: ", $car->isRunning() ? "true" : "false", PHP_EOL;
+echo 'Running: ', $car->isRunning() ? 'true' : 'false', PHP_EOL;
 ```
 
 Run it:

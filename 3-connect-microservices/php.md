@@ -71,15 +71,15 @@ The exact configuration snippet for your language is available in [Graftcode Vis
 
 declare(strict_types=1);
 
-require __DIR__ . "/vendor/autoload.php";
+require __DIR__ . '/vendor/autoload.php';
 
 use Graft\Nuget\Energypriceservice\GraftConfig;
 use Graft\Nuget\Energypriceservice\MeterLogic;
 
-GraftConfig::$host = "wss://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io/ws";
+GraftConfig::$host = 'wss://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io/ws';
 
 $consumption = MeterLogic::netConsumptionKWh(1000, 1150);
-echo "Net consumption: {$consumption}", PHP_EOL;
+echo sprintf('Net consumption: %d', $consumption), PHP_EOL;
 ```
 
 Run it:

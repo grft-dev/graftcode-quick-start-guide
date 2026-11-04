@@ -192,7 +192,7 @@ class BillingService
 {
     public static function calculateBill(int $kwhUsed): int
     {
-        GraftConfig::setConfig(getenv("GRAFT_CONFIG"));
+        GraftConfig::setConfig(getenv('GRAFT_CONFIG'));
         $price = EnergyPriceCalculator::getPrice();
 
         return $kwhUsed * $price;
