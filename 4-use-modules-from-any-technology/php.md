@@ -15,7 +15,7 @@ Use a module from any supported technology directly in a PHP service with Graftc
 
 ### Prerequisites
 
-- [PHP 8.2+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) installed locally
+- [PHP 7.4 or 8.0+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) installed locally
 - [.NET SDK](https://dotnet.microsoft.com/download) (or a `Microsoft.NETCore.App` runtime) installed locally - `inMemory` loads this Graft on Netcore, not on the PHP runtime alone
 
 ## Step 1. Create a project folder
@@ -37,7 +37,7 @@ Create `composer.json`:
 {
     "name": "example/dotnet-module-demo",
     "require": {
-        "php": ">=8.2",
+        "php": "^7.4 || ^8.0",
         "hypertube/php-sdk": "*",
         "graft/nuget-sdntestsimplecar": "0.1.0"
     },
@@ -46,13 +46,24 @@ Create `composer.json`:
             "type": "composer",
             "url": "https://grft.dev/composer"
         }
-    ]
+    ],
+    "scripts": {
+        "post-install-cmd": [
+            "@post-update-cmd"
+        ],
+        "post-update-cmd": [
+            "@php vendor/graftcode/hypertube-php-sdk/scripts/download-lfs-files.php",
+            "@php vendor/graftcode/hypertube-php-sdk/scripts/extract-zip-packages.php"
+        ]
+    }
 }
 ```
 
 ```bash
 composer install
 ```
+
+Composer runs the Hypertube post-install scripts above to download Git LFS binaries and extract SDK packages into `vendor/graftcode/hypertube-php-sdk/hypertube/` (requires `ext-zip`, `ext-ffi`, and network access).
 
 This installs a **Graft** - a strongly-typed PHP client generated from the module. You import and call it like any other Composer package, regardless of which technology the module was originally written in.
 
@@ -87,20 +98,22 @@ Create `main.php`:
 ```php
 <?php
 
+declare(strict_types=1);
+
 require __DIR__ . "/vendor/autoload.php";
 
 use Graft\Nuget\SdnTestSimpleCar\GraftConfig;
 use Graft\Nuget\SdnTestSimpleCar\SimpleCar;
 
-GraftConfig::$host = "inMemory";
+GraftConfig::$host = 'inMemory';
 
-$car = new SimpleCar("Toyota", "Corolla", 2022, "car-001");
+$car = new SimpleCar('Toyota', 'Corolla', 2022, 'car-001');
 
 echo $car->toString(), PHP_EOL;
-echo "Running: ", $car->isRunning() ? "true" : "false", PHP_EOL;
+echo 'Running: ', $car->isRunning() ? 'true' : 'false', PHP_EOL;
 
 $car->start();
-echo "Running: ", $car->isRunning() ? "true" : "false", PHP_EOL;
+echo 'Running: ', $car->isRunning() ? 'true' : 'false', PHP_EOL;
 ```
 
 Run it:

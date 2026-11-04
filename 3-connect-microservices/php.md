@@ -16,7 +16,7 @@ Connect a PHP backend service to another remote service using Graftcode - so the
 
 ### Prerequisites
 
-- [PHP 8.2+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) installed locally
+- [PHP 7.4 or 8.0+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) installed locally
 
 ## Step 1. Create a PHP service
 
@@ -43,7 +43,7 @@ Create `composer.json`:
 {
     "name": "example/energy-consumer",
     "require": {
-        "php": ">=8.2",
+        "php": "^7.4 || ^8.0",
         "hypertube/php-sdk": "*",
         "graft/nuget-energypriceservice": "1.2.0"
     },
@@ -52,13 +52,24 @@ Create `composer.json`:
             "type": "composer",
             "url": "https://grft.dev/composer/4b4e411f-60a0-4868-b8a6-46f5dee07448__free"
         }
-    ]
+    ],
+    "scripts": {
+        "post-install-cmd": [
+            "@post-update-cmd"
+        ],
+        "post-update-cmd": [
+            "@php vendor/graftcode/hypertube-php-sdk/scripts/download-lfs-files.php",
+            "@php vendor/graftcode/hypertube-php-sdk/scripts/extract-zip-packages.php"
+        ]
+    }
 }
 ```
 
 ```bash
 composer install
 ```
+
+Composer runs the Hypertube post-install scripts above to download Git LFS binaries and extract SDK packages into `vendor/graftcode/hypertube-php-sdk/hypertube/` (requires `ext-zip`, `ext-ffi`, and network access).
 
 This adds the generated strongly-typed client for the remote service to your project.
 
@@ -69,15 +80,17 @@ The exact configuration snippet for your language is available in [Graftcode Vis
 ```php
 <?php
 
-require __DIR__ . "/vendor/autoload.php";
+declare(strict_types=1);
+
+require __DIR__ . '/vendor/autoload.php';
 
 use Graft\Nuget\Energypriceservice\GraftConfig;
 use Graft\Nuget\Energypriceservice\MeterLogic;
 
-GraftConfig::$host = "wss://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io/ws";
+GraftConfig::$host = 'wss://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io/ws';
 
 $consumption = MeterLogic::netConsumptionKWh(1000, 1150);
-echo "Net consumption: {$consumption}", PHP_EOL;
+echo sprintf('Net consumption: %d', $consumption), PHP_EOL;
 ```
 
 Run it:

@@ -16,7 +16,7 @@ Turn a PHP class into a remotely callable backend service using Graftcode Gatewa
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [PHP 8.2+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) only if you run the Composer consumer locally - Docker alone is enough to build and host the service
+- [PHP 7.4 or 8.0+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) only if you run the Composer consumer locally - Docker alone is enough to build and host the service
 
 ## Step 1. Create a project folder
 
@@ -60,7 +60,7 @@ namespace Energy;
 
 use Random\RandomException;
 
-final class EnergyPriceCalculator
+class EnergyPriceCalculator
 {
     /**
      * @throws RandomException
@@ -150,20 +150,25 @@ A Project Key gives you:
 
 Your service is now accessible from any application. From Graftcode Vision, select your target package type - for example `Composer` - and copy the generated install command. That installs a **Graft**: a strongly-typed client that lets any app call your service methods directly.
 
+> **Test the Graft locally with a Composer consumer**  
+> This step shows a call snippet only. To create a separate consumer project (`composer.json`, Graft `repositories`, `composer install`, Hypertube post-install scripts, and `vendor/autoload.php`), follow **[Connect Microservices — PHP, Step 3: Install the Graft](../3-connect-microservices/php.md#step-3-install-the-graft)**. Use the **Composer install command, registry URL, and package name from Vision at [http://localhost:81/GV](http://localhost:81/GV)** after Step 4 above—not the hosted demo URLs in that tutorial. Set `GraftConfig::$host` to your gateway WebSocket endpoint (for this tutorial, typically `ws://localhost:80/ws`). Prefer `use` namespaces from the installed Graft package or Vision, not only from the example below.
+
 Use the package name and import paths from Vision or Gateway logs (for this sample the package is typically `graft/composer-energy-service:1.0.0`). `getPrice()` is synchronous and returns an `int`:
 
 ```php
 <?php
 
-require __DIR__ . "/vendor/autoload.php";
+declare(strict_types=1);
+
+require __DIR__ . '/vendor/autoload.php';
 
 use Graft\Composer\EnergyService\EnergyPriceCalculator;
 use Graft\Composer\EnergyService\GraftConfig;
 
-GraftConfig::$host = "ws://localhost:80/ws";
+GraftConfig::$host = 'ws://localhost:80/ws';
 
 $price = EnergyPriceCalculator::getPrice();
-echo $price, PHP_EOL;
+echo sprintf('Energy price is: %d $', $price), PHP_EOL;
 ```
 
 Always prefer the exact namespace, package id, and install command from Graftcode Vision - generated Composer Grafts mirror your hosted class names (often camelCase method names such as `getPrice`).

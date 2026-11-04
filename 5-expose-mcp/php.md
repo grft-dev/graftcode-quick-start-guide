@@ -17,7 +17,7 @@ Turn a PHP module into an MCP-compatible service that AI agents can discover and
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed and running
-- [PHP 8.2+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) *(optional)* - only if you edit files outside Docker; build and Gateway run entirely in the container
+- [PHP 7.4 or 8.0+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) *(optional)* - only if you edit files outside Docker; build and Gateway run entirely in the container
 - An AI tool with MCP support - for example [Cursor](https://cursor.com/) or [Claude Desktop](https://claude.ai/download)
 
 ## Step 1. Create a project folder
@@ -37,8 +37,9 @@ Create `composer.json`:
     "description": "Energy module for MCP demo",
     "type": "library",
     "license": "ISC",
+    "version": "1.0.0",
     "require": {
-        "php": ">=8.2"
+        "php": "^7.4 || ^8.0"
     },
     "autoload": {
         "psr-4": {
@@ -55,6 +56,8 @@ Create `src/EnergyPriceCalculator.php`:
 ```php
 <?php
 
+declare(strict_types=1);
+
 namespace Energy;
 
 class EnergyPriceCalculator
@@ -67,6 +70,7 @@ class EnergyPriceCalculator
     public static function calculateBill(float $kwhUsed): float
     {
         $pricePerKwh = random_int(100, 104);
+
         return $kwhUsed * $pricePerKwh;
     }
 }
@@ -79,7 +83,7 @@ This is a plain PHP class - no attributes, no frameworks, no MCP-specific annota
 Create a `Dockerfile` in the project root:
 
 ```dockerfile
-FROM php:8.3-cli
+FROM php:8.4-cli
 
 WORKDIR /usr/app
 
@@ -94,14 +98,14 @@ RUN apt-get update && apt-get install -y git unzip \
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "--modules", "/usr/app/src", "--runtime", "php"]
+CMD ["gg", "/usr/app/src"]
 ```
 
 `gg` (Graftcode Gateway) analyzes the module path under `--modules`, discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and as MCP tools for AI agents. Port `80` handles service calls, port `81` serves Graftcode Vision and the MCP endpoint.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
-- **FROM php:8.3-cli** - Uses the official PHP 8.3 CLI image as the base runtime environment.
+- **FROM php:8.4-cli** - Uses the official PHP 8.4 CLI image as the base runtime environment.
 - **COPY . /usr/app/** - Copies your project files into the container.
 - **composer install --no-dev --optimize-autoloader** - Registers PSR-4 autoloading for your classes.
 - **RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb** - `curl` downloads the installer, `dpkg -i gg.deb` installs Graftcode Gateway, and `rm gg.deb` removes the package.
@@ -185,7 +189,7 @@ Everything above works without any account - perfect for learning and local deve
 Then pass the key when starting your gateway:
 
 ```dockerfile
-CMD ["gg", "--modules", "/usr/app/src", "--runtime", "php", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", "/usr/app/src", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 A Project Key gives you:
