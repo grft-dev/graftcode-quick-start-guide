@@ -91,7 +91,7 @@ ENV HYPERTUBE_RUBY_RUNTIME_PATH=/usr/local/lib/libruby.so
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "./lib", "--runtime", "ruby"]
+CMD ["gg", ".", "--runtime", "ruby"]
 ```
 
 The last line is the important one - `gg` (Graftcode Gateway) analyzes the module path, discovers public methods on your classes, and exposes them automatically. Port `80` handles service calls (WebSocket), port `81` serves Graftcode Vision. `HYPERTUBE_RUBY_RUNTIME_PATH` points Hypertube at the MRI shared library inside the image, matching how Gateway hosts Ruby Receivers.
@@ -105,7 +105,7 @@ The last line is the important one - `gg` (Graftcode Gateway) analyzes the modul
 - **ENV HYPERTUBE_RUBY_RUNTIME_PATH=/usr/local/lib/libruby.so** - Tells Hypertube where to load the Ruby runtime for cross-runtime bridges.
 - **EXPOSE 80** - WebSocket port for Graft calls.
 - **EXPOSE 81** - HTTP port for Graftcode Vision (and health checks such as `GET /status`).
-- **CMD ["gg", "./lib", "--runtime", "ruby"]** - Runs Gateway from `WORKDIR` against your `lib/` tree with an explicit Ruby runtime, matching [Run Gateway locally](https://academy.dev.graftcode.com/documentation) (`bundle install` then `gg ./lib/`). `--modules` is optional when `gg` can infer a single target directory.
+- **CMD ["gg", ".", "--runtime", "ruby"]** - Runs Graftcode Gateway from `/usr/app` with `--runtime ruby`. The first argument is your hosted module path (the gem root, same idea as `bundle install` then hosting that folder — see [Run Gateway locally](https://academy.dev.graftcode.com/documentation)). `--modules` is optional when `gg` can infer a single target directory.
 
 </collapsible>
 
@@ -134,7 +134,7 @@ Everything above works without any account - perfect for learning and local deve
 Then pass the key when starting your gateway:
 
 ```dockerfile
-CMD ["gg", "./lib", "--runtime", "ruby", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", ".", "--runtime", "ruby", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 A Project Key gives you:

@@ -106,7 +106,7 @@ ENV HYPERTUBE_RUBY_RUNTIME_PATH=/usr/local/lib/libruby.so
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "./lib", "--runtime", "ruby"]
+CMD ["gg", ".", "--runtime", "ruby"]
 ```
 
 Build and run:
@@ -116,7 +116,7 @@ docker build --no-cache --pull -t ruby-energy-platform:test .
 docker run -d -p 80:80 -p 81:81 --name energy_platform ruby-energy-platform:test
 ```
 
-`gg` scans `/usr/app/lib`, discovers both classes, and exposes their public class methods. Open [http://localhost:81/GV](http://localhost:81/GV) and invoke `BillingService.calculate_bill` — both classes show up because everything runs in one process.
+`gg` (Graftcode Gateway) scans `/usr/app/lib`, discovers both classes, and exposes their public class methods. Open [http://localhost:81/GV](http://localhost:81/GV) and invoke `BillingService.calculate_bill` — both classes show up because everything runs in one process.
 
 ## Step 5. Extract the price calculator as a separate microservice
 
@@ -139,8 +139,10 @@ ENV HYPERTUBE_RUBY_RUNTIME_PATH=/usr/local/lib/libruby.so
 EXPOSE 90
 EXPOSE 91
 
-CMD ["gg", "./lib/energy_price_calculator.rb", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092", "--runtime", "ruby"]
+CMD ["gg", ".", "--runtime", "ruby", "--types", "EnergyPriceCalculator", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
 ```
+
+The second container uses the same gem layout as the monolith. `--types EnergyPriceCalculator` exposes only that class as a standalone service while keeping the usual Ruby hosting path (gem root with `*.gemspec`).
 
 Build and run the dedicated gateway:
 
@@ -201,7 +203,7 @@ docker stop energy_platform
 docker rm energy_platform
 docker build --no-cache --pull -t ruby-energy-platform:test .
 docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=graft.rubygems.energy_platform;host=ws://price_calculator:90/ws;runtime=ruby;modules=/usr/app/lib" \
+  -e GRAFT_CONFIG="name=graft.rubygems.energy_platform;host=ws://price_calculator:90/ws;runtime=ruby;modules=/usr/app" \
   -p 80:80 -p 81:81 \
   --name energy_platform ruby-energy-platform:test
 ```
@@ -214,7 +216,7 @@ Call `BillingService.calculate_bill` from [http://localhost:81/GV](http://localh
 docker stop energy_platform
 docker rm energy_platform
 docker run -d \
-  -e GRAFT_CONFIG="name=graft.rubygems.energy_platform;host=inmemory;runtime=ruby;modules=/usr/app/lib" \
+  -e GRAFT_CONFIG="name=graft.rubygems.energy_platform;host=inmemory;runtime=ruby;modules=/usr/app" \
   -p 80:80 -p 81:81 \
   --name energy_platform ruby-energy-platform:test
 ```
@@ -223,10 +225,10 @@ Side-by-side:
 
 ```text
 # Monolith (in-process)
-name=graft.rubygems.energy_platform;host=inmemory;runtime=ruby;modules=/usr/app/lib
+name=graft.rubygems.energy_platform;host=inmemory;runtime=ruby;modules=/usr/app
 
 # Microservice (remote)
-name=graft.rubygems.energy_platform;host=ws://price_calculator:90/ws;runtime=ruby;modules=/usr/app/lib
+name=graft.rubygems.energy_platform;host=ws://price_calculator:90/ws;runtime=ruby;modules=/usr/app
 ```
 
 `GRAFT_CONFIG` owns the topology — same image, same Ruby source, one environment variable.

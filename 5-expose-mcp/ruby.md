@@ -79,10 +79,10 @@ ENV HYPERTUBE_RUBY_RUNTIME_PATH=/usr/local/lib/libruby.so
 EXPOSE 80
 EXPOSE 81
 
-CMD ["gg", "./lib", "--runtime", "ruby"]
+CMD ["gg", ".", "--runtime", "ruby"]
 ```
 
-`gg` discovers public methods and exposes them both as Grafts for app-to-app calls and as MCP tools for AI agents. Port `80` carries WebSocket traffic; port `81` serves Graftcode Vision and the MCP HTTP surface.
+`gg` (Graftcode Gateway) discovers public methods and exposes them both as Grafts for app-to-app calls and as MCP tools for AI agents. Port `80` carries WebSocket traffic; port `81` serves Graftcode Vision and the MCP HTTP surface.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
@@ -92,7 +92,7 @@ CMD ["gg", "./lib", "--runtime", "ruby"]
 - **RUN curl ... grft.dev/get/gg** - Installs Graftcode Gateway (`gg`) from the published Linux package.
 - **ENV HYPERTUBE_RUBY_RUNTIME_PATH** - Locates `libruby.so` for Hypertube's Ruby runtime bridge.
 - **EXPOSE 80 / 81** - WebSocket (`80`) and Vision + MCP HTTP (`81`).
-- **CMD ["gg", "./lib", "--runtime", "ruby"]** - Publishes every public method under `lib/` with an explicit Ruby runtime selection (run from `WORKDIR`, same pattern as [Run Gateway locally](https://academy.dev.graftcode.com/documentation)).
+- **CMD ["gg", ".", "--runtime", "ruby"]** - Starts Graftcode Gateway against your gem project. It discovers public methods and exposes them as Grafts and MCP tools (same pattern as [Run Gateway locally](https://academy.dev.graftcode.com/documentation)).
 
 </collapsible>
 
@@ -163,7 +163,7 @@ That maps to `EnergyPriceCalculator.calculate_bill(250)` with no hand-authored t
 Everything above works without any account - perfect for learning and local development. When you're ready for real-world usage, create a free account at [portal.graftcode.com](https://portal.graftcode.com), set up a project, and copy its **Project Key**.
 
 ```dockerfile
-CMD ["gg", "./lib", "--runtime", "ruby", "--projectKey", "YOUR_PROJECT_KEY"]
+CMD ["gg", ".", "--runtime", "ruby", "--projectKey", "YOUR_PROJECT_KEY"]
 ```
 
 A Project Key gives you:
