@@ -35,7 +35,9 @@ Create `energy-service.gemspec`:
 Gem::Specification.new do |spec|
   spec.name = "energy-service"
   spec.version = "1.0.0"
+  spec.authors = ["Example"]
   spec.summary = "Energy price sample module"
+  spec.license = "MIT"
   spec.files = Dir["lib/**/*.rb"]
   spec.require_paths = ["lib"]
   spec.required_ruby_version = ">= 3.2.0"
