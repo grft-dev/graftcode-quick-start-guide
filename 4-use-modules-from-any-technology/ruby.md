@@ -31,7 +31,15 @@ cd ruby-dotnet-module-demo
 
 For this example we'll use a .NET sample library from NuGet (`sdnTestSimpleCar` / `SimpleCar`), but the same approach works with any module from a supported repository - npm, PyPI, Maven, or NuGet.
 
-Add a `Gemfile` (versions and registry - **use the public sample or copy from Vision**):
+The published RubyGems package name is **all lowercase** (`graft-nuget-sdntestsimplecar`) — not `graft-nuget-sdnTestSimpleCar`. If `bundle exec ruby main.rb` says the gem is missing, your `Gemfile` likely used the wrong casing; fix the name and run `bundle install` again.
+
+Install from the CLI:
+
+```bash
+gem install graft-nuget-sdntestsimplecar -v "0.1.0" --source https://grft.dev/
+```
+
+Or add a `Gemfile` (registry — **copy from Vision when connecting to your own gateway**):
 
 ```ruby
 # frozen_string_literal: true
@@ -39,11 +47,9 @@ Add a `Gemfile` (versions and registry - **use the public sample or copy from Vi
 source "https://rubygems.org"
 
 source "https://grft.dev/" do
-  gem "graft-rubygems-sdn_test_simple_car", "0.2.2"
+  gem "graft-nuget-sdntestsimplecar", "0.1.0"
 end
 ```
-
-The maintained cross-runtime sample appears in [Obtain and install a Graft](https://academy.dev.graftcode.com/documentation) under **Install a public Graft** - adjust the `gem` line if the published version moves forward.
 
 ```bash
 bundle install
@@ -83,9 +89,9 @@ Create `main.rb`:
 # frozen_string_literal: true
 
 require "bundler/setup"
-require "graft_rubygems_sdn_test_simple_car"
+require "graft_nuget_sdntestsimplecar"
 
-GraftConfig.host = "inmemory"
+GraftConfig.host = "inMemory"
 
 car = SimpleCar.new("Toyota", "Corolla", 2022, "car-001")
 
@@ -104,7 +110,7 @@ ruby main.rb
 
 Prefer property and method names from the installed gem or Vision - generated Ruby often uses `snake_case` (`to_string`, `is_running`) even when the .NET API uses PascalCase.
 
-You should see the car description and running state printed in your terminal. `SimpleCar` comes from a .NET NuGet package, but your code reads like ordinary Ruby - no HTTP stack, no manual deserialization. `GraftConfig.host = "inmemory"` tells Graftcode to load and execute the .NET assembly inside the Hypertube bridge for this Graft.
+You should see the car description and running state printed in your terminal. `SimpleCar` comes from a .NET NuGet package, but your code reads like ordinary Ruby - no HTTP stack, no manual deserialization. `GraftConfig.host = "inMemory"` tells Graftcode to load and execute the .NET assembly inside the Hypertube bridge for this Graft.
 
 ## Step 5. Run with a Project Key (recommended for real-world usage)
 
