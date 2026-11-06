@@ -89,12 +89,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 ENV HYPERTUBE_RUBY_RUNTIME_PATH=/usr/local/lib/libruby.so
 
 EXPOSE 80
-EXPOSE 81
 
 CMD ["gg", ".", "--runtime", "ruby"]
 ```
 
-The last line is the important one - `gg` (Graftcode Gateway) analyzes the module path, discovers public methods on your classes, and exposes them automatically. Port `80` handles service calls (WebSocket), port `81` serves Graftcode Vision. `HYPERTUBE_RUBY_RUNTIME_PATH` points Hypertube at the MRI shared library inside the image, matching how Gateway hosts Ruby Receivers.
+The last line is the important one - `gg` (Graftcode Gateway) analyzes the module path, discovers public methods on your classes, and exposes them automatically. The **`--port` listener (default `80`) carries WebSocket traffic** (for example `ws://localhost:80/ws`) **and serves HTTP** for Graftcode Vision, MCP, and `/status` on the **same TCP port** (for example `http://localhost:80/GV`). Gateway also starts a **second HTTP listener on `--httpPort`** (default `81`); you can expose that too, but for this tutorial one host port is enough. `HYPERTUBE_RUBY_RUNTIME_PATH` points Hypertube at the MRI shared library inside the image, matching how Gateway hosts Ruby Receivers.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
@@ -103,8 +102,7 @@ The last line is the important one - `gg` (Graftcode Gateway) analyzes the modul
 - **bundle install** - Resolves gems so Gateway analyzes the same layout you use locally.
 - **RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb** - Installs the Linux `gg` package for Graftcode Gateway.
 - **ENV HYPERTUBE_RUBY_RUNTIME_PATH=/usr/local/lib/libruby.so** - Tells Hypertube where to load the Ruby runtime for cross-runtime bridges.
-- **EXPOSE 80** - WebSocket port for Graft calls.
-- **EXPOSE 81** - HTTP port for Graftcode Vision (and health checks such as `GET /status`).
+- **EXPOSE 80** - The default `--port`: WebSocket for Graft calls **and** HTTP for Vision (`/GV`), MCP (`/mcp`), and `GET /status` on the same listener.
 - **CMD ["gg", ".", "--runtime", "ruby"]** - Runs Graftcode Gateway from `/usr/app` with `--runtime ruby`. The first argument is your hosted module path (the gem root, same idea as `bundle install` then hosting that folder — see [Run Gateway locally](https://academy.dev.graftcode.com/documentation)). `--modules` is optional when `gg` can infer a single target directory.
 
 </collapsible>
@@ -113,14 +111,14 @@ Build and run the container:
 
 ```bash
 docker build --no-cache --pull -t myenergyservice-ruby:test .
-docker run -d -p 80:80 -p 81:81 --name graftcode_demo_ruby myenergyservice-ruby:test
+docker run -d -p 80:80 --name graftcode_demo_ruby myenergyservice-ruby:test
 ```
 
 Your Ruby service is now running and exposed through Graftcode Gateway.
 
 ## Step 4. Explore the service in Graftcode Vision
 
-Open [http://localhost:81/GV](http://localhost:81/GV) in your browser.
+Open [http://localhost:80/GV](http://localhost:80/GV) in your browser.
 
 You will see all public methods from your Ruby class - their names, parameter types, and return types. Graftcode Vision also provides:
 
@@ -149,9 +147,7 @@ A Project Key gives you:
 Your service is now accessible from any application. From Graftcode Vision, select **RubyGems**, copy the generated `gem install` command, and add the gem to a `Gemfile` or install it locally. That installs a **Graft**: a strongly-typed client that lets any app call your service methods directly.
 
 > **Test the Graft locally with a Ruby consumer**  
-> This step shows a call snippet only. To wire a full Bundler project (`Gemfile`, registry `source` block, `bundle install`, and `require`), follow **[Connect Microservices — Ruby, Step 3: Install the Graft](../3-connect-microservices/ruby.md#step-3-install-the-graft)**. Use the **RubyGems install command, registry URL, and gem name from Vision at [http://localhost:81/GV](http://localhost:81/GV)** after Step 4 above - not the hosted demo URLs in that tutorial. Set `GraftConfig.host` to your gateway WebSocket endpoint (for this tutorial, typically `ws://localhost:80/ws`). Prefer `require` names from Vision or the installed gem, not only the example below.
-
-After install, configuration matches [Configure Graft invocation](https://academy.dev.graftcode.com/documentation) - set the host **before** the first call:
+> This step shows a call snippet only. To wire a full Bundler project (`Gemfile`, registry `source` block, `bundle install`, and `require`), follow **[Connect Microservices — Ruby, Step 3: Install the Graft](../3-connect-microservices/ruby.md#step-3-install-the-graft)**. Use the **RubyGems install command, registry URL, and gem name from Vision at [http://localhost:80/GV](http://localhost:80/GV)** after Step 4 above — not the hosted demo URLs in that tutorial. Set `GraftConfig.host` to your gateway WebSocket endpoint (for this tutorial, typically `ws://localhost:80/ws`). Prefer `require` names from Vision or the installed gem, not only the example below.
 
 After `bundle install` or `gem install`, set the host **before the first call** (see [Configure Graft invocation](https://academy.dev.graftcode.com/documentation)):
 

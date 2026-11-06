@@ -104,7 +104,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 ENV HYPERTUBE_RUBY_RUNTIME_PATH=/usr/local/lib/libruby.so
 
 EXPOSE 80
-EXPOSE 81
 
 CMD ["gg", ".", "--runtime", "ruby"]
 ```
@@ -113,10 +112,10 @@ Build and run:
 
 ```bash
 docker build --no-cache --pull -t ruby-energy-platform:test .
-docker run -d -p 80:80 -p 81:81 --name energy_platform ruby-energy-platform:test
+docker run -d -p 80:80 --name energy_platform ruby-energy-platform:test
 ```
 
-`gg` (Graftcode Gateway) scans `/usr/app/lib`, discovers both classes, and exposes their public class methods. Open [http://localhost:81/GV](http://localhost:81/GV) and invoke `BillingService.calculate_bill` — both classes show up because everything runs in one process.
+`gg` (Graftcode Gateway) scans the gem project under `/usr/app`, discovers both classes, and exposes their public class methods. Open [http://localhost:80/GV](http://localhost:80/GV) and invoke `BillingService.calculate_bill` — both classes show up because everything runs in one process.
 
 ## Step 5. Extract the price calculator as a separate microservice
 
@@ -152,11 +151,11 @@ docker network create graftcode_demo
 docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name price_calculator price-calculator-ruby:test
 ```
 
-Open [http://localhost:91/GV](http://localhost:91/GV) — only `EnergyPriceCalculator` is published on this Gateway instance.
+Open [http://localhost:90/GV](http://localhost:90/GV) — only `EnergyPriceCalculator` is published on this Gateway instance. (This gateway uses `--port 90` for the primary listener and `--httpPort 91` for the second HTTP stack; Vision is also on **90** at `/GV`.)
 
 ## Step 6. Connect the billing service through a Graft
 
-From Vision at [http://localhost:91/GV](http://localhost:91/GV), choose **RubyGems** and copy the `gem install` / Bundler snippet.
+From Vision at [http://localhost:90/GV](http://localhost:90/GV), choose **RubyGems** and copy the `gem install` / Bundler snippet.
 
 Merge that gem into the root `Gemfile` next to `gemspec` (illustration only — **paste Vision's `source` + `gem` lines**):
 
@@ -204,11 +203,11 @@ docker rm energy_platform
 docker build --no-cache --pull -t ruby-energy-platform:test .
 docker run -d --network graftcode_demo \
   -e GRAFT_CONFIG="name=graft.rubygems.energy_platform;host=ws://price_calculator:90/ws;runtime=ruby;modules=/usr/app" \
-  -p 80:80 -p 81:81 \
+  -p 80:80 \
   --name energy_platform ruby-energy-platform:test
 ```
 
-Call `BillingService.calculate_bill` from [http://localhost:81/GV](http://localhost:81/GV) — results match the monolith, but price selection now crosses the network.
+Call `BillingService.calculate_bill` from [http://localhost:80/GV](http://localhost:80/GV) — results match the monolith, but price selection now crosses the network.
 
 ## Step 8. Switch back to monolith
 
@@ -217,7 +216,7 @@ docker stop energy_platform
 docker rm energy_platform
 docker run -d \
   -e GRAFT_CONFIG="name=graft.rubygems.energy_platform;host=inmemory;runtime=ruby;modules=/usr/app" \
-  -p 80:80 -p 81:81 \
+  -p 80:80 \
   --name energy_platform ruby-energy-platform:test
 ```
 

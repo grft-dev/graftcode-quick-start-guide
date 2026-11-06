@@ -77,12 +77,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 ENV HYPERTUBE_RUBY_RUNTIME_PATH=/usr/local/lib/libruby.so
 
 EXPOSE 80
-EXPOSE 81
 
 CMD ["gg", ".", "--runtime", "ruby"]
 ```
 
-`gg` (Graftcode Gateway) discovers public methods and exposes them both as Grafts for app-to-app calls and as MCP tools for AI agents. Port `80` carries WebSocket traffic; port `81` serves Graftcode Vision and the MCP HTTP surface.
+`gg` (Graftcode Gateway) discovers public methods and exposes them both as Grafts for app-to-app calls and as MCP tools for AI agents. On the default **`--port` (`80`)** the process handles **WebSocket** traffic (for example `ws://localhost:80/ws`) **and HTTP** for Graftcode Vision and MCP on the **same TCP port** (for example `http://localhost:80/GV` and `http://localhost:80/mcp`). Gateway also listens on **`--httpPort`** (default `81`) as a second HTTP stack — optional to map in Docker if you only need one host port.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
@@ -91,7 +90,7 @@ CMD ["gg", ".", "--runtime", "ruby"]
 - **bundle install** - Ensures dependency metadata matches what you use locally.
 - **RUN curl ... grft.dev/get/gg** - Installs Graftcode Gateway (`gg`) from the published Linux package.
 - **ENV HYPERTUBE_RUBY_RUNTIME_PATH** - Locates `libruby.so` for Hypertube's Ruby runtime bridge.
-- **EXPOSE 80 / 81** - WebSocket (`80`) and Vision + MCP HTTP (`81`).
+- **EXPOSE 80** - Default `--port`: WebSocket plus HTTP for Vision, MCP, and `/status` on one listener.
 - **CMD ["gg", ".", "--runtime", "ruby"]** - Starts Graftcode Gateway against your gem project. It discovers public methods and exposes them as Grafts and MCP tools (same pattern as [Run Gateway locally](https://academy.dev.graftcode.com/documentation)).
 
 </collapsible>
@@ -100,20 +99,20 @@ Build and run the container:
 
 ```bash
 docker build --no-cache --pull -t ruby-ai-backend:test .
-docker run -d -p 80:80 -p 81:81 --name graftcode_mcp_demo_ruby ruby-ai-backend:test
+docker run -d -p 80:80 --name graftcode_mcp_demo_ruby ruby-ai-backend:test
 ```
 
 Your Ruby service now exposes MCP automatically alongside Grafts.
 
 ## Step 4. Explore the service in Graftcode Vision
 
-Open [http://localhost:81/GV](http://localhost:81/GV).
+Open [http://localhost:80/GV](http://localhost:80/GV).
 
 You will see each public class method with parameters and return types. Those same methods are MCP tools agents can list and invoke.
 
 ## Step 5. Connect an AI tool to the MCP endpoint
 
-Graftcode Gateway serves MCP on the Vision HTTP port by default. Point your AI client at `http://localhost:81/mcp`.
+By default, MCP is available over HTTP on **`--port` (same as WebSocket)** — for this tutorial, `http://localhost:80/mcp`. If you expose `--httpPort` (default `81`), `http://localhost:81/mcp` works too.
 
 **Cursor** - add to `.cursor/mcp.json` (or **Cursor Settings → Tools & MCP → New MCP Server**):
 
@@ -121,7 +120,7 @@ Graftcode Gateway serves MCP on the Vision HTTP port by default. Point your AI c
 {
   "mcpServers": {
     "energy-service": {
-      "url": "http://localhost:81/mcp"
+      "url": "http://localhost:80/mcp"
     }
   }
 }
@@ -137,7 +136,7 @@ Graftcode Gateway serves MCP on the Vision HTTP port by default. Point your AI c
       "args": [
         "-y",
         "mcp-remote",
-        "http://localhost:81/mcp"
+        "http://localhost:80/mcp"
       ]
     }
   }
