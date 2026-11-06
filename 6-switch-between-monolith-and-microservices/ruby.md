@@ -54,6 +54,17 @@ source "https://rubygems.org"
 gemspec
 ```
 
+Create `.dockerignore` in the project root so **host-only Bundler output is never copied into the image**:
+
+```gitignore
+# Do not ship Windows/macOS bundle paths into Linux containers — native gems (e.g. ffi x64-mingw-ucrt)
+# conflict with Linux (x86_64-linux-gnu) and cause FrozenError / duplicate constant warnings at runtime.
+vendor/
+.bundle/
+```
+
+If you already ran `bundle install --path vendor/bundle` on **Windows**, delete `vendor/` before `docker build` (or rely on `.dockerignore`). Otherwise `COPY . /usr/app/` pulls **Ruby 3.4 + mingw `ffi`** next to the image’s **Ruby 3.3 + Linux `ffi`**, and Gateway fails with **`FrozenError: can't modify frozen Hash`** when both versions load.
+
 ## Step 2. Write the price calculator
 
 Create `lib/energy_price_calculator.rb`:
@@ -107,6 +118,8 @@ EXPOSE 80
 
 CMD ["gg", ".", "--runtime", "ruby"]
 ```
+
+Keep **`.dockerignore`** from Step 1 in the repo before building — without it, a host **`vendor/bundle`** from `bundle install` (especially on **Windows**) is copied in and breaks native gems such as **`ffi`** at runtime.
 
 Build and run:
 
@@ -165,20 +178,27 @@ Merge that gem into the root `Gemfile` next to `gemspec` (illustration only — 
 source "https://rubygems.org"
 
 source "https://grft.dev/<uuid>__free" do
-  gem "graft-rubygems-energy-platform", "1.0.0"
+  gem "graft-rubygems-energy-platform_5kg1tc", "1.0.0"
 end
 
 gemspec
 ```
 
-Run `bundle install` locally so `Gemfile.lock` captures the Graft coordinates, then rebuild the Docker image — the existing `RUN bundle install` layer pulls the gem during `docker build`.
+Run
+
+```bash
+rm Gemfile.lock
+bundle install
+```
+
+locally so `Gemfile.lock` captures the Graft coordinates, then rebuild the Docker image — the existing `RUN bundle install` layer pulls the gem during `docker build`.
 
 Update `lib/billing_service.rb` to load the Graft and read configuration from `GRAFT_CONFIG`:
 
 ```ruby
 # frozen_string_literal: true
 
-require "graft_rubygems_energy_platform"
+require "graft_rubygems_energy_platform_5kg1tc"
 
 class BillingService
   def self.calculate_bill(kwh_used)
@@ -189,7 +209,7 @@ class BillingService
 end
 ```
 
-Use the exact `require` string and namespaces printed in Vision - generated Ruby typically mirrors the hosted types (for example `EnergyPriceCalculator` and `GraftConfig`). This single edit is the only code change in the tutorial; topology is now driven entirely by `GRAFT_CONFIG`, as described in [Configure Graft invocation](https://academy.dev.graftcode.com/documentation).
+Use the exact `require` string and namespaces printed in Vision - generated Ruby typically mirrors the hosted types (for example `EnergyPriceCalculator` and `GraftConfig`). This single edit is the only code change in the tutorial; topology is now driven entirely by `GRAFT_CONFIG`, as described in [Configure Graft invocation](https://academy.graftcode.com/documentation).
 
 > In `GRAFT_CONFIG`, `name=` is the graft's internal identifier (often like `graft.rubygems.energy_platform`) — **not** the hyphenated RubyGems package id. Copy the `name=` segment from Vision or the generated `GraftConfig`.
 
@@ -201,10 +221,7 @@ Rebuild the main image and run it on the Docker network:
 docker stop energy_platform
 docker rm energy_platform
 docker build --no-cache --pull -t ruby-energy-platform:test .
-docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=graft.rubygems.energy_platform;host=ws://price_calculator:90/ws;runtime=ruby;modules=/usr/app" \
-  -p 80:80 \
-  --name energy_platform ruby-energy-platform:test
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.rubygems.energy_platform;host=ws://price_calculator:90/ws;runtime=ruby;modules=/usr/app" -p 80:80 --name energy_platform ruby-energy-platform:test
 ```
 
 Call `BillingService.calculate_bill` from [http://localhost:80/GV](http://localhost:80/GV) — results match the monolith, but price selection now crosses the network.
@@ -214,10 +231,7 @@ Call `BillingService.calculate_bill` from [http://localhost:80/GV](http://localh
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker run -d \
-  -e GRAFT_CONFIG="name=graft.rubygems.energy_platform;host=inmemory;runtime=ruby;modules=/usr/app" \
-  -p 80:80 \
-  --name energy_platform ruby-energy-platform:test
+docker run -d -e GRAFT_CONFIG="name=graft.rubygems.energy_platform;host=inmemory;runtime=ruby;modules=/usr/app" -p 80:80 --name energy_platform ruby-energy-platform:test
 ```
 
 Side-by-side:
@@ -238,7 +252,7 @@ Return to microservice mode, stop `price_calculator`, and watch `calculate_bill`
 
 ## Step 10. Run with a Project Key (recommended for real-world usage)
 
-When you graduate beyond local UUID registries, add `--projectKey` to each `gg` invocation (Dockerfile `CMD` or orchestration env) so RubyGems coordinates and MCP endpoints stay stable — see [Use a project key](https://academy.dev.graftcode.com/documentation).
+When you graduate beyond local UUID registries, add `--projectKey` to each `gg` invocation (Dockerfile `CMD` or orchestration env) so RubyGems coordinates and MCP endpoints stay stable — see [Use a project key](https://academy.graftcode.com/documentation).
 
 <collapsible title="Old Way vs New Way">
 
