@@ -27,7 +27,26 @@ mkdir ruby-ai-backend
 cd ruby-ai-backend
 ```
 
-Add `energy-service.gemspec` (same shape as in [Expose a Backend Service — Ruby](../2-expose-backend/ruby.md)) and a `Gemfile`:
+Gateway expects a **gem-shaped layout**: a `*.gemspec` in the project root (analyzed from `.` when you run `gg .`) plus a `Gemfile` that references it. Without them, `bundle install` in the Docker build fails with **Could not locate Gemfile**.
+
+Create `energy-service.gemspec` in the project root:
+
+```ruby
+# frozen_string_literal: true
+
+Gem::Specification.new do |spec|
+  spec.name = "energy-service"
+  spec.version = "1.0.0"
+  spec.authors = ["Example"]
+  spec.summary = "Energy price sample module for MCP tutorial"
+  spec.license = "MIT"
+  spec.files = Dir["lib/**/*.rb"]
+  spec.require_paths = ["lib"]
+  spec.required_ruby_version = ">= 3.2.0"
+end
+```
+
+Create `Gemfile` next to the gemspec:
 
 ```ruby
 # frozen_string_literal: true
@@ -91,7 +110,7 @@ CMD ["gg", ".", "--runtime", "ruby"]
 - **RUN curl ... grft.dev/get/gg** - Installs Graftcode Gateway (`gg`) from the published Linux package.
 - **ENV HYPERTUBE_RUBY_RUNTIME_PATH** - Locates `libruby.so` for Hypertube's Ruby runtime bridge.
 - **EXPOSE 80** - Default `--port`: WebSocket plus HTTP for Vision, MCP, and `/status` on one listener.
-- **CMD ["gg", ".", "--runtime", "ruby"]** - Starts Graftcode Gateway against your gem project. It discovers public methods and exposes them as Grafts and MCP tools (same pattern as [Run Gateway locally](https://academy.dev.graftcode.com/documentation)).
+- **CMD ["gg", ".", "--runtime", "ruby"]** - Starts Graftcode Gateway against your gem project. It discovers public methods and exposes them as Grafts and MCP tools (same pattern as [Run Gateway locally](https://academy.graftcode.com/documentation)).
 
 </collapsible>
 
