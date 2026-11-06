@@ -111,7 +111,6 @@ RUN apt-get update && apt-get install -y git unzip \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 80
-EXPOSE 81
 
 CMD ["gg", "/usr/app/src"]
 ```
@@ -120,12 +119,12 @@ Build and run:
 
 ```bash
 docker build --no-cache --pull -t php-energy-platform:test .
-docker run -d -p 80:80 -p 81:81 --name energy_platform php-energy-platform:test
+docker run -d -p 80:80 --name energy_platform php-energy-platform:test
 ```
 
-`gg` (Graftcode Gateway) scans the `/usr/app/src` directory, discovers both classes, and exposes all their public methods. Port `80` handles service calls, port `81` serves Graftcode Vision.
+`gg` (Graftcode Gateway) scans the `/usr/app/src` directory, discovers both classes, and exposes all their public methods. The **`--port` listener (default `80`) carries WebSocket traffic** (for example `ws://localhost:80/ws`) **and serves HTTP** for Graftcode Vision on the **same TCP port** (for example `http://localhost:80/GV`). Gateway also starts a **second HTTP listener on `--httpPort`** (default `81`); you can map that in Docker too, but one host port is enough for this tutorial.
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and try calling `BillingService.calculateBill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
+Open [http://localhost:80/GV](http://localhost:80/GV) and try calling `BillingService.calculateBill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
 
 At this point, everything runs inside **one container** — both classes share a single PHP process. This is your monolith.
 
@@ -162,13 +161,13 @@ docker network create graftcode_demo
 docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name price_calculator price-calculator-php:test
 ```
 
-Open [http://localhost:91/GV](http://localhost:91/GV) — the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.getPrice` listed with its return type.
+Open [http://localhost:90/GV](http://localhost:90/GV) — the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.getPrice` listed with its return type. (This gateway uses `--port 90` for the primary listener and `--httpPort 91` for the second HTTP stack; Vision is also on **90** at `/GV`.)
 
 ## Step 6. Connect the billing service through a Graft
 
 Now that the price calculator runs on its own gateway, install its **Graft** — the strongly-typed client that Graftcode generates automatically.
 
-From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **Composer** and copy the generated install command. Run it from the project root so the package lands in `vendor/` and is copied into the container on the next build. The package name follows your hosted module coordinates (for this sample, typically `graft/composer-energy-platform:1.0.0` from `composer.json` `name = "example/energy-platform"`). The registry URL shown in Vision may differ from the example below.
+From Graftcode Vision at [http://localhost:90/GV](http://localhost:90/GV), select **Composer** and copy the generated install command. Run it from the project root so the package lands in `vendor/` and is copied into the container on the next build. The package name follows your hosted module coordinates (for this sample, typically `graft/composer-energy-platform:1.0.0` from `composer.json` `name = "example/energy-platform"`). The registry URL shown in Vision may differ from the example below.
 
 ```bash
 composer require graft/composer-energy-platform:1.0.0 --repository '{"type":"composer","url":"https://grft.dev/composer/<uuid>__free"}'
@@ -230,11 +229,11 @@ docker rm energy_platform
 docker build --no-cache --pull -t php-energy-platform:test .
 docker run -d --network graftcode_demo \
   -e GRAFT_CONFIG="name=graft.composer.energyplatform;host=ws://price_calculator:90/ws;runtime=php;modules=/usr/app/src" \
-  -p 80:80 -p 81:81 \
+  -p 80:80 \
   --name energy_platform php-energy-platform:test
 ```
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and call `BillingService.calculateBill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
+Open [http://localhost:80/GV](http://localhost:80/GV) and call `BillingService.calculateBill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
 
 ## Step 8. Switch back to monolith
 
@@ -245,7 +244,7 @@ docker stop energy_platform
 docker rm energy_platform
 docker run -d \
   -e GRAFT_CONFIG="name=graft.composer.energyplatform;host=inMemory;runtime=php;modules=/usr/app/src" \
-  -p 80:80 -p 81:81 \
+  -p 80:80 \
   --name energy_platform php-energy-platform:test
 ```
 
@@ -270,7 +269,7 @@ docker stop energy_platform
 docker rm energy_platform
 docker run -d --network graftcode_demo \
   -e GRAFT_CONFIG="name=graft.composer.energyplatform;host=ws://price_calculator:90/ws;runtime=php;modules=/usr/app/src" \
-  -p 80:80 -p 81:81 \
+  -p 80:80 \
   --name energy_platform php-energy-platform:test
 ```
 

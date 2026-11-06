@@ -81,7 +81,6 @@ RUN dotnet publish -c Release -o /usr/app/publish
 RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
-EXPOSE 81
 
 CMD ["gg", "--modules", "/usr/app/publish/EnergyPlatform.dll"]
 ```
@@ -90,12 +89,12 @@ Build and run:
 
 ```bash
 docker build --pull -t dotnet-energy-platform:test .
-docker run -d -p 80:80 -p 81:81 --name energy_platform dotnet-energy-platform:test
+docker run -d -p 80:80 --name energy_platform dotnet-energy-platform:test
 ```
 
-`gg` (Graftcode Gateway) discovers both classes automatically and exposes all their public methods. Port `80` handles service calls, port `81` serves Graftcode Vision.
+`gg` (Graftcode Gateway) discovers both classes automatically and exposes all their public methods. The **`--port` listener (default `80`) carries WebSocket traffic** (for example `ws://localhost:80/ws`) **and serves HTTP** for Graftcode Vision on the **same TCP port** (for example `http://localhost:80/GV`). Gateway also starts a **second HTTP listener on `--httpPort`** (default `81`); you can map that in Docker too, but one host port is enough for this tutorial.
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and try calling `BillingService.CalculateBill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
+Open [http://localhost:80/GV](http://localhost:80/GV) and try calling `BillingService.CalculateBill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
 
 At this point, everything runs inside **one container** — both classes share a single process and a single DLL. This is your monolith.
 
@@ -160,7 +159,6 @@ RUN dotnet publish EnergyPlatform.sln -c Release -o /usr/app/publish
 RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
-EXPOSE 81
 
 CMD ["gg", "--modules", "/usr/app/publish/BillingService.dll,/usr/app/publish/EnergyPriceCalculator.dll"]
 ```
@@ -171,10 +169,10 @@ Rebuild and run:
 docker stop energy_platform
 docker rm energy_platform
 docker build --pull -t dotnet-energy-platform:test .
-docker run -d -p 80:80 -p 81:81 --name energy_platform dotnet-energy-platform:test
+docker run -d -p 80:80 --name energy_platform dotnet-energy-platform:test
 ```
 
-Open [http://localhost:81/GV](http://localhost:81/GV) — everything works exactly as before. Both classes, same methods, same results. But now each module is its own DLL, ready to be deployed independently.
+Open [http://localhost:80/GV](http://localhost:80/GV) — everything works exactly as before. Both classes, same methods, same results. But now each module is its own DLL, ready to be deployed independently.
 
 ## Step 6. Update the price calculator namespace
 
@@ -237,16 +235,16 @@ Build and run the price calculator as a standalone service:
 ```bash
 docker build --pull -f Dockerfile.priceCalculator -t price-calculator-dotnet:test .
 docker network create graftcode_demo
-docker run -d --network graftcode_demo -p 90:90 -p 91:91 --name price_calculator price-calculator-dotnet:test
+docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name price_calculator price-calculator-dotnet:test
 ```
 
-Open [http://localhost:91/GV](http://localhost:91/GV) — the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.GetPrice` listed with its return type.
+Open [http://localhost:90/GV](http://localhost:90/GV) — the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.GetPrice` listed with its return type. (This gateway uses `--port 90` for the primary listener and `--httpPort 91` for the second HTTP stack; Vision is also on **90** at `/GV`.)
 
 ## Step 8. Connect the billing service through a Graft
 
 Now that the price calculator runs on its own gateway, install its **Graft** — the strongly-typed client that Graftcode generates automatically.
 
-From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **NuGet** and copy the generated install command.
+From Graftcode Vision at [http://localhost:90/GV](http://localhost:90/GV), select **NuGet** and copy the generated install command.
 
 > The exact package name and source URL are shown in Graftcode Vision — copy them from there. The example below is a snapshot and may differ for your gateway.
 
@@ -302,12 +300,12 @@ Stop the monolith container, rebuild the image with the updated code, and run th
 docker stop energy_platform
 docker rm energy_platform
 docker build --pull -t dotnet-energy-platform:test .
-docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.nuget.EnergyPriceCalculator;host=ws://price_calculator:90/ws;runtime=netcore" -p 80:80 -p 81:81 --name energy_platform dotnet-energy-platform:test
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.nuget.EnergyPriceCalculator;host=ws://price_calculator:90/ws;runtime=netcore" -p 80:80 --name energy_platform dotnet-energy-platform:test
 ```
 
 > Use the `name=` value from your Graft / Vision. The example above matches the generated client namespace.
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and call `BillingService.CalculateBill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
+Open [http://localhost:80/GV](http://localhost:80/GV) and call `BillingService.CalculateBill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
 
 ## Step 11. Prove the microservice call goes over the network
 
@@ -335,7 +333,7 @@ Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
 docker stop energy_platform
 docker rm energy_platform
 docker build --pull -t dotnet-energy-platform:test .
-docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.nuget.EnergyPriceCalculator;host=inMemory;runtime=netcore;modules=/usr/app/publish" -p 80:80 -p 81:81 --name energy_platform dotnet-energy-platform:test
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.nuget.EnergyPriceCalculator;host=inMemory;runtime=netcore;modules=/usr/app/publish" -p 80:80 --name energy_platform dotnet-energy-platform:test
 ```
 
 Compare the two configurations side by side:

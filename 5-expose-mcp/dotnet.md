@@ -70,12 +70,11 @@ RUN dotnet publish -c Release -o /usr/app/
 RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
-EXPOSE 81
 
 CMD ["gg", "EnergyService.dll"]
 ```
 
-`gg` (Graftcode Gateway) reads your `.dll`, discovers all public methods, and exposes them automatically - both as Grafts for app-to-app calls and for static methods also as MCP tools for AI agents. Port `80` handles service calls, port `81` serves Graftcode Vision and the MCP endpoint.
+`gg` (Graftcode Gateway) reads your `.dll`, discovers all public methods, and exposes them automatically — both as Grafts for app-to-app calls and for static methods also as MCP tools for AI agents. On the default **`--port` (`80`)** the process handles **WebSocket** traffic (for example `ws://localhost:80/ws`) **and HTTP** for Graftcode Vision and MCP on the **same TCP port** (for example `http://localhost:80/GV` and `http://localhost:80/mcp`). Gateway also listens on **`--httpPort`** (default `81`) as a second HTTP stack — optional to map in Docker if you only need one host port.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
@@ -83,8 +82,7 @@ CMD ["gg", "EnergyService.dll"]
 - **COPY . /usr/app/** - Copies your project files (including `EnergyPriceCalculator.cs` and the `.csproj`) into the container.
 - **RUN dotnet publish -c Release -o /usr/app/** - Builds and publishes the project in Release mode, placing the compiled assembly in `/usr/app/`.
 - **RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb** - `curl` downloads the installer, `dpkg -i gg.deb` installs Graftcode Gateway, and `rm gg.deb` removes the package.
-- **EXPOSE 80** - Declares the port for Graft service calls (app-to-app).
-- **EXPOSE 81** - Declares the port for Graftcode Vision and the MCP endpoint.
+- **EXPOSE 80** - Default `--port`: WebSocket for Graft calls **and** HTTP for Vision (`/GV`), MCP (`/mcp`), and `GET /status` on the same listener.
 - **CMD ["gg", "EnergyService.dll"]** - Starts Graftcode Gateway against your compiled assembly. Gateway analyzes `EnergyService.dll`, discovers public methods, and exposes them as Grafts and MCP tools.
 
 </collapsible>
@@ -93,16 +91,14 @@ Build and run the container:
 
 ```bash
 docker build --no-cache --pull -t dotnet-ai-backend:test .
-docker run -d -p 80:80 -p 81:81 --name graftcode_mcp_demo_dotnet dotnet-ai-backend:test
+docker run -d -p 80:80 --name graftcode_mcp_demo_dotnet dotnet-ai-backend:test
 ```
 
 Your .NET service is now running with an MCP endpoint exposed automatically by Graftcode Gateway.
 
 ## Step 4. Explore the service in Graftcode Vision
 
-Open [http://localhost:81/GV](http://localhost:81/GV) in your browser.
-
-With the port mapping from this tutorial (`-p 80:80 -p 81:81`), Graftcode Vision is at **`http://localhost:81/GV`** - even if container logs also mention port 80.
+Open [http://localhost:80/GV](http://localhost:80/GV) in your browser.
 
 You will see all public methods from your .NET class - their names, parameter types, and return types. Every method listed here is also available as an MCP tool that AI agents can discover and call. Graftcode Vision also provides:
 
@@ -113,13 +109,15 @@ You will see all public methods from your .NET class - their names, parameter ty
 
 Graftcode Gateway exposes an [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) endpoint alongside your service automatically. Point your AI tool at it.
 
+By default, MCP is available over HTTP on **`--port` (same as WebSocket)** — for this tutorial, `http://localhost:80/mcp`. If you expose `--httpPort` (default `81`), `http://localhost:81/mcp` works too.
+
 **For Cursor**, create or edit `.cursor/mcp.json` in your project root (or navigate to **File > Preferences > Cursor Settings > Tools & MCP** and press **New MCP Server** and add definition from below):
 
 ```json
 {
   "mcpServers": {
     "energy-service": {
-      "url": "http://localhost:81/mcp"
+      "url": "http://localhost:80/mcp"
     }
   }
 }
@@ -135,7 +133,7 @@ Graftcode Gateway exposes an [MCP](https://modelcontextprotocol.io/) (Model Cont
       "args": [
         "-y",
         "mcp-remote",
-        "http://localhost:81/mcp"
+        "http://localhost:80/mcp"
       ]
     }
   }
