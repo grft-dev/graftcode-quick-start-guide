@@ -77,7 +77,6 @@ COPY . /usr/app/
 RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
-EXPOSE 81
 
 CMD ["gg", "./package.json"]
 ```
@@ -86,12 +85,12 @@ Build and run:
 
 ```bash
 docker build --no-cache --pull -t js-energy-platform:test .
-docker run -d -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
+docker run -d -p 80:80 --name energy_platform js-energy-platform:test
 ```
 
-`gg` (Graftcode Gateway) discovers both modules automatically and exposes all their public methods. Port `80` handles service calls, port `81` serves Graftcode Vision.
+`gg` (Graftcode Gateway) discovers both modules automatically and exposes all their public methods. The **`--port` listener (default `80`) carries WebSocket traffic** (for example `ws://localhost:80/ws`) **and serves HTTP** for Graftcode Vision on the **same TCP port** (for example `http://localhost:80/GV`). Gateway also starts a **second HTTP listener on `--httpPort`** (default `81`); you can map that in Docker too, but one host port is enough for this tutorial.
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and try calling `BillingService.calculateBill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
+Open [http://localhost:80/GV](http://localhost:80/GV) and try calling `BillingService.calculateBill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
 
 At this point, everything runs inside **one container** — both modules share a single process. This is your monolith.
 
@@ -136,13 +135,13 @@ docker network create graftcode_demo
 docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name price_calculator price-calculator:test
 ```
 
-Open [http://localhost:91/GV](http://localhost:91/GV) — the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.getPrice` listed with its return type.
+Open [http://localhost:90/GV](http://localhost:90/GV) — the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.getPrice` listed with its return type. (This gateway uses `--port 90` for the primary listener and `--httpPort 91` for the second HTTP stack; Vision is also on **90** at `/GV`.)
 
 ## Step 6. Connect the billing service through a Graft
 
 Now that the price calculator runs on its own gateway, install its **Graft** — the strongly-typed client that Graftcode generates automatically.
 
-From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **npm** and copy the generated install command. Note that the `--registry` address shown in your Graftcode Vision interface may be different than the example provided below.
+From Graftcode Vision at [http://localhost:90/GV](http://localhost:90/GV), select **npm** and copy the generated install command. Note that the `--registry` address shown in your Graftcode Vision interface may be different than the example provided below.
 
 ```bash
 npm install --registry https://grft.dev/54ee6507-ca20-48c0-8c31-7248fac7faf6__free @graft/npm-price-calculator@1.0.0
@@ -177,12 +176,12 @@ Stop the monolith container, rebuild the image with the updated code, and run th
 docker stop energy_platform
 docker rm energy_platform
 docker build --no-cache --pull -t js-energy-platform:test .
-docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=price-calculator;runtime=nodejs;host=ws://price_calculator:90/ws" -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=price-calculator;runtime=nodejs;host=ws://price_calculator:90/ws" -p 80:80 --name energy_platform js-energy-platform:test
 ```
 
 > Use the `name=` value from your Graft (Vision or the package's generated config). In remote mode, `modules=price-calculator` identifies the hosted service. In `inMemory` mode, `modules=` must point to the local JavaScript file in the billing container.
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and call `BillingService.calculateBill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
+Open [http://localhost:80/GV](http://localhost:80/GV) and call `BillingService.calculateBill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
 
 ## Step 8. Switch back to monolith
 
@@ -191,7 +190,7 @@ Want to go back to a monolith? Stop and restart with `host=inMemory` and `module
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker run -d -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=/usr/app/src/priceCalculator.js;runtime=nodejs;host=inMemory" -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
+docker run -d -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=/usr/app/src/priceCalculator.js;runtime=nodejs;host=inMemory" -p 80:80 --name energy_platform js-energy-platform:test
 ```
 
 Compare the two configurations side by side:
@@ -213,7 +212,7 @@ Switch back to microservice mode to verify the call is truly remote:
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=price-calculator;runtime=nodejs;host=ws://price_calculator:90/ws" -p 80:80 -p 81:81 --name energy_platform js-energy-platform:test
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=@graft/npm-price-calculator;modules=price-calculator;runtime=nodejs;host=ws://price_calculator:90/ws" -p 80:80 --name energy_platform js-energy-platform:test
 ```
 
 Stop the price calculator:

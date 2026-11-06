@@ -100,7 +100,6 @@ RUN mvn package -q
 RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
-EXPOSE 81
 
 CMD ["gg", "--modules", "/usr/app/target/energy-platform-1.0.0.jar"]
 ```
@@ -109,12 +108,12 @@ Build and run:
 
 ```bash
 docker build --no-cache --pull -t java-energy-platform:test .
-docker run -d -p 80:80 -p 81:81 --name energy_platform java-energy-platform:test
+docker run -d -p 80:80 --name energy_platform java-energy-platform:test
 ```
 
-`gg` (Graftcode Gateway) discovers both classes automatically and exposes all their public methods. Port `80` handles service calls, port `81` serves Graftcode Vision.
+`gg` (Graftcode Gateway) discovers both classes automatically and exposes all their public methods. The **`--port` listener (default `80`) carries WebSocket traffic** (for example `ws://localhost:80/ws`) **and serves HTTP** for Graftcode Vision on the **same TCP port** (for example `http://localhost:80/GV`). Gateway also starts a **second HTTP listener on `--httpPort`** (default `81`); you can map that in Docker too, but one host port is enough for this tutorial.
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and try calling `BillingService.calculateBill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
+Open [http://localhost:80/GV](http://localhost:80/GV) and try calling `BillingService.calculateBill` with a value like `250`. You'll see both `BillingService` and `EnergyPriceCalculator` listed with all their methods.
 
 At this point, everything runs inside **one container** — both classes share a single process. This is your monolith.
 
@@ -231,7 +230,6 @@ RUN mvn package -q
 RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
-EXPOSE 81
 
 CMD ["gg", "--modules", "/usr/app/target/energy-platform-1.0.0.jar"]
 ```
@@ -269,13 +267,13 @@ docker network create graftcode_demo
 docker run -d --network graftcode_demo -p 90:90 -p 91:91 -p 9092:9092 --name price_calculator price-calculator-java:test
 ```
 
-Open [http://localhost:91/GV](http://localhost:91/GV) — the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.getPrice` listed with its return type.
+Open [http://localhost:90/GV](http://localhost:90/GV) — the price calculator is now an independent service with its own Graftcode Vision. You can see `EnergyPriceCalculator.getPrice` listed with its return type. (This gateway uses `--port 90` for the primary listener and `--httpPort 91` for the second HTTP stack; Vision is also on **90** at `/GV`.)
 
 ## Step 6. Connect the billing service through a Graft
 
 Now that the price calculator runs on its own gateway, install its **Graft** — the strongly-typed client that Graftcode generates automatically.
 
-From Graftcode Vision at [http://localhost:91/GV](http://localhost:91/GV), select **Maven** and copy the generated dependency coordinates. Note that the repository URL shown in your Graftcode Vision interface may be different than the example provided below.
+From Graftcode Vision at [http://localhost:90/GV](http://localhost:90/GV), select **Maven** and copy the generated dependency coordinates. Note that the repository URL shown in your Graftcode Vision interface may be different than the example provided below.
 
 > The exact group ID, artifact ID, and repository URL are shown in Graftcode Vision — copy them from there.
 
@@ -352,11 +350,11 @@ docker rm energy_platform
 docker build --no-cache --pull -t java-energy-platform:test .
 docker run -d --network graftcode_demo \
   -e GRAFT_CONFIG="name=graft.maven.price_calculator;host=price_calculator:9092;runtime=jvm;modules=/usr/app/target" \
-  -p 80:80 -p 81:81 \
+  -p 80:80 \
   --name energy_platform java-energy-platform:test
 ```
 
-Open [http://localhost:81/GV](http://localhost:81/GV) and call `BillingService.calculateBill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
+Open [http://localhost:80/GV](http://localhost:80/GV) and call `BillingService.calculateBill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
 
 ## Step 8. Switch back to monolith
 
@@ -367,7 +365,7 @@ docker stop energy_platform
 docker rm energy_platform
 docker run -d \
   -e GRAFT_CONFIG="name=graft.maven.price_calculator;host=inMemory;runtime=jvm;modules=/usr/app/target" \
-  -p 80:80 -p 81:81 \
+  -p 80:80 \
   --name energy_platform java-energy-platform:test
 ```
 
@@ -392,7 +390,7 @@ docker stop energy_platform
 docker rm energy_platform
 docker run -d --network graftcode_demo \
   -e GRAFT_CONFIG="name=graft.maven.price_calculator;host=price_calculator:9092;runtime=jvm;modules=/usr/app/target" \
-  -p 80:80 -p 81:81 \
+  -p 80:80 \
   --name energy_platform java-energy-platform:test
 ```
 

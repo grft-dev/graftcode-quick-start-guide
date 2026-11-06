@@ -67,20 +67,18 @@ COPY ./pyproject.toml /usr/app/energy-service/
 RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
-EXPOSE 81
 
 CMD ["gg","--modules","./energy-service/"]
 ```
 
-The key line is the last one - `gg` (Graftcode Gateway) reads the module directory passed via `--modules` (`./energy-service/`, which includes your `pyproject.toml`), discovers all public methods in your module, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
+The key line is the last one - `gg` (Graftcode Gateway) reads the module directory passed via `--modules` (`./energy-service/`, which includes your `pyproject.toml`), discovers all public methods in your module, and exposes them automatically. The **`--port` listener (default `80`) carries WebSocket traffic** (for example `ws://localhost:80/ws`) **and serves HTTP** for Graftcode Vision, MCP, and `/status` on the **same TCP port** (for example `http://localhost:80/GV`). Gateway also starts a **second HTTP listener on `--httpPort`** (default `81`); you can map that in Docker too, but one host port is enough for this tutorial.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
 - **FROM python:3.13-bookworm** - Uses the official Python 3.13 image as the base runtime environment.
 - **COPY ./energy_price_calculator.py /usr/app/energy-service/** and **COPY ./pyproject.toml /usr/app/energy-service/** - Copies the module source and `pyproject.toml` into `/usr/app/energy-service/` inside the container.
 - **RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb** - `curl` downloads the installer, `dpkg -i gg.deb` installs Graftcode Gateway, and `rm gg.deb` removes the package.
-- **EXPOSE 80** - Declares the port used for service communication (Grafts connect here).
-- **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
+- **EXPOSE 80** - The default `--port`: WebSocket for Graft calls **and** HTTP for Vision (`/GV`), MCP (`/mcp`), and `GET /status` on the same listener.
 - **CMD ["gg", "--modules", "./energy-service/"]** - Runs Graftcode Gateway. `--modules` points Gateway at the module directory to analyze; it discovers public methods and makes them callable. `--modules` is optional when the same directory as `gg` contains only one target module.
 
 </collapsible>
@@ -89,14 +87,14 @@ Build and run the container:
 
 ```bash
 docker build --no-cache --pull -t myenergyservice-py:test .
-docker run -d -p 80:80 -p 81:81 --name graftcode_demo_py myenergyservice-py:test
+docker run -d -p 80:80 --name graftcode_demo_py myenergyservice-py:test
 ```
 
 Your Python service is now running and exposed through Graftcode Gateway.
 
 ## Step 4. Explore the service in Graftcode Vision
 
-Open [http://localhost:81/GV](http://localhost:81/GV) in your browser.
+Open [http://localhost:80/GV](http://localhost:80/GV) in your browser.
 
 You will see all public methods from your Python module - their names, parameter types, and return types. Graftcode Vision also provides:
 

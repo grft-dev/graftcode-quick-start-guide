@@ -92,12 +92,11 @@ RUN apt-get update && apt-get install -y git unzip \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 80
-EXPOSE 81
 
 CMD ["gg", "/usr/app/src"]
 ```
 
-The key line is the last one - `gg` (Graftcode Gateway) reads the module path under `--modules`, discovers all public methods in your PHP classes, and exposes them automatically. Port `80` handles service calls, port `81` serves Graftcode Vision.
+The key line is the last one - `gg` (Graftcode Gateway) reads the module path under `--modules`, discovers all public methods in your PHP classes, and exposes them automatically. The **`--port` listener (default `80`) carries WebSocket traffic** (for example `ws://localhost:80/ws`) **and serves HTTP** for Graftcode Vision, MCP, and `/status` on the **same TCP port** (for example `http://localhost:80/GV`). Gateway also starts a **second HTTP listener on `--httpPort`** (default `81`); you can map that in Docker too, but one host port is enough for this tutorial.
 
 <collapsible title="🐳 Understanding the Dockerfile - click to see what each line does">
 
@@ -105,8 +104,7 @@ The key line is the last one - `gg` (Graftcode Gateway) reads the module path un
 - **COPY . /usr/app/** - Copies your project files (including `composer.json` and `src/`) into the container.
 - **composer install --no-dev --optimize-autoloader** - Registers PSR-4 autoloading so Gateway can load your classes.
 - **RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb** - `curl` downloads the installer, `dpkg -i gg.deb` installs Graftcode Gateway, and `rm gg.deb` removes the package.
-- **EXPOSE 80** - Declares the port used for service communication (Grafts connect here).
-- **EXPOSE 81** - Declares the port used by Graftcode Vision, the live portal for exploring and testing exposed methods.
+- **EXPOSE 80** - The default `--port`: WebSocket for Graft calls **and** HTTP for Vision (`/GV`), MCP (`/mcp`), and `GET /status` on the same listener.
 - **CMD ["gg", "--modules", "/usr/app/src", "--runtime", "php"]** - Runs Graftcode Gateway against your `src/` directory with the PHP runtime. It discovers public methods and makes them callable. `--modules` is optional when the same directory as `gg` contains only one target module.
 
 </collapsible>
@@ -115,14 +113,14 @@ Build and run the container:
 
 ```bash
 docker build --no-cache --pull -t myenergyservice-php:test .
-docker run -d -p 80:80 -p 81:81 --name graftcode_demo_php myenergyservice-php:test
+docker run -d -p 80:80 --name graftcode_demo_php myenergyservice-php:test
 ```
 
 Your PHP service is now running and exposed through Graftcode Gateway.
 
 ## Step 4. Explore the service in Graftcode Vision
 
-Open [http://localhost:81/GV](http://localhost:81/GV) in your browser.
+Open [http://localhost:80/GV](http://localhost:80/GV) in your browser.
 
 You will see all public methods from your PHP class - their names, parameter types, and return types. Graftcode Vision also provides:
 
@@ -151,7 +149,7 @@ A Project Key gives you:
 Your service is now accessible from any application. From Graftcode Vision, select your target package type - for example `Composer` - and copy the generated install command. That installs a **Graft**: a strongly-typed client that lets any app call your service methods directly.
 
 > **Test the Graft locally with a Composer consumer**  
-> This step shows a call snippet only. To create a separate consumer project (`composer.json`, Graft `repositories`, `composer install`, Hypertube post-install scripts, and `vendor/autoload.php`), follow **[Connect Microservices — PHP, Step 3: Install the Graft](../3-connect-microservices/php.md#step-3-install-the-graft)**. Use the **Composer install command, registry URL, and package name from Vision at [http://localhost:81/GV](http://localhost:81/GV)** after Step 4 above—not the hosted demo URLs in that tutorial. Set `GraftConfig::$host` to your gateway WebSocket endpoint (for this tutorial, typically `ws://localhost:80/ws`). Prefer `use` namespaces from the installed Graft package or Vision, not only from the example below.
+> This step shows a call snippet only. To create a separate consumer project (`composer.json`, Graft `repositories`, `composer install`, Hypertube post-install scripts, and `vendor/autoload.php`), follow **[Connect Microservices — PHP, Step 3: Install the Graft](../3-connect-microservices/php.md#step-3-install-the-graft)**. Use the **Composer install command, registry URL, and package name from Vision at [http://localhost:80/GV](http://localhost:80/GV)** after Step 4 above—not the hosted demo URLs in that tutorial. Set `GraftConfig::$host` to your gateway WebSocket endpoint (for this tutorial, typically `ws://localhost:80/ws`). Prefer `use` namespaces from the installed Graft package or Vision, not only from the example below.
 
 Use the package name and import paths from Vision or Gateway logs (for this sample the package is typically `graft/composer-energy-service:1.0.0`). `getPrice()` is synchronous and returns an `int`:
 
