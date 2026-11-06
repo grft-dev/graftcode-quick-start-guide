@@ -37,17 +37,21 @@ Graftcode Vision shows all public classes and methods exposed by the remote serv
 
 Open [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io), pick **RubyGems**, and copy the generated install command.
 
-Add a `Gemfile` that pulls the Graft from the registry URL Vision shows. **Copy the complete `gem` line from Vision** - the public demo feed often uses the same registry host as the other package managers (`https://grft.dev/...`) with a RubyGems-compatible `source` block, and the generated gem name typically starts with `graft-rubygems-` (for example, for the .NET **EnergyPriceService** sample the name is often `graft-rubygems-nuget-energypriceservice`).
+Add a `Gemfile` that pulls the Graft from the registry URL Vision shows. **Copy the complete `gem` line from Vision** when you connect to your own gateway. For this tutorial’s public **EnergyPriceService** (.NET-hosted) sample, the RubyGems package is:
 
-Illustrative layout (replace `source`, `gem` name, and version with Vision output):
+```bash
+gem install graft-nuget-energypriceservice -v "1.3.0" --source https://grft.dev/d7bfad98-62f3-4b23-bf7b-b732fc9baf18__free
+```
+
+With Bundler, use the same registry, gem name, and version:
 
 ```ruby
 # frozen_string_literal: true
 
 source "https://rubygems.org"
 
-source "https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free" do
-  gem "graft-rubygems-nuget-energypriceservice", "1.2.0"
+source "https://grft.dev/d7bfad98-62f3-4b23-bf7b-b732fc9baf18__free" do
+  gem "graft-nuget-energypriceservice", "1.3.0"
 end
 ```
 
@@ -67,7 +71,7 @@ The exact configuration snippet for Ruby is available in [Graftcode Vision](http
 # frozen_string_literal: true
 
 require "bundler/setup"
-require "graft_rubygems_nuget_energypriceservice" # underscores: Vision / installed gem are authoritative
+require "graft_nuget_energypriceservice" # underscores: match the installed gem; Vision is authoritative if it differs
 
 GraftConfig.host =
   "wss://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io/ws"
