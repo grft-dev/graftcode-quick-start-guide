@@ -134,7 +134,7 @@ You will see each public class method with parameters and return types. Those sa
 
 By default, MCP is available over HTTP on **`--port` (same as WebSocket)** — for this tutorial, `http://localhost:80/mcp`. If you expose `--httpPort` (default `81`), `http://localhost:81/mcp` works too.
 
-**Cursor** - add to `.cursor/mcp.json` (or **Cursor Settings → Tools & MCP → New MCP Server**). Confirm the server is enabled under **Tools & MCP** and reload Cursor if tools do not appear:
+**Cursor** — add to `.cursor/mcp.json`, or **Cursor Settings → Customize → MCPs** (or **Tools & MCP → New MCP Server**). Confirm the server is enabled and reload Cursor if tools do not appear:
 
 ```json
 {

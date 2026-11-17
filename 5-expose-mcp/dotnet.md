@@ -111,7 +111,7 @@ Graftcode Gateway exposes an [MCP](https://modelcontextprotocol.io/) (Model Cont
 
 By default, MCP is available over HTTP on **`--port` (same as WebSocket)** — for this tutorial, `http://localhost:80/mcp`. If you expose `--httpPort` (default `81`), `http://localhost:81/mcp` works too.
 
-**For Cursor**, create or edit `.cursor/mcp.json` in your project root (or open **Cursor Settings → Tools & MCP → New MCP Server** and paste the definition below). Confirm the server is enabled under **Tools & MCP** and reload Cursor if tools do not appear:
+**For Cursor**, create or edit `.cursor/mcp.json` in your project root, or open **Cursor Settings → Customize → MCPs** (or **Tools & MCP → New MCP Server**) and add the definition below. After saving, confirm the server is enabled and reload Cursor if tools do not appear:
 
 ```json
 {
