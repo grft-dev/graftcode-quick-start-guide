@@ -90,7 +90,7 @@ class EnergyPriceCalculator {
 }
 ```
 
-This is a plain Groovy class - no annotations, no frameworks, no special interfaces. Groovy methods are public by default, so methods you define here become available for remote consumption once hosted through Graftcode Gateway. Vision and MCP may also list inherited Groovy runtime methods such as `getMetaClass` and `setMetaClass`.
+This is a plain Groovy class - no annotations, no frameworks, no special interfaces. Groovy methods are public by default, so methods you define here become available for remote consumption once hosted through Graftcode Gateway. Vision may also list inherited Groovy runtime methods such as `getMetaClass` and `setMetaClass`; do not call those from clients — use `--types` and `--methods` on Gateway so only your business API is exposed (see [Filter the callable surface](https://academy.graftcode.com/documentation/how-to-guides/filter-the-callable-surface)).
 
 ## Step 3. Host it with Graftcode Gateway
 
@@ -109,7 +109,7 @@ RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 
 EXPOSE 80
 
-CMD ["gg","--modules", "/usr/app/target/energy-service-1.0.0.jar"]
+CMD ["gg", "--modules", "/usr/app/target/energy-service-1.0.0.jar", "--types", "energy.EnergyPriceCalculator", "--methods", "getPrice"]
  
 ```
 

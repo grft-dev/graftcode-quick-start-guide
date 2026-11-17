@@ -36,11 +36,14 @@ Graftcode Vision shows all public classes and methods exposed by the remote serv
 
 ## Step 3. Install the Graft
 
-Open [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io), pick `npm`, and copy the generated install command.
+Open [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io), pick `npm`, and copy the generated install command. Run that command exactly — registry URL, package name, and version change with the hosted service.
 
 ```bash
+# Illustration only — copy the command from Vision, do not reuse this line verbatim if Vision differs.
 npm install --registry https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free @graft/nuget-energypriceservice@1.2.0
 ```
+
+If your project `package.json` sets `"type": "module"`, use the `import` snippet from Vision's **Configuration** tab instead of `require()` below.
 
 This adds the generated strongly-typed client for the remote service to your project.
 
@@ -49,7 +52,7 @@ This adds the generated strongly-typed client for the remote service to your pro
 The exact configuration snippet for your language is available in [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Now, let's create `index.js`, paste the code below and save the file:
 
 ```javascript
-const { GraftConfig, MeterLogic } = require("@graft/nuget-energypriceservice/index.cjs");
+const { GraftConfig, MeterLogic } = require("@graft/nuget-energypriceservice");
 
 GraftConfig.host = "wss://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io/ws";
 
