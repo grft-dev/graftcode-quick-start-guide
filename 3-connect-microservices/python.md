@@ -47,12 +47,12 @@ This adds the generated strongly-typed client for the remote service to your pro
 
 The exact configuration snippet for your language is available in [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Create `main.py`:
 
-The generated PyPI Graft uses a flat package layout (`graft_config.py`, `meter_logic.py`). Import those modules directly:
+Import paths follow the installed package layout. In current builds, `GraftConfig` sits at the package root and `MeterLogic` is under `energy_price_service`. Prefer the paths shown in Graftcode Vision.
 
 ```python
 import os
 from graft_nuget_energypriceservice.graft_config import GraftConfig
-from graft_nuget_energypriceservice.meter_logic import MeterLogic
+from graft_nuget_energypriceservice.energy_price_service.meter_logic import MeterLogic
 
 GraftConfig.host = "wss://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io/ws"
 

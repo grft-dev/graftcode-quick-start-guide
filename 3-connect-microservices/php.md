@@ -17,6 +17,7 @@ Connect a PHP backend service to another remote service using Graftcode - so the
 ### Prerequisites
 
 - [PHP 7.4 or 8.0+](https://www.php.net/downloads) and [Composer](https://getcomposer.org/) installed locally
+- PHP extensions `ext-zip` and `ext-ffi` enabled (`ext-ffi` is required by the Hypertube PHP SDK; some Windows installs ship with FFI disabled in `php.ini`)
 
 ## Step 1. Create a PHP service
 
@@ -37,20 +38,22 @@ Graftcode Vision shows all public classes and methods exposed by the remote serv
 
 Open [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io), pick `Composer`, and copy the generated install command.
 
-Create `composer.json`:
+In Graftcode Vision, copy the full `composer.json` snippet (package names, version, and registry URL). If you merge into an existing `composer.json`, **remove** stale `repositories` or `require` entries after pasting Vision's values — Composer will not delete old repository URLs by itself.
+
+Example shape (replace package id, version, and `repositories.url` with Vision):
 
 ```json
 {
     "name": "example/energy-consumer",
     "require": {
         "php": "^7.4 || ^8.0",
-        "hypertube/php-sdk": "*",
-        "graft/nuget-energypriceservice": "1.2.0"
+        "graftcode/hypertube-php-sdk": "*",
+        "graft-nuget/energypriceservice": "1.3.0"
     },
     "repositories": [
         {
             "type": "composer",
-            "url": "https://grft.dev/composer/4b4e411f-60a0-4868-b8a6-46f5dee07448__free"
+            "url": "https://grft.dev/composer/<project-key>__free"
         }
     ],
     "scripts": {

@@ -139,18 +139,16 @@ FROM php:8.4-cli
 
 WORKDIR /usr/app
 
-COPY . /usr/app/
+COPY src/EnergyPriceCalculator.php /usr/app/price-calculator/
 
 RUN apt-get update && apt-get install -y git unzip \
- && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
- && composer install --no-dev --optimize-autoloader \
  && curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 90
 EXPOSE 91
 
-CMD ["gg", "/usr/app/src/EnergyPriceCalculator.php", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
+CMD ["gg", "/usr/app/price-calculator", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092", "--runtime", "php"]
 ```
 
 Build and run the price calculator as a standalone service:

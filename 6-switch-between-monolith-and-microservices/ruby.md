@@ -187,7 +187,14 @@ gemspec
 Run
 
 ```bash
-rm Gemfile.lock
+# bash / macOS / Linux (omit if Gemfile.lock does not exist yet)
+rm -f Gemfile.lock
+bundle install
+```
+
+```powershell
+# PowerShell
+Remove-Item Gemfile.lock -ErrorAction SilentlyContinue
 bundle install
 ```
 
@@ -248,7 +255,24 @@ name=graft.rubygems.energy_platform;host=ws://price_calculator:90/ws;runtime=rub
 
 ## Step 9. Prove the remote call
 
-Return to microservice mode, stop `price_calculator`, and watch `calculate_bill` fail in Vision until the dependency container restarts — identical behavior to the other language tutorials, proving the billing service now depends on the remote Gateway.
+Switch back to microservice mode, then stop the price calculator while the billing gateway keeps running:
+
+```bash
+docker stop energy_platform
+docker rm energy_platform
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.rubygems.energy_platform;host=ws://price_calculator:90/ws;runtime=ruby;modules=/usr/app" -p 80:80 --name energy_platform ruby-energy-platform:test
+docker stop price_calculator
+```
+
+Call `BillingService.calculate_bill` in [Graftcode Vision](http://localhost:80/GV) — you should see a connection error while the calculator is down.
+
+Start the calculator again:
+
+```bash
+docker start price_calculator
+```
+
+The method works again without any code changes.
 
 ## Step 10. Run with a Project Key (recommended for real-world usage)
 

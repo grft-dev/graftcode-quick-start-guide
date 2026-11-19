@@ -119,7 +119,7 @@ RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
 EXPOSE 90
 EXPOSE 91
 
-CMD ["gg", "--modules", "/usr/app/src/price_calculator.py", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
+CMD ["gg", "--modules", "/usr/app/src", "--httpPort", "91", "--port", "90", "--TCPServer", "--tcpPort=9092"]
 ```
 
 Build and run the price calculator as a standalone service:
@@ -148,7 +148,7 @@ Update `src/billing_service.py` to use the Graft instead of the direct import. I
 
 ```python
 import os
-from graft_pypi_energy_platform.energy_price_calculator import EnergyPriceCalculator
+from graft_pypi_energy_platform.price_calculator.price_calculator import EnergyPriceCalculator
 from graft_pypi_energy_platform.graft_config import GraftConfig
 
 GraftConfig.set_config(os.environ.get("GRAFT_CONFIG"))
@@ -173,11 +173,14 @@ Stop the monolith container, rebuild the image with the updated code, and run th
 docker stop energy_platform
 docker rm energy_platform
 docker build --no-cache --pull -t py-energy-platform:test .
-docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=graft_pypi_energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src" \
-  -e PYTHONPATH=/usr/app/lib \
-  -p 80:80 \
-  --name energy_platform py-energy-platform:test
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft_pypi_energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src" -e PYTHONPATH=/usr/app/lib -p 80:80 --name energy_platform py-energy-platform:test
+```
+
+```powershell
+docker stop energy_platform
+docker rm energy_platform
+docker build --no-cache --pull -t py-energy-platform:test .
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft_pypi_energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src" -e PYTHONPATH=/usr/app/lib -p 80:80 --name energy_platform py-energy-platform:test
 ```
 
 Open [http://localhost:80/GV](http://localhost:80/GV) and call `BillingService.calculate_bill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
@@ -189,11 +192,13 @@ Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker run -d \
-  -e GRAFT_CONFIG="name=graft_pypi_energy_platform;host=inMemory;runtime=python;modules=/usr/app/src" \
-  -e PYTHONPATH=/usr/app/lib \
-  -p 80:80 \
-  --name energy_platform py-energy-platform:test
+docker run -d -e GRAFT_CONFIG="name=graft_pypi_energy_platform;host=inMemory;runtime=python;modules=/usr/app/src" -e PYTHONPATH=/usr/app/lib -p 80:80 --name energy_platform py-energy-platform:test
+```
+
+```powershell
+docker stop energy_platform
+docker rm energy_platform
+docker run -d -e GRAFT_CONFIG="name=graft_pypi_energy_platform;host=inMemory;runtime=python;modules=/usr/app/src" -e PYTHONPATH=/usr/app/lib -p 80:80 --name energy_platform py-energy-platform:test
 ```
 
 Compare the two configurations side by side:
@@ -215,11 +220,13 @@ Switch back to microservice mode to verify the call is truly remote:
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=graft_pypi_energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src" \
-  -e PYTHONPATH=/usr/app/lib \
-  -p 80:80 \
-  --name energy_platform py-energy-platform:test
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft_pypi_energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src" -e PYTHONPATH=/usr/app/lib -p 80:80 --name energy_platform py-energy-platform:test
+```
+
+```powershell
+docker stop energy_platform
+docker rm energy_platform
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft_pypi_energy_platform;host=ws://price_calculator:90/ws;runtime=python;modules=/usr/app/src" -e PYTHONPATH=/usr/app/lib -p 80:80 --name energy_platform py-energy-platform:test
 ```
 
 Stop the price calculator:

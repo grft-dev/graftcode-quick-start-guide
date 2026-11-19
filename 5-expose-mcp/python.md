@@ -53,13 +53,12 @@ class EnergyPriceCalculator:
         return random.randint(100, 104)
 
     @staticmethod
-    def calculate_bill(kwh_used):
-        kwh_used = float(kwh_used)
-        price_per_kwh = random.randint(100, 104)
+    def calculate_bill(kwh_used: float) -> float:
+        price_per_kwh = float(random.randint(100, 104))
         return kwh_used * price_per_kwh
 ```
 
-This is a plain Python class - no decorators, no frameworks, no MCP-specific annotations. Any public method you write here will automatically become a callable MCP tool once hosted through Graftcode Gateway.
+This is a plain Python class - no decorators, no frameworks, no MCP-specific annotations. Gateway still needs **parameter and return type annotations** on public methods so Vision and MCP can publish them; without annotations, parameters may appear as `undefined` and the method can be marked unsupported.
 
 ## Step 3. Host it with Graftcode Gateway
 
@@ -116,7 +115,7 @@ Graftcode Gateway exposes an [MCP](https://modelcontextprotocol.io/) (Model Cont
 
 By default, MCP is available over HTTP on **`--port` (same as WebSocket)** — for this tutorial, `http://localhost:80/mcp`. If you expose `--httpPort` (default `81`), `http://localhost:81/mcp` works too.
 
-**For Cursor**, create or edit `.cursor/mcp.json` in your project root (or navigate to **File > Preferences > Cursor Settings > Tools & MCP** and press **New MCP Server** and add definition from below):
+**For Cursor**, create or edit `.cursor/mcp.json` in your project root, or open **Cursor Settings → Customize → MCPs** (on some builds: **Tools & MCP → New MCP Server**) and add the definition below. After saving, confirm the server is enabled and reload Cursor if tools do not appear:
 
 ```json
 {

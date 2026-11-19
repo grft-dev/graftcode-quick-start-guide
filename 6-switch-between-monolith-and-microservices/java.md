@@ -316,6 +316,27 @@ Replace the local `com.example:price-calculator` dependency with the Graft. Put 
 
 You can also drop the `mvn install` of the local `price-calculator` project from the billing Dockerfile once billing depends only on the Graft.
 
+Update the root `Dockerfile` so the generated Graft JAR lands on Gateway's module path (copy it into `target/` after `mvn package`):
+
+```dockerfile
+FROM maven:3.9-eclipse-temurin-21
+
+WORKDIR /usr/app
+
+COPY . /usr/app/
+
+RUN mvn package -q
+RUN mvn dependency:copy -Dartifact=graft.maven.com.example:price-calculator:1.0.0 -DoutputDirectory=/usr/app/target -q
+
+RUN curl -fsSL grft.dev/get/gg | sh && dpkg -i gg.deb && rm gg.deb
+
+EXPOSE 80
+
+CMD ["gg", "--modules", "/usr/app/target/energy-platform-1.0.0.jar"]
+```
+
+Use the exact `groupId:artifactId:version` from Vision in the `dependency:copy` line. Without the Graft JAR in `target/`, `GraftConfig` fails at runtime when `GRAFT_CONFIG` points at a remote host.
+
 Update `src/main/java/energy/BillingService.java` to use the Graft instead of the direct reference:
 
 ```java
@@ -348,10 +369,14 @@ Stop the monolith container, rebuild the image with the updated code, and run th
 docker stop energy_platform
 docker rm energy_platform
 docker build --no-cache --pull -t java-energy-platform:test .
-docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=graft.maven.price_calculator;host=price_calculator:9092;runtime=jvm;modules=/usr/app/target" \
-  -p 80:80 \
-  --name energy_platform java-energy-platform:test
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.maven.price_calculator;host=price_calculator:9092;runtime=jvm;modules=/usr/app/target" -p 80:80 --name energy_platform java-energy-platform:test
+```
+
+```powershell
+docker stop energy_platform
+docker rm energy_platform
+docker build --no-cache --pull -t java-energy-platform:test .
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.maven.price_calculator;host=price_calculator:9092;runtime=jvm;modules=/usr/app/target" -p 80:80 --name energy_platform java-energy-platform:test
 ```
 
 Open [http://localhost:80/GV](http://localhost:80/GV) and call `BillingService.calculateBill` with `250`. Same method, same result — but the price calculation now happens over the network in a separate container.
@@ -363,10 +388,13 @@ Want to go back to a monolith? Stop and restart with `host=inMemory` instead:
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker run -d \
-  -e GRAFT_CONFIG="name=graft.maven.price_calculator;host=inMemory;runtime=jvm;modules=/usr/app/target" \
-  -p 80:80 \
-  --name energy_platform java-energy-platform:test
+docker run -d -e GRAFT_CONFIG="name=graft.maven.price_calculator;host=inMemory;runtime=jvm;modules=/usr/app/target" -p 80:80 --name energy_platform java-energy-platform:test
+```
+
+```powershell
+docker stop energy_platform
+docker rm energy_platform
+docker run -d -e GRAFT_CONFIG="name=graft.maven.price_calculator;host=inMemory;runtime=jvm;modules=/usr/app/target" -p 80:80 --name energy_platform java-energy-platform:test
 ```
 
 Compare the two configurations side by side:
@@ -388,10 +416,13 @@ Switch back to microservice mode to verify the call is truly remote:
 ```bash
 docker stop energy_platform
 docker rm energy_platform
-docker run -d --network graftcode_demo \
-  -e GRAFT_CONFIG="name=graft.maven.price_calculator;host=price_calculator:9092;runtime=jvm;modules=/usr/app/target" \
-  -p 80:80 \
-  --name energy_platform java-energy-platform:test
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.maven.price_calculator;host=price_calculator:9092;runtime=jvm;modules=/usr/app/target" -p 80:80 --name energy_platform java-energy-platform:test
+```
+
+```powershell
+docker stop energy_platform
+docker rm energy_platform
+docker run -d --network graftcode_demo -e GRAFT_CONFIG="name=graft.maven.price_calculator;host=price_calculator:9092;runtime=jvm;modules=/usr/app/target" -p 80:80 --name energy_platform java-energy-platform:test
 ```
 
 Stop the price calculator:

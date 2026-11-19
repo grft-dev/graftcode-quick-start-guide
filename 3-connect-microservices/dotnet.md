@@ -33,17 +33,38 @@ We're hosting this sample service for you so you can see exactly what connecting
 
 Graftcode Vision shows all public classes and methods exposed by the remote service - their names, parameter types, and return types. It also gives you the exact package manager command needed to install that service as a Graft.
 
-## Step 3. Install the Graft
+## Step 3. Add the Graft feed
 
-Open [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io), pick `NuGet`, and copy the generated install command.
+Open [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io), pick `NuGet`, and copy the registry URL from the install command.
+
+`dotnet add package -s` often fails when **Package Source Mapping** is enabled in a global `NuGet.Config`. Create `nuget.config` in the project folder (use the graft URL from Vision):
+
+```
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <add key="graft" value="https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free" allowInsecureConnections="true" />
+  </packageSources>
+  <packageSourceMapping>
+    <packageSource key="graft">
+      <package pattern="graft.nuget.energypriceservice" />
+    </packageSource>
+    <packageSource key="nuget.org">
+      <package pattern="*" />
+    </packageSource>
+  </packageSourceMapping>
+</configuration>
+```
+
+## Step 4. Install the Graft
 
 ```bash
-dotnet add package -s https://grft.dev/4b4e411f-60a0-4868-b8a6-46f5dee07448__free graft.nuget.energypriceservice --version 1.2.0
+dotnet add package graft.nuget.energypriceservice --version 1.2.0
 ```
 
 This adds the generated strongly-typed client for the remote service to your project.
 
-## Step 4. Call the remote method and run it
+## Step 5. Call the remote method and run it
 
 The exact configuration snippet for your language is available in [Graftcode Vision](https://g-d-ca-polc-demo-ecbe-01.nicedesert-fa74799d.polandcentral.azurecontainerapps.io) under the **Configuration** installation tab. Replace the contents of `Program.cs`:
 
@@ -65,7 +86,7 @@ You should see the net consumption value printed in your terminal. `MeterLogic.N
 
 Your IDE can autocomplete available methods on `MeterLogic`, `BillingLogic`, and any other class from that service because the Graft is a real installed package.
 
-## Step 5. Run with a Project Key (recommended for real-world usage)
+## Step 6. Run with a Project Key (recommended for real-world usage)
 
 Everything above works without any account - perfect for learning and local development. When you're ready for real-world usage, create a free account at [portal.graftcode.com](https://portal.graftcode.com), set up a project, and copy its **Project Key**.
 
